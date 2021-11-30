@@ -1,0 +1,40 @@
+{
+  "name": "alignment-app",
+  "version": "0.1.0",
+  "description": "3D structure alignment and comparison",
+  "dependencies": {
+    "@rcsb/rcsb-molstar": "^1.9.6",
+    "lodash.clonedeep": "^4.5.0",
+    "pako": "^2.0.3",
+    "rc-collapse": "^2.1.0",
+    "rc-dropdown": "^3.2.0",
+    "rc-menu": "^8.10.2",
+    "rc-select": "^11.5.0",
+    "rc-tabs": "^11.7.0",
+    "rc-upload": "^3.3.1",
+    "react": "^17.0.1",
+    "react-autosuggest": "^10.0.4",
+    "react-dom": "^17.0.1",
+    "react-popup": "^0.10.0",
+    "rxjs": "^6.6.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-react": "^7.12.5",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.1",
+    "css-loader": "^5.0.1",
+    "eslint": "^7.13.0",
+    "style-loader": "^2.0.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.11.0",
+    "regenerator-runtime": "^0.13.9"
+  },
+  "scripts": {
+    "watch": "webpack-dev-server --progress",
+    "build": "webpack --mode production",
+    "postinstall": "npm run build"
+  }
+}
