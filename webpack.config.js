@@ -1,15 +1,22 @@
-const path = require('path')
+const path = require('path');
 
 module.exports = {
   entry: ["regenerator-runtime/runtime.js", path.resolve(__dirname, './src/index.js')],
+  mode: "production",
   output: {
-    path: path.resolve(__dirname, '../../../static/build/js'),
+    path: path.resolve(__dirname, 'build/src/'),
     filename: 'alignment-app.js',
   },
   devServer: {
     port: 3000,
     historyApiFallback: true,
-    contentBase: path.resolve(__dirname, './src'),
+    static: path.resolve(__dirname, './src'),
+    client: {
+      overlay: {
+        errors: true,
+        warnings: false,
+      },
+    }
   },
   module: {
     rules: [
