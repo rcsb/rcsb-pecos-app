@@ -2,8 +2,13 @@
   "name": "rcsb-pecos-app",
   "version": "0.1.0",
   "description": "RCSB 3D Structure Alignment Web App",
+  "license": "MIT",
+  "repository": {
+    "type": "git"
+  },
   "dependencies": {
     "@rcsb/rcsb-molstar": "^1.9.6",
+    "rxjs": "^6.6.6",
     "lodash.clonedeep": "^4.5.0",
     "pako": "^2.0.3",
     "rc-collapse": "^2.1.0",
@@ -15,8 +20,7 @@
     "react": "^17.0.1",
     "react-autosuggest": "^10.0.4",
     "react-dom": "^17.0.1",
-    "react-popup": "^0.10.0",
-    "rxjs": "^6.6.3"
+    "react-popup": "^0.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -25,12 +29,12 @@
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.1",
     "css-loader": "^5.0.1",
-    "eslint": "^7.13.0",
+    "eslint": "^8.3.0",
+    "regenerator-runtime": "^0.13.9",
     "style-loader": "^2.0.0",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.11.0",
-    "regenerator-runtime": "^0.13.9"
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.6.0"
   },
   "scripts": {
     "watch": "webpack-dev-server --progress",
