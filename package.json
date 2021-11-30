@@ -1,7 +1,7 @@
 {
-  "name": "alignment-app",
+  "name": "rcsb-pecos-app",
   "version": "0.1.0",
-  "description": "3D structure alignment and comparison",
+  "description": "RCSB 3D Structure Alignment Web App",
   "dependencies": {
     "@rcsb/rcsb-molstar": "^1.9.6",
     "lodash.clonedeep": "^4.5.0",
@@ -34,7 +34,6 @@
   },
   "scripts": {
     "watch": "webpack-dev-server --progress",
-    "build": "webpack --mode production",
-    "postinstall": "npm run build"
+    "build": "webpack --mode production"
   }
 }
