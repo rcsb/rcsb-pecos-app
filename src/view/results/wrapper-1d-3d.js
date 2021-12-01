@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import View1DSequence from './view-1d-sequense';
 import { resultsToSequence } from '../../adapter/api-to-sequence';
@@ -22,5 +22,5 @@ export default function Wrapper1Dto3D({ results, type, view }) {
             </div>
 
         </div>
-    )
+    );
 }

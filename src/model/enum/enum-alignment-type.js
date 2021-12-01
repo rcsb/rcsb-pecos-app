@@ -3,12 +3,12 @@ export const AlignmentTypeEnum = Object.freeze({
         id: 1,
         value: 'rigid',
         blockIndex: 0,
-        name: "ALIGNMENT",
+        name: 'ALIGNMENT'
     },
     FLEXIBLE: {
         id: 2,
         value: 'flexible',
-        name: "FLEXIBLE ALIGNMENT"
+        name: 'FLEXIBLE ALIGNMENT'
     }
 });
 

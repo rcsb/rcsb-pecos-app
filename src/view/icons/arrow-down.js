@@ -8,5 +8,5 @@ export default function ArrowDownIcon() {
                 <path fill="currentColor" d="M5.6 12 l4.594 4.594 4.594-4.594 1.406 1.406-6 6-6-6z"></path>
             </svg>
         </div>
-    )
+    );
 }

@@ -17,13 +17,13 @@ class AlignmentPosition {
         return this.seq_id;
     }
     setSeqId(seq_id) {
-        this.seq_id=seq_id;
+        this.seq_id = seq_id;
     }
     getIndex() {
         return this.index;
     }
     setIndex(index) {
-        this.index=index;
+        this.index = index;
     }
 }
 

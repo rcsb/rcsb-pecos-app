@@ -11,7 +11,7 @@ import AlignmentTypeEnum from '../../model/enum/enum-alignment-type';
 export default React.memo(MainViewResults, deepEqual);
 
 const generateTransformationOptions = (alignment) => {
-    const options = []
+    const options = [];
     const blocksCount = alignment.blocksNum();
     const isFlexible = blocksCount > 1;
     for (let i = 0; i < blocksCount; i++) {
@@ -27,16 +27,15 @@ const generateTransformationOptions = (alignment) => {
         options.unshift(type);
     }
     return options;
-}
+};
 
 function MainViewResults({ response }) {
-
     const alignment = response.getResults()[0];
     const transformOptions = generateTransformationOptions(alignment);
 
     return (
         <>
-            <ViewMembersInfo 
+            <ViewMembersInfo
                 results={response.getResults()}
             />
             {response.getMeta().getAlignmentMode() === AlignmentModeEnum.PAIRWISE.value &&
@@ -46,5 +45,5 @@ function MainViewResults({ response }) {
                 />
             }
         </>
-    )
+    );
 }

@@ -1,7 +1,7 @@
 export const AlignmentJobStatusEnum = Object.freeze({
     ERROR: {
-      id: 1,
-      value: 'ERROR'
+        id: 1,
+        value: 'ERROR'
     },
     RUNNING: {
         id: 2,
@@ -11,6 +11,6 @@ export const AlignmentJobStatusEnum = Object.freeze({
         id: 3,
         value: 'COMPLETE'
     }
-})
+});
 
 export default AlignmentJobStatusEnum;

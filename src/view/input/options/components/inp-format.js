@@ -1,14 +1,13 @@
-import React, { useState } from 'react'
+import React from 'react';
 
-import Selector from '../../../select/select'
-import StructureFileFormatEnum from '../../../../model/enum/enum-file-format'
+import Selector from '../../../select/select';
+import StructureFileFormatEnum from '../../../../model/enum/enum-file-format';
 
 export default function FormatSelection({ value, onValueChange }) {
-    
     const options = [
         [StructureFileFormatEnum.MMCIF.value, StructureFileFormatEnum.MMCIF.name],
         [StructureFileFormatEnum.PDB.value, StructureFileFormatEnum.PDB.name]
-    ]
+    ];
 
     return (
         <Selector
@@ -18,5 +17,5 @@ export default function FormatSelection({ value, onValueChange }) {
             cb={onValueChange}
             style={'inp-format'}
         />
-    )
+    );
 }

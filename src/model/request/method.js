@@ -11,7 +11,7 @@ class Method {
 
     _constructEmpty() {
         this.name = ALIGNMENT_METHOD_DEFAULT.value;
-     }
+    }
 
     _constructFromObject(obj) {
         obj && Object.assign(this, obj);
@@ -28,7 +28,7 @@ class Method {
         return this.parameters;
     }
     setParameters(parameters) {
-        this.parameters=parameters;
+        this.parameters = parameters;
     }
     setMethodParameter(paramName, paramValue) {
         this.getParameters()[paramName] = paramValue;

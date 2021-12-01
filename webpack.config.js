@@ -1,34 +1,51 @@
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ExtraWatchWebpackPlugin = require('extra-watch-webpack-plugin');
 
-module.exports = {
-  entry: ["regenerator-runtime/runtime.js", path.resolve(__dirname, './src/index.js')],
-  mode: "production",
-  output: {
-    path: path.resolve(__dirname, 'build/src/'),
-    filename: 'alignment-app.js',
-  },
-  devServer: {
-    port: 3000,
-    historyApiFallback: true,
-    static: path.resolve(__dirname, './src'),
-    client: {
-      overlay: {
-        errors: true,
-        warnings: false,
-      },
-    }
-  },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        exclude: /(node_modules)/,
-        loader: 'babel-loader',
-      },
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      },
+const configOptions = {
+    module: {
+        rules: [
+            {
+                test: /\.(html|ico)$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: { name: '[name].[ext]' }
+                }]
+            },
+            {
+                test: /\.(s*)css$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    { loader: 'css-loader', options: { sourceMap: false } }
+                ]
+            }
+        ]
+    },
+    plugins: [
+        new ExtraWatchWebpackPlugin({
+            files: [
+                './lib/**/*.css',
+                './lib/**/*.html'
+            ],
+        }),
+        new MiniCssExtractPlugin({ filename: 'rcsb-pecos-app.css' })
     ],
-  },
+    resolve: {
+        modules: [
+            'node_modules',
+            path.resolve(__dirname, 'lib/')
+        ]
+    }
+};
+
+function createEntryPoint() {
+    return {
+        entry: path.resolve(__dirname, 'lib/index.js'),
+        output: { filename: 'rcsb-pecos-app.js', path: path.resolve(__dirname, 'build') },
+        ...configOptions
+    };
 }
+
+module.exports = [
+    createEntryPoint()
+];

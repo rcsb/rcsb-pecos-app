@@ -6,13 +6,20 @@ class PropsetPreset {
     kind;
     selection;
     representation;
-    
-    constructor() {
-        this.kind='prop-set';
+
+    constructor(obj) {
+        if (obj) this._constructFromObject(obj);
+        else this._constructEmpty();
+    }
+
+    _constructEmpty() { this.kind = 'prop-set'; }
+
+    _constructFromObject(obj) {
+        obj && Object.assign(this, obj);
     }
 
     getSelection() {
-        if (!this.selection)this.selection=[];
+        if (!this.selection) this.selection = [];
         return this.selection;
     }
     addAsymSelection(matrix, asym) {
@@ -22,7 +29,7 @@ class PropsetPreset {
             sele.setMatrix(matrix);
             sele.addRange(asym);
             this.getSelection().push(sele);
-        } 
+        }
     }
     addSelection(matrix, asym, beg, end) {
         if (beg) {
@@ -33,10 +40,10 @@ class PropsetPreset {
         } else {
             this.addAsymSelection(matrix, asym);
         }
-        
+
     }
     getRepresentation() {
-        if (!this.representation)this.representation=[];
+        if (!this.representation) this.representation = [];
         return this.representation;
     }
     addRepresentation(color, asym, beg, end) {

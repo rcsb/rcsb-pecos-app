@@ -1,5 +1,5 @@
 class InstanceSelection {
-    
+
     asym_id;
     beg_seq_id;
     end_seq_id;
@@ -9,7 +9,7 @@ class InstanceSelection {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         obj && Object.assign(this, obj);
@@ -41,11 +41,11 @@ class InstanceSelection {
 
         const beg = this.beg_seq_id;
         const end = this.end_seq_id;
-        
+
         const isRangeOmitted = !beg && !end;
         const isRangeSet = (beg && end) ? true : false;
         const isRangeValid = isRangeSet ? end - beg > 9 : true;
-      
+
         return isRangeOmitted || isRangeValid;
     }
     isValid() {

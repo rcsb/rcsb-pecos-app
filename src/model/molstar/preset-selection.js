@@ -1,17 +1,26 @@
-import PresetSeqRange from "./preset-seq-range";
+import PresetSeqRange from './preset-seq-range';
 
 class PresetSelection {
     label_asym_id;
     label_seq_id;
     matrix;
 
-    constructor() {}
+    constructor(obj) {
+        if (obj) this._constructFromObject(obj);
+        else this._constructEmpty();
+    }
+
+    _constructEmpty() { return; }
+
+    _constructFromObject(obj) {
+        obj && Object.assign(this, obj);
+    }
 
     getlLabelAsymId() {
         return this.label_asym_id;
     }
     setMatrix(matrix) {
-        this.matrix=matrix;
+        this.matrix = matrix;
     }
     getMatrix() {
         return this.matrix;

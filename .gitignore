@@ -1,5 +1,13 @@
 # Base
 node_modules/
+build/
+lib/
+
+# TypeScript
+tsconfig.tsbuildinfo
 
 # Visual Studio Code
 .vscode/
+
+npm-debug.log
+.DS_Store

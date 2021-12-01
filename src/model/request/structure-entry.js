@@ -10,7 +10,7 @@ class StructureEntry {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         this.entry_id = obj.entry_id;
@@ -37,8 +37,8 @@ class StructureEntry {
         return this.isValidId() && this.getSelection().isValid();
     }
     getInstanceId() {
-        return `${this.entry_id}.${this.getSelection().getAsymId()}`
-    }    
+        return `${this.entry_id}.${this.getSelection().getAsymId()}`;
+    }
     getType() {
         return InputOptionsEnum.PDB_ENTRY.id;
     }

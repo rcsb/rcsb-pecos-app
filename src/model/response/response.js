@@ -12,7 +12,7 @@ class QueryResponse {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         this.info = new QueryResponseInfo(obj.info);
@@ -32,7 +32,7 @@ class QueryResponse {
         return this.meta;
     }
     setMeta(meta) {
-        this.meta=meta;
+        this.meta = meta;
     }
     getResults() {
         if (!this.results) this.results = [];

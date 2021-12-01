@@ -1,8 +1,7 @@
-import React from 'react'
-import classNames from 'classnames'
+import React from 'react';
+import classNames from 'classnames';
 
-export default function ResidueID( {label, value, onValueChange, disabled} ) {
-
+export default function ResidueID({ label, value, onValueChange, disabled }) {
     return (
         <input
             type='number'
@@ -11,6 +10,6 @@ export default function ResidueID( {label, value, onValueChange, disabled} ) {
             value={value}
             disabled={disabled}
             onChange={(e) => onValueChange(parseInt(e.target.value))}
-          />
-    )
+        />
+    );
 }

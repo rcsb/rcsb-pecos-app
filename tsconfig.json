@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "commonjs",
+        "rootDir": "src",
+        "outDir": "lib",
+        "allowJs": true,
+        "declaration": true,
+        "alwaysStrict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "sourceMap": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "importHelpers": true,
+        "noEmitHelpers": true,
+        "allowSyntheticDefaultImports": true,
+        "jsx": "react-jsx",
+        "lib": [ "es6", "dom", "esnext.asynciterable", "es2016" ] 
+    },
+    "include": [ "src/**/*" ]
+}

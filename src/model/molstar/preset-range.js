@@ -1,4 +1,4 @@
-import PresetSeqRange from "./preset-seq-range";
+import PresetSeqRange from './preset-seq-range';
 
 class PresetRange {
     label_asym_id;
@@ -13,11 +13,11 @@ class PresetRange {
         return this.label_asym_id;
     }
     setLabelAsymId(label_asym_id) {
-        this.label_asym_id=label_asym_id;
+        this.label_asym_id = label_asym_id;
     }
     getLabelSeqId() {
         if (!this.label_seq_id) this.label_seq_id = new PresetSeqRange();
-        return this.label_seq_id; 
+        return this.label_seq_id;
     }
 }
 

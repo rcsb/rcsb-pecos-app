@@ -12,9 +12,9 @@ function MenuItem({ item, onSelect }) {
 export default function InputItemsMenu({ onSelect }) {
     return (
         <div className='dropdown-content'>
-            <MenuItem item={InputOptionsEnum.PDB_ENTRY}  onSelect={onSelect}/>
+            <MenuItem item={InputOptionsEnum.PDB_ENTRY} onSelect={onSelect}/>
             <MenuItem item={InputOptionsEnum.FILE_UPLOAD} onSelect={onSelect}/>
-            <MenuItem item={InputOptionsEnum.WEB_LINK}  onSelect={onSelect}/>
+            <MenuItem item={InputOptionsEnum.WEB_LINK} onSelect={onSelect}/>
         </div>
-    )
+    );
 }

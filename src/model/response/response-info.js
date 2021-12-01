@@ -10,7 +10,7 @@ class QueryResponseInfo {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         obj && Object.assign(this, obj);
@@ -22,14 +22,14 @@ class QueryResponseInfo {
     setUuid(in_uuid) {
         this.uuid = in_uuid;
     }
-    
+
     getStatus() {
         return this.status;
     }
     setStatus(in_status) {
         this.status = in_status;
     }
-    
+
     getMessage() {
         return this.message;
     }

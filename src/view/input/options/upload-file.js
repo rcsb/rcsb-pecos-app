@@ -8,7 +8,6 @@ import InputOptionsEnum from '../../../model/enum/enum-input-options';
 const type = InputOptionsEnum.FILE_UPLOAD;
 
 export default function UploadFile({ ctx, index }) {
-
     const file = ctx.getFile(index);
     const asym_id = ctx.getAsymId(index, type);
     const beg_seq_id = ctx.getBegSeqId(index, type);
@@ -28,19 +27,19 @@ export default function UploadFile({ ctx, index }) {
                 onValueChange={(v) => ctx.updateAsymId(v, index, type)}
             />
 
-            <ResidueID 
+            <ResidueID
                 label='Beg'
                 value={beg_seq_id || ''}
                 disabled={disable}
                 onValueChange={(v) => ctx.updateBegSeqId(v, index, type)}
             />
 
-            <ResidueID 
+            <ResidueID
                 label='End'
                 value={end_seq_id || ''}
                 disabled={disable}
                 onValueChange={(v) => ctx.updateEndSeqId(v, index, type)}
             />
         </>
-    )
+    );
 }

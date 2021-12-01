@@ -6,22 +6,31 @@ class EntryPreset {
     matrix;
     props;
 
-    constructor() {}
+    constructor(obj) {
+        if (obj) this._constructFromObject(obj);
+        else this._constructEmpty();
+    }
+
+    _constructEmpty() { return; }
+
+    _constructFromObject(obj) {
+        obj && Object.assign(this, obj);
+    }
 
     getPdbId() {
         return this.pdbId;
     }
     setPdbId(pdbId) {
-        this.pdbId=pdbId;
+        this.pdbId = pdbId;
     }
     getMatrix() {
         return this.matrix;
     }
     setMatrix(matrix) {
-        this.matrix=matrix;
+        this.matrix = matrix;
     }
     setProps(props) {
-        this.props=props;
+        this.props = props;
     }
     getProps() {
         if (!this.props) this.props = new PropsetPreset();

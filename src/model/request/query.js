@@ -10,11 +10,11 @@ class Query {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         this.options = new QueryOptions(obj.options);
-        this.context = new QueryContext(obj.context); 
+        this.context = new QueryContext(obj.context);
     }
 
     setOptions(options) {

@@ -1,4 +1,4 @@
-import AllignmentScore from "./score";
+import AllignmentScore from './score';
 
 class AlignmentSummary {
     scores;

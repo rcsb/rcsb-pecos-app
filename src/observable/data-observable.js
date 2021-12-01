@@ -17,21 +17,21 @@ export const DataEventObservable = {
     },
     fetchInstanceDataFromAPI: async (instanceIds) => {
         fetchInstanceData(instanceIds)
-        .then( data => {
-            const _state = clonedeep(state);
-            const map = new Map();
-            instanceIds.map((id, i) => map.set(id, data[i]));
-            _state.instances = map;
-            subject.next(_state);
-        });
+            .then(data => {
+                const _state = clonedeep(state);
+                const map = new Map();
+                instanceIds.map((id, i) => map.set(id, data[i]));
+                _state.instances = map;
+                subject.next(_state);
+            });
     },
     getInstanceSequence: async (instanceId) => {
         if (state.instances && state.instances.has(instanceId)) {
             return state.instances.get(instanceId).pdbx_seq_one_letter_code;
         } else {
-             const data = await fetchInstanceData([instanceId]).then(data => data[0]);
-             state.instances.set(instanceId, data);
-             return data.pdbx_seq_one_letter_code;
+            const data = await fetchInstanceData([instanceId]).then(data => data[0]);
+            state.instances.set(instanceId, data);
+            return data.pdbx_seq_one_letter_code;
         }
     },
     getInstanceData: async (instanceId) => {
@@ -48,7 +48,7 @@ export const DataEventObservable = {
         subject.next(state);
     },
     initialState
-}
+};
 
 async function fetchInstanceData(instanceIds) {
     const query = `
@@ -67,8 +67,8 @@ async function fetchInstanceData(instanceIds) {
                     }
                 }
             }
-        }`
-    const response = await fetchFromDataAPI(query, {instanceIds: instanceIds});
+        }`;
+    const response = await fetchFromDataAPI(query, { instanceIds: instanceIds });
     if (response && response.polymer_entity_instances) {
         const data = response.polymer_entity_instances.filter(i => i).map(instance => {
             return {
@@ -76,7 +76,7 @@ async function fetchInstanceData(instanceIds) {
                 pdbx_description: instance.polymer_entity.rcsb_polymer_entity.pdbx_description,
                 pdbx_seq_one_letter_code: instance.polymer_entity.entity_poly.pdbx_seq_one_letter_code_can,
                 rcsb_sample_sequence_length: instance.polymer_entity.entity_poly.rcsb_sample_sequence_length
-            }
+            };
         });
         return data;
     }

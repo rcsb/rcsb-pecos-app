@@ -11,10 +11,9 @@ import AlignmentRegion from '../model/response/region';
 import { triggerDownload, getFormattedTime } from '../utils/downloads';
 
 export const resultsToSequence = async (alignment, type) => {
-
     const rows = [];
     const alignmentSize = alignment.getSequenceAlignment().length;
-    for (let i=0; i<alignmentSize; i++) {
+    for (let i = 0; i < alignmentSize; i++) {
         const sequence = await getSequence(alignment, i);
         const gaps = alignment.getSequenceAlignment()[i].getGaps();
         const regions = alignment.getSequenceAlignment()[i].getRegions();
@@ -22,7 +21,7 @@ export const resultsToSequence = async (alignment, type) => {
         rows.push(toMarkupPositions(sequence, regions, gaps, lookup));
     }
     return toBlocks(rows);
-}
+};
 
 const toBlocks = (sequences) => {
     let i, j;
@@ -36,21 +35,21 @@ const toBlocks = (sequences) => {
         }
     }
     return rows;
-}
+};
 
 const addRows = (rows, list) => {
-    const row = []
+    const row = [];
     row[0] = asFirst(list);
     row[1] = asMarkup(list).join('');
     row[2] = asLast(list);
     rows.push(row);
-}
+};
 
 function getFirstLabel(arr) {
-    for (var i = 0; i < arr.length; i++) {
-        if (arr[i].code !== '-') return arr[i].seq_id
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i].code !== '-') return arr[i].seq_id;
     }
-    return ''
+    return '';
 }
 
 function asFirst(arr) {
@@ -58,14 +57,14 @@ function asFirst(arr) {
 }
 
 function getLastLabel(arr) {
-    for (var i = arr.length - 1; i >= 0; i--) {
-        if (arr[i].code !== '-') return arr[i].seq_id
+    for (let i = arr.length - 1; i >= 0; i--) {
+        if (arr[i].code !== '-') return arr[i].seq_id;
     }
-    return ''
+    return '';
 }
 
 function asLast(arr) {
-    return "<div class='res-num-end'>" + getLastLabel(arr) + '</div>'
+    return "<div class='res-num-end'>" + getLastLabel(arr) + '</div>';
 }
 
 const getSequence = async (alignment, i) => {
@@ -75,14 +74,14 @@ const getSequence = async (alignment, i) => {
         const instanceId = alignment.getStructure(i).getInstanceId();
         return await DataEventObservable.getInstanceSequence(instanceId);
     }
-}
+};
 
 const toMarkupPositions = (sequence, regions, gaps, lookup) => {
     const positions = toPositions(regions, gaps);
     addAminoacidCodes(positions, sequence);
     addAlignmentMarkup(positions, lookup);
     return positions;
-}
+};
 
 const toPositions = (regions, gaps) => {
     const positions = [];
@@ -90,36 +89,36 @@ const toPositions = (regions, gaps) => {
     gaps && gaps.map(g => addPositions(positions, undefined, g));
     positions.sort((a, b) => (a.index > b.index) ? 1 : -1);
     return positions;
-}
+};
 
 const addPositions = (positions, asym, r) => {
     const index = r.getBegIndex();
     const seq_id = (r instanceof AlignmentRegion) ? r.getBegSeqId() : undefined;
-    for (let i=0; i<r.getLength(); i++) {
+    for (let i = 0; i < r.getLength(); i++) {
         const pos = {
             asym_id: asym,
-            index: index+i, 
-            seq_id: (seq_id) ? seq_id+i : undefined
+            index: index + i,
+            seq_id: (seq_id) ? seq_id + i : undefined
         };
         positions[pos.index] = pos;
     }
-}
+};
 
 const addAminoacidCodes = (positions, sequence) => {
     positions.map(p => {
-        p.code = (p.seq_id) ? sequence[p.seq_id-1] : '-';
+        p.code = (p.seq_id) ? sequence[p.seq_id - 1] : '-';
         return p;
     });
-}
+};
 
 const addAlignmentMarkup = (positions, lookup) => {
     return positions.map((p) => {
         if (p.code !== '-') {
-            const key = residueKey(p)
+            const key = residueKey(p);
             p.markup = lookup.has(key) ? colorMarkup(lookup.get(key)) : '';
         }
     });
-}
+};
 
 function asMarkup(positions) {
     const data = positions.map((p) => wrappResidueElement(p));
@@ -127,7 +126,6 @@ function asMarkup(positions) {
 }
 
 function residueElement(p) {
-    
     if (p.code !== '-') {
         return `<div ${p.markup} class="elmnt-seq elmnt-res">${p.code}</div>`;
     } else {
@@ -137,29 +135,28 @@ function residueElement(p) {
 
 function wrappResidueElement(p) {
     if (p.code !== '-') {
-        return `<span data-tooltip="${p.asym_id}:${p.seq_id}" data-flow="right">${residueElement(p)}</span>`
+        return `<span data-tooltip="${p.asym_id}:${p.seq_id}" data-flow="right">${residueElement(p)}</span>`;
     } else {
-        return `<span>${residueElement(p)}</span>`
+        return `<span>${residueElement(p)}</span>`;
     }
 }
 
 function residueKey(residue) {
-    return `${residue.asym_id}-${residue.seq_id}`
+    return `${residue.asym_id}-${residue.seq_id}`;
 }
 
 function colorMarkup(value) {
-    const color = hexToStyle(value, 0.45)
-    return `style='background-color: ${color};'`
+    const color = hexToStyle(value, 0.45);
+    return `style='background-color: ${color};'`;
 }
 
 const representationLookup = (alignment, i, type) => {
-    const regions = getRegions(alignment, i, type); 
+    const regions = getRegions(alignment, i, type);
     const positions = toPositions(regions, null).filter(p => p);
     return createColorLookup(positions, i);
-}
+};
 
 const getRegions = (alignment, i, type) => {
-
     if (type.id === AlignmentTypeEnum.RIGID.id) {
         return alignment.getStructureAlignment()[type.blockIndex].getRegions()[i];
     } else if (type.id === AlignmentTypeEnum.FLEXIBLE.id) {
@@ -167,9 +164,9 @@ const getRegions = (alignment, i, type) => {
         alignment.getStructureAlignment().map(b => regions.push(...b.getRegions()[i]));
         return regions;
     } else {
-        throw new Error('Unsupported alignment type [ '+JSON.stringify(type)+' ]');
+        throw new Error('Unsupported alignment type [ ' + JSON.stringify(type) + ' ]');
     }
-}
+};
 
 function createColorLookup(positions, index) {
     const map = new Map();
@@ -196,11 +193,11 @@ function createFASTAHeader(structure) {
 async function alignmentsToFASTA(results) {
     const data = [];
     const multipleEntries = results.length > 1;
-    for (let j=0; j<results.length; j++) {
+    for (let j = 0; j < results.length; j++) {
         const alignment = results[j];
         const size = alignment.getSequenceAlignment().length;
-        (multipleEntries) && data.push((j+1).toString());
-        for (let i=0; i<size; i++) {
+        (multipleEntries) && data.push((j + 1).toString());
+        for (let i = 0; i < size; i++) {
             const s = alignment.getStructure(i);
             data.push(createFASTAHeader(s));
             const sequence = await getSequence(alignment, i);

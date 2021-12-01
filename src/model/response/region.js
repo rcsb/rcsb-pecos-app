@@ -9,7 +9,7 @@ class AlignmentRegion {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         obj && Object.assign(this, obj);
@@ -25,19 +25,19 @@ class AlignmentRegion {
         return this.beg_seq_id;
     }
     setBegSeqId(beg_seq_id) {
-        this.beg_seq_id=beg_seq_id;
+        this.beg_seq_id = beg_seq_id;
     }
     getBegIndex() {
         return this.beg_index;
     }
     setBegIndex(beg_index) {
-        this.beg_index=beg_index;
+        this.beg_index = beg_index;
     }
     getLength() {
         return this.length;
     }
     setLength(length) {
-        this.length=length;
+        this.length = length;
     }
 }
 

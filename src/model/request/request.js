@@ -16,11 +16,11 @@ class QueryRequest {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         this.query = new Query(obj.query);
-        this.files = obj.files; 
+        this.files = obj.files;
     }
 
     getQuery() {
@@ -28,7 +28,7 @@ class QueryRequest {
         return this.query;
     }
     setQuery(query) {
-        this.query=query;
+        this.query = query;
     }
     getFile(index) {
         return this.getFiles()[index];
@@ -43,16 +43,16 @@ class QueryRequest {
         return this.files;
     }
     setFiles(files) {
-        this.files=files;
+        this.files = files;
     }
     isSubmittable() {
         let count = 0;
-        this.getQuery().getContext().getStructures().map(s => { s.isValid() && count++ });
+        this.getQuery().getContext().getStructures().map(s => { s.isValid() && count++; });
         return count >= 2;
     }
     includeFiles() {
         for (const s of this.getQuery().getContext().getStructures()) {
-            if ( s instanceof StructureFile || s instanceof StructureWebLink ) return true;
+            if (s instanceof StructureFile || s instanceof StructureWebLink) return true;
         }
         return false;
     }
@@ -77,10 +77,10 @@ class QueryRequest {
 }
 
 function guessFileFormat(file) {
-    if (file.name.includes('.cif') || file.name.includes('.bcif')) 
-      return StructureFileFormatEnum.MMCIF.value;
-    else if (file.name.includes('.pdb') || value.name.includes('.ent')) 
-      return StructureFileFormatEnum.PDB.value;
+    if (file.name.includes('.cif') || file.name.includes('.bcif'))
+        return StructureFileFormatEnum.MMCIF.value;
+    else if (file.name.includes('.pdb') || file.name.includes('.ent'))
+        return StructureFileFormatEnum.PDB.value;
 }
 
 export default QueryRequest;

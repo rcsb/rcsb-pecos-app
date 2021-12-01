@@ -10,7 +10,7 @@ class StructureFile {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         obj && Object.assign(this, obj);

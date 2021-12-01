@@ -1,8 +1,7 @@
-import React from 'react';
 import './index.css';
 
 export default function Spin() {
-    return(
+    return (
         <div className="spinner"></div>
-    )
+    );
 }

@@ -7,6 +7,8 @@
     "type": "git"
   },
   "dependencies": {
+    "@types/react": "^17.0.37",
+    "@types/react-dom": "^17.0.11",
     "@rcsb/rcsb-molstar": "^1.9.6",
     "lodash.clonedeep": "^4.5.0",
     "pako": "^2.0.3",
@@ -16,28 +18,40 @@
     "rc-select": "^11.5.0",
     "rc-tabs": "^11.7.0",
     "rc-upload": "^3.3.1",
-    "react": "^17.0.1",
     "react-autosuggest": "^10.0.4",
-    "react-dom": "^17.0.1",
     "react-popup": "^0.10.0",
-    "rxjs": "^6.6.6"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "rxjs": "^7.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1",
-    "@babel/preset-react": "^7.12.5",
-    "babel-eslint": "^10.1.0",
-    "babel-loader": "^8.2.1",
-    "css-loader": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "concurrently": "^6.4.0",
+    "cpx2": "^4.0.0",
+    "css-loader": "^6.5.1",
     "eslint": "^8.3.0",
-    "regenerator-runtime": "^0.13.9",
-    "style-loader": "^2.0.0",
+    "eslint-plugin-react": "^7.27.1",
+    "extra-watch-webpack-plugin": "^1.0.3",
+    "file-loader": "^6.2.0",
+    "http-server": "^14.0.0",
+    "mini-css-extract-plugin": "^2.4.5",
+    "style-loader": "^3.3.1",
+    "typescript": "^4.5.2",
     "webpack": "^5.64.4",
-    "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.6.0"
+    "webpack-cli": "^4.9.1"
   },
   "scripts": {
-    "watch": "webpack-dev-server --progress",
-    "build": "webpack --mode production"
+    "build-tsc": "tsc --incremental",
+    "build-extra": "cpx \"src/**/*.{css,html,ico}\" lib/",
+    "build-webpack": "webpack --mode production",
+    "build": "npm run build-tsc && npm run build-extra && npm run build-webpack",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "watch-tsc": "tsc --watch --incremental",
+    "watch-extra": "cpx \"src/**/*.{css,html,ico}\" lib/ --watch",
+    "watch-webpack": "webpack -w --mode development --stats minimal",
+    "serve": "http-server -p 3000 -g",
+    "watch-app": "concurrently -c \"green,gray,gray\" --names \"tsc,ext,wpc\" --kill-others \"npm:watch-tsc\" \"npm:watch-extra\" \"npm:watch-webpack\""
   }
 }

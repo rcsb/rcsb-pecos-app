@@ -11,7 +11,7 @@ class StructureWebLink {
         if (obj) this._constructFromObject(obj);
         else this._constructEmpty();
     }
-    
+
     _constructEmpty() {
         this.format = FILE_FORMAT_DEFAULT.value;
     }
@@ -20,7 +20,7 @@ class StructureWebLink {
         obj && Object.assign(this, obj);
         this.selection = new InstanceSelection(obj.selection);
     }
-    
+
     setURL(url) {
         this.url = url;
     }

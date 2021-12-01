@@ -5,13 +5,13 @@ class StructureAlignmentBlock {
     summary;
     regions;
     transformations;
-    
+
     constructor(obj) {
         if (obj) this._constructFromObject(obj);
         else this._constructEmpty();
     }
 
-    _constructEmpty() { }
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         this.regions = obj.regions && obj.regions.map(arr => arr.map(r => new AlignmentRegion(r)));
@@ -36,7 +36,7 @@ class StructureAlignmentBlock {
         return this.summary;
     }
     setSummary(in_summary) {
-        this.summary = summary;
+        this.summary = in_summary;
     }
     getRegion(index) {
         this.getRegions()[index];

@@ -8,11 +8,11 @@ export const SEARCH_SERVICE_URL = 'https://search.rcsb.org';
 export const ALIGNMENT_SERVICE_URL = 'https://alignment.rcsb.org';
 
 function route() {
-  if (window?.RC?.instance === 'local' // running locally in sierra
+    if (window?.RC?.instance === 'local' // running locally in sierra
       || window?.RC === undefined) // running locally in dev server
     // return 'http://localhost:8080';
-    return 'https://alignment-dev.rcsb.org'
-  else return ALIGNMENT_SERVICE_URL;
+        return 'https://alignment-dev.rcsb.org';
+    else return ALIGNMENT_SERVICE_URL;
 }
 
 export const ALIGNMENT_SERVICE_SUBMIT_ENDPOINT = route() + '/api/v1-beta/structures/submit';

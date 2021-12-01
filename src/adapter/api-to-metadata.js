@@ -1,7 +1,7 @@
 import { createAsymLabel } from '../utils/common';
-import StructureEntry from "../model/request/structure-entry";
-import StructureURL from "../model/response/structure-url";
-import AlignmentTypeEnum from "../model/enum/enum-alignment-type";
+import StructureEntry from '../model/request/structure-entry';
+import StructureURL from '../model/response/structure-url';
+import AlignmentTypeEnum from '../model/enum/enum-alignment-type';
 import DataEventObservable from '../observable/data-observable';
 
 import { triggerDownload, getFormattedTime } from '../utils/downloads';
@@ -11,8 +11,8 @@ export const resultsToStatistics = (results, type) => {
     return {
         scores: summary(alignment, type).getScores().map(s => s.toObject()),
         length: summary(alignment, type).getNAlnResiduePairs()
-      }
-}
+    };
+};
 
 const summary = (alignment, type) => {
     if (alignment.isFlexible()) {
@@ -23,13 +23,12 @@ const summary = (alignment, type) => {
         }
     } else {
         return alignment.getSummary();
-    }    
-}
+    }
+};
 
 export const resultsToInfo = async (alignment) => {
-
     const data = [];
-    for (let i=0; i<alignment.getStructures().length; i++) {
+    for (let i = 0; i < alignment.getStructures().length; i++) {
         const info = {};
         const s = alignment.getStructure(i);
         if (s instanceof StructureEntry) {
@@ -46,11 +45,11 @@ export const resultsToInfo = async (alignment) => {
             throw new Error('Unsupported structure type');
         }
         info.modeled_length = alignment.getSummary().getNModeledResidues()[i];
-        info.coverage = alignment.getSummary().getAlnCoverage()[i]
+        info.coverage = alignment.getSummary().getAlnCoverage()[i];
         data.push(info);
     }
     return data;
-}
+};
 
 function getStructureName(s) {
     if (s instanceof StructureEntry) {
@@ -78,15 +77,15 @@ function parseTransformations(structures, block) {
 
 function transformsToJSON(results) {
     const transformations = [];
-    for (let j=0; j<results.length; j++) {
+    for (let j = 0; j < results.length; j++) {
         const alignment = results[j];
         const structures = alignment.getStructures();
         const blocks = alignment.getStructureAlignment();
-        for (let i=0; i<blocks.length; i++) {
+        for (let i = 0; i < blocks.length; i++) {
             transformations.push({
                 block_id: i + 1,
                 transformations: parseTransformations(structures, blocks[i])
-            })
+            });
         }
     }
 

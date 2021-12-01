@@ -1,7 +1,3 @@
-import clonedeep from 'lodash.clonedeep';
-import { deleteProperty } from './common'
-
-
 export function getFormattedTime() {
     const today = new Date();
     const y = today.getFullYear();
@@ -47,53 +43,53 @@ function click(node) {
 }
 
 function download(data, downloadName = 'download') {
-    if (!data) return
+    if (!data) return;
 
     if ('download' in HTMLAnchorElement.prototype) {
-        const a = document.createElement('a')
-        a.download = downloadName
-        a.rel = 'noopener'
+        const a = document.createElement('a');
+        a.download = downloadName;
+        a.rel = 'noopener';
 
         if (typeof data === 'string') {
-            a.href = data
-            click(a)
+            a.href = data;
+            click(a);
         } else {
-            a.href = URL.createObjectURL(data)
-            setTimeout(() => URL.revokeObjectURL(a.href), 4e4) // 40s
-            setTimeout(() => click(a))
+            a.href = URL.createObjectURL(data);
+            setTimeout(() => URL.revokeObjectURL(a.href), 4e4); // 40s
+            setTimeout(() => click(a));
         }
     } else if (typeof navigator !== 'undefined' && navigator.msSaveOrOpenBlob) {
-        // native saveAs in IE 10+
-        navigator.msSaveOrOpenBlob(data, downloadName)
+    // native saveAs in IE 10+
+        navigator.msSaveOrOpenBlob(data, downloadName);
     } else {
-        const ua = window.navigator.userAgent
-        const isSafari = /Safari/i.test(ua)
-        const isChromeIos = /CriOS\/[\d]+/.test(ua)
+        const ua = window.navigator.userAgent;
+        const isSafari = /Safari/i.test(ua);
+        const isChromeIos = /CriOS\/[\d]+/.test(ua);
 
         const open = (str) => {
             openUrl(
                 isChromeIos ? str : str.replace(/^data:[^;]*;/, 'data:attachment/file;')
-            )
-        }
+            );
+        };
 
         if ((isSafari || isChromeIos) && FileReader) {
             if (data instanceof Blob) {
                 // no downloading of blob urls in Safari
-                const reader = new FileReader()
-                reader.onloadend = () => open(reader.result)
-                reader.readAsDataURL(data)
+                const reader = new FileReader();
+                reader.onloadend = () => open(reader.result);
+                reader.readAsDataURL(data);
             } else {
-                open(data)
+                open(data);
             }
         } else {
-            const url = URL.createObjectURL(data)
-            location.href = url
-            setTimeout(() => URL.revokeObjectURL(url), 4e4) // 40s
+            const url = URL.createObjectURL(data);
+            location.href = url;
+            setTimeout(() => URL.revokeObjectURL(url), 4e4); // 40s
         }
     }
 }
 
 export async function triggerDownload(data, filename) {
-    const blob = new Blob([data], {type: 'text/plain'});
+    const blob = new Blob([data], { type: 'text/plain' });
     download(blob, filename);
 }

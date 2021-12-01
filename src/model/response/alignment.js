@@ -1,15 +1,15 @@
-import StructureURL from "./structure-url";
-import StructureEntry from "../request/structure-entry";
-import StructureAlignmentBlock from "./alignment-block";
-import AlignmentSummary from "./summary";
-import SequenceAlignment from "./sequence-alignment";
+import StructureURL from './structure-url';
+import StructureEntry from '../request/structure-entry';
+import StructureAlignmentBlock from './alignment-block';
+import AlignmentSummary from './summary';
+import SequenceAlignment from './sequence-alignment';
 
 class AlignmentSolution {
     summary;
     structures;
     structure_alignment;
     sequence_alignment;
-    
+
     constructor(obj) {
         if (obj) this._constructFromObject(obj);
         else this._constructEmpty();
@@ -20,7 +20,7 @@ class AlignmentSolution {
     _constructFromObject(obj) {
         this.structures = obj.structures.map(s => {
             if (s.entry_id) return new StructureEntry(s);
-            else  return new StructureURL(s);
+            else return new StructureURL(s);
         });
         this.summary = new AlignmentSummary(obj.summary);
         this.sequence_alignment = obj.sequence_alignment && obj.sequence_alignment.map(a => new SequenceAlignment(a));
@@ -54,7 +54,7 @@ class AlignmentSolution {
     blocksNum() {
         return this.getStructureAlignment().length;
     }
-    isFlexible(){
+    isFlexible() {
         return this.blocksNum() > 1;
     }
 }

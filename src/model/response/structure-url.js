@@ -11,14 +11,14 @@ class StructureURL {
         if (obj) this._constructFromObject(obj);
         else this._constructEmpty();
     }
-    
-    _constructEmpty() {}
+
+    _constructEmpty() { return; }
 
     _constructFromObject(obj) {
         obj && Object.assign(this, obj);
         this.selection = new InstanceSelection(obj.selection);
     }
-    
+
     setURL(url) {
         this.url = url;
     }

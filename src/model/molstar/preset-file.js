@@ -1,5 +1,5 @@
-import PropsetPreset from "./preset-propset";
-import StructureFileFormatEnum from "../enum/enum-file-format";
+import PropsetPreset from './preset-propset';
+import StructureFileFormatEnum from '../enum/enum-file-format';
 import { clean } from '../../utils/common';
 
 class FilePreset {
@@ -9,10 +9,19 @@ class FilePreset {
     matrix;
     props;
 
-    constructor() {}
+    constructor(obj) {
+        if (obj) this._constructFromObject(obj);
+        else this._constructEmpty();
+    }
+
+    _constructEmpty() { return; }
+
+    _constructFromObject(obj) {
+        obj && Object.assign(this, obj);
+    }
 
     setURL(url) {
-        this.url=url;
+        this.url = url;
     }
     getURL() {
         return this.url;
@@ -27,14 +36,14 @@ class FilePreset {
                 this.format = 'mmcif';
                 break;
             default:
-                throw new Error('Unsupported file format: '+format);
+                throw new Error('Unsupported file format: ' + format);
         }
     }
     getFormat() {
         return this.format;
     }
     setIsBinary(is_binary) {
-        this.isBinary=is_binary;
+        this.isBinary = is_binary;
     }
     getIsBinary() {
         return this.isBinary;
@@ -46,7 +55,7 @@ class FilePreset {
         return this.matrix;
     }
     setProps(props) {
-        this.props=props;
+        this.props = props;
     }
     getProps() {
         if (!this.props) this.props = new PropsetPreset();

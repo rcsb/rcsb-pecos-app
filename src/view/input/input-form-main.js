@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import '../collapse/index.css';
 import Collapse from 'rc-collapse';
-const { Panel } = Collapse;
 
 import InputForm from './input-form';
+const { Panel } = Collapse;
 
 export default function MainViewInputs({ ctx, onMount, onSubmit, onClear }) {
-
     const [activeKey, updateKey] = useState(['0']);
 
-    useEffect(() => { onMount([activeKey, updateKey]) }, [onMount, activeKey]);
+    useEffect(() => { onMount([activeKey, updateKey]); }, [onMount, activeKey]);
 
     return (
         <div className='box-row'>
@@ -24,5 +23,5 @@ export default function MainViewInputs({ ctx, onMount, onSubmit, onClear }) {
                 </Panel>
             </Collapse>
         </div>
-    )
+    );
 }

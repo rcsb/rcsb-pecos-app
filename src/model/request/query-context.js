@@ -6,7 +6,7 @@ import InputOptionsEnum from '../enum/enum-input-options';
 
 import { DEFAULT_ALIGNMENT_MODE } from '../enum/enum-alignment-mode';
 
-function createStructure(type) {     
+function createStructure(type) {
     const id = type.id;
     switch (id) {
         case InputOptionsEnum.PDB_ENTRY.id:
@@ -30,20 +30,20 @@ class QueryContext {
         else this._constructEmpty();
     }
 
-    _constructEmpty() { 
+    _constructEmpty() {
         this.mode = DEFAULT_ALIGNMENT_MODE;
         this.structures = [new StructureEntry(), new StructureEntry()];
     }
 
-    _constructFromObject(obj) {   
+    _constructFromObject(obj) {
         obj && Object.assign(this, obj);
         this.method = new Method(obj.method);
         this.structures = obj.structures.map(s => {
             if (s.entry_id) return new StructureEntry(s);
             else if (s.url) return new StructureWebLink(s);
             else if (s.format) return new StructureFile(s);
-            else throw new Error('Unsupported structure type: [ '+JSON.stringify(s)+' ]');
-        });   
+            else throw new Error('Unsupported structure type: [ ' + JSON.stringify(s) + ' ]');
+        });
     }
 
     setMode(mode) {
