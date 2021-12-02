@@ -1,6 +1,6 @@
 class AlignmentMetadata {
     alignment_mode;
-    algorithm_name;
+    alignment_method;
 
     constructor(obj) {
         if (obj) this._constructFromObject(obj);
@@ -17,8 +17,8 @@ class AlignmentMetadata {
         return this.alignment_mode;
     }
 
-    getAlgorithmName() {
-        return this.algorithm_name;
+    getAlignmentMethod() {
+        return this.alignment_method;
     }
 }
 
