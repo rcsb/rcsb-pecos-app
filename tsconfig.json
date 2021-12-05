@@ -1,25 +1,33 @@
 {
     "compilerOptions": {
-        "target": "esnext",
-        "module": "commonjs",
+        // Language and Environment
+        "target": "esnext", // changes which JS features are downleveled
+        "jsx": "react-jsx", // affects output of JS files that started in .tsx files ???
+        "lib": [ "es6", "dom", "esnext.asynciterable", "es2016" ], // default set of type definitions for built-in JS APIs
+        // JavaScript Support
+        "allowJs": true, // allows JavaScript files to be imported inside the project
+        // Modules
+        "module": "commonjs", // sets the module system
+        "moduleResolution": "node", // module resolution strategy
+        // does this duplicate webpack config?
         "rootDir": "src",
         "outDir": "lib",
-        "allowJs": true,
-        "declaration": true,
-        "alwaysStrict": true,
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "sourceMap": true,
-        "noUnusedLocals": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "importHelpers": true,
-        "noEmitHelpers": true,
-        "allowSyntheticDefaultImports": true,
-        "jsx": "react-jsx",
-        "lib": [ "es6", "dom", "esnext.asynciterable", "es2016" ] 
+        // Emit
+        "sourceMap": true, // enables the generation of sourcemap files that allow debuggers to display 
+                           // the original TypeScript source code when working with the emitted JavaScript files
+        "declaration": true, // generates .d.ts files for every TypeScript or JavaScript file
+        "importHelpers": true, // helper functions are imported from the tslib module
+        "noEmitHelpers": true, // turns off emitting of helper functions
+        // Type Checking
+        "alwaysStrict": true, // files are parsed in the ECMAScript strict mode
+        "noImplicitAny": true, // TypeScript will issue an error whenever it would have inferred 'any'
+        "noImplicitThis": true, // raises error on ‘this’ expressions with an implied ‘any’ type
+        "strictNullChecks": true, // raises type error if 'null' and 'undefined' are used where a concrete value is expected
+        "strictFunctionTypes": true, // functions parameters are checked more correctly
+        "noUnusedLocals": true, // reports errors on unused local variables
+        // Interop Constraints
+        "esModuleInterop": true, // 
+        "allowSyntheticDefaultImports": true, // allow default imports from files no default objects
     },
     "include": [ "src/**/*" ]
 }
