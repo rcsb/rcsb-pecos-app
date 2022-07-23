@@ -27,8 +27,10 @@ export class DataProvider {
         const url = this._config.base + '/' + this._config.gql +
         '?query=' + encodeURIComponent(query) +
         '&variables=' + encodeURIComponent(JSON.stringify(variables));
-        return fetch(url)
-            .then(response => response.json())
+        return fetch(url, {
+            method: 'GET',
+            headers: this._config.httpHeaders
+        }).then(response => response.json())
             .then(json => json.data as Query);
     }
 

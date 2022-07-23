@@ -15,7 +15,10 @@ export class SearchProvider {
         const url = this._config.base + '/' + this._config.suggest +
         '?json=' + encodeURIComponent(JSON.stringify(query));
         const errorMessage = `Failed to fetch data from for [ ${url} ]'`;
-        return fetch(url).then(r => {
+        return fetch(url, {
+            method: 'GET',
+            headers: this._config.httpHeaders
+        }).then(r => {
             if (r.status === 200) return r.json();
             else if (r.status === 204) return null;
             else this._errFn(errorMessage);

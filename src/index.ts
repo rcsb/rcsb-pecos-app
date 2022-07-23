@@ -11,16 +11,19 @@ const DefaultAppConfigs = {
     service: {
         data: {
             base: 'https://data-models.rcsb.org',
-            gql: 'graphql'
+            gql: 'graphql',
+            httpHeaders: {}
         },
         search: {
             base: 'https://search-models.rcsb.org/rcsbsearch/v2',
-            suggest: 'suggest'
+            suggest: 'suggest',
+            httpHeaders: {}
         },
         alignment: {
             base: 'http://localhost:8080/api/v1-beta',
             submit: 'structures/submit',
-            results: 'structures/results'
+            results: 'structures/results',
+            httpHeaders: {}
         }
     }
 };

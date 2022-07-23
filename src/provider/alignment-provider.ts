@@ -1,20 +1,27 @@
 
+import { AppConfigs } from '..';
 import { StructureAlignmentQuery } from '../auto/alignment/alignment-request';
 import { StructureAlignmentResponse } from '../auto/alignment/alignment-response';
 import { isEntry } from '../utils/helper';
 import { QueryOptionsImpl, QueryRequest } from '../utils/request';
 
+type AlignmentProviderConfigs = AppConfigs['service']['alignment'];
 export class StructureAlignmentProvider {
 
+    private readonly _config;
     private readonly waitMs = 1000;
     private readonly timeoutMs = 300 * 1000;
 
-    private readonly submitURL;
-    private readonly resultsURL;
+    constructor(config: AlignmentProviderConfigs) {
+        this._config = config;
+    }
 
-    constructor(alignment: {base: string, submit: string, results: string}) {
-        this.submitURL = alignment.base + '/' + alignment.submit;
-        this.resultsURL = alignment.base + '/' + alignment.results;
+    private submitURL() {
+        return this._config.base + '/' + this._config.submit;
+    }
+
+    private resultsURL() {
+        return this._config.base + '/' + this._config.results;
     }
 
     /**
@@ -25,13 +32,16 @@ export class StructureAlignmentProvider {
      */
     async submit(request: QueryRequest): Promise<string> {
         const data = toFormData(request.query, request.files);
-        return fetch(this.submitURL, { method: 'POST', body: data })
-            .then(async response => {
-                if (response.status === 200)
-                    return response.text();
-                const error = await response.json();
-                throw new Error(`Failed to submit the job to the server: ${this.submitURL}. HTTP ${error.status}: ${error.message}`);
-            });
+        return fetch(this.submitURL(), {
+            method: 'POST',
+            body: data,
+            headers: this._config.httpHeaders
+        }).then(async response => {
+            if (response.status === 200)
+                return response.text();
+            const error = await response.json();
+            throw new Error(`Failed to submit the job to the server: ${this.submitURL}. HTTP ${error.status}: ${error.message}`);
+        });
     }
 
     /**
@@ -60,7 +70,7 @@ export class StructureAlignmentProvider {
     }
 
     private async poll(uuid: string): Promise<StructureAlignmentResponse> {
-        const url = this.resultsURL + '?uuid=' + uuid;
+        const url = this.resultsURL() + '?uuid=' + uuid;
         const response = await fetch(url, { method: 'get' });
         if (response.ok) {
             return await response.json();
