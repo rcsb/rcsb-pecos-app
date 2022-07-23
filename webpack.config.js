@@ -34,18 +34,41 @@ const configOptions = {
         modules: [
             'node_modules',
             path.resolve(__dirname, 'lib/')
-        ]
+        ],
+        fallback: {
+            fs: false,
+            crypto: require.resolve('crypto-browserify'),
+            stream: require.resolve('stream-browserify'),
+            path: require.resolve('path-browserify')
+        },
     }
 };
 
-function createEntryPoint() {
+function assetsEntryPoint() {
+    return {
+        entry: path.resolve(__dirname, `lib/assets.js`),
+        output: {
+            path: path.resolve(__dirname, `build`)
+        },
+        ...configOptions
+    }
+}
+
+function appEntryPoint() {
     return {
         entry: path.resolve(__dirname, 'lib/index.js'),
-        output: { filename: 'rcsb-pecos-app.js', path: path.resolve(__dirname, 'build') },
+        target: "web",
+        output: { 
+            library: 'RcsbStructureAlignment',
+            libraryTarget: 'umd', 
+            filename: 'rcsb-pecos-app.js', 
+            path: path.resolve(__dirname, 'build')
+        },
         ...configOptions
     };
 }
 
 module.exports = [
-    createEntryPoint()
+    appEntryPoint(),
+    assetsEntryPoint()
 ];

@@ -1,0 +1,13 @@
+overwrite: true
+schema: https://data.rcsb.org/graphql
+documents: './src/auto/data/query.gql.ts'
+generates:
+  './src/auto/data/graphql.d.ts':
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - typescript
+      - typescript-operations
+    config:
+      immutableTypes: true
+      skipTypename: true
