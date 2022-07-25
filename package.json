@@ -1,6 +1,6 @@
 {
   "name": "@rcsb/rcsb-pecos-app",
-  "version": "0.1.0-dev.0",
+  "version": "0.1.0-dev.1",
   "description": "RCSB 3D Structure Alignment Application",
   "license": "MIT",
   "homepage": "https://github.com/rcsb/rcsb-pecos-app#readme",
@@ -12,13 +12,13 @@
     "url": "https://github.com/rcsb/rcsb-pecos-app/issues"
   },
   "author": {
-    "name" : "Yana Rose",
-    "email" : "yana.v.rose@gmail.com"
+    "name": "Yana Rose",
+    "email": "yana.v.rose@gmail.com"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "files":[
+  "files": [
     "build/"
   ],
   "dependencies": {
