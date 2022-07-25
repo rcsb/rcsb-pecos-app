@@ -1,11 +1,26 @@
 {
-  "name": "rcsb-pecos-app",
-  "version": "0.1.0-dev.1",
+  "name": "@rcsb/rcsb-pecos-app",
+  "version": "0.1.0-dev.0",
   "description": "RCSB 3D Structure Alignment Application",
   "license": "MIT",
+  "homepage": "https://github.com/rcsb/rcsb-pecos-app#readme",
   "repository": {
-    "type": "git"
+    "type": "git",
+    "url": "https://github.com/rcsb/rcsb-pecos-app.git"
   },
+  "bugs": {
+    "url": "https://github.com/rcsb/rcsb-pecos-app/issues"
+  },
+  "author": {
+    "name" : "Yana Rose",
+    "email" : "yana.v.rose@gmail.com"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files":[
+    "build/"
+  ],
   "dependencies": {
     "@rcsb/rcsb-molstar": "^2.5.3",
     "@rcsb/rcsb-saguaro": "^2.0.0",
@@ -66,16 +81,19 @@
   },
   "scripts": {
     "codegen-gql": "graphql-codegen --config src/auto/data/codegen.yml",
+    "clean": "node ./scripts/clean.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "build-tsc": "tsc",
     "build-extra": "cpx \"src/**/*.{css,html,ico}\" lib/",
     "build-webpack": "webpack --mode production",
     "build": "npm run build-tsc && npm run build-extra && npm run build-webpack",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "watch-tsc": "tsc --watch --incremental",
     "watch-extra": "cpx \"src/**/*.{css,html,ico}\" lib/ --watch",
     "watch-webpack": "webpack -w --mode development --stats minimal",
     "serve": "http-server -p 3000 -g",
-    "watch-app": "concurrently -c \"green,gray,gray\" --names \"tsc,ext,wpc\" --kill-others \"npm:watch-tsc\" \"npm:watch-extra\" \"npm:watch-webpack\""
+    "watch-app": "concurrently -c \"green,gray,gray\" --names \"tsc,ext,wpc\" --kill-others \"npm:watch-tsc\" \"npm:watch-extra\" \"npm:watch-webpack\"",
+    "version": "npm run clean && npm run build",
+    "postversion": "git push && git push --tags"
   }
 }
