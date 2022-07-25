@@ -33,6 +33,15 @@
   }
 }
 
+.error {
+  border: 1px solid;
+  margin: 10px 0px;
+  padding: 15px 10px 15px 50px;
+  background-repeat: no-repeat;
+  background-position: 10px center;
+	background-color: #FFBABA;
+}
+
 /* BUTTONS */
 
 .btn-action {
@@ -92,7 +101,7 @@
   border-color: #325880;
 }
 .btn-submit:hover .copy-icon {
-  fill: white;
+  color: white;
 }
 .btn-submit:active,
 .btn-submit:hover,
@@ -215,7 +224,7 @@
 }
 
 .inp-entry {
-  width: 100px;
+  width: 90px;
 }
 
 .inp-link {
@@ -744,7 +753,7 @@
   margin: 1.5rem;
   width: 2.5rem;
   height: 2.5rem;
-  fill: currentColor;
+  color: currentColor;
 }
 
 .icon-container {
@@ -836,15 +845,15 @@
 }
 
 .add-new-item:hover {
-  fill: green!;
+  color: green;
 }
 
 .add-new-item-disabled {
-  fill: #808080a3;
+  color: #808080a3;
 }
 
 .arrow-down-icon:hover {
-  fill: green;
+  color: green;
 }
 
 .dropdown {

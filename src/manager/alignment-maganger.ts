@@ -115,7 +115,7 @@ class PairwiseAlignmentManager implements AlignmentManagerI {
         const intervals: number[][] = [];
         for (let i = 0; i < this.results.length; i++) {
             this.results[i].structure_alignment.forEach(block => {
-                block.regions![i].forEach(region => {
+                block.regions![0].forEach(region => {
                     intervals.push([region.beg_seq_id!, region.beg_seq_id! + region.length! - 1]);
                 });
             });

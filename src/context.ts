@@ -11,7 +11,7 @@ import { StructureAlignmentResponse, StructureInstanceSelection } from './auto/a
 import { getCombinedInstanceIds } from './utils/identifier';
 import { isEntry } from './utils/helper';
 import { AlignmentManager } from './manager/alignment-maganger';
-import { urlParamEncoding, urlParamRequestBody, urlParamResponseBody } from './utils/constants';
+import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
 
 export type Status = 'init' | 'loading' | 'ready' | 'error';
@@ -39,7 +39,7 @@ export class ApplicationContext {
     } as const;
 
     constructor(public configs: AppConfigs) {
-        this._gql = new DataProvider(configs.service.data);
+        this._gql = new DataProvider(configs.service.data, this.error.bind(this));
         this._search = new SearchProvider(configs.service.search, this.error.bind(this));
         this._alignment = new StructureAlignmentProvider(configs.service.alignment);
         this._manager = new AlignmentManager();
@@ -48,23 +48,24 @@ export class ApplicationContext {
     async init() {
         const url = window.location.search;
         const params = new URLSearchParams(url);
-        if (params.has('uuid')) {
+        if (params.has(uuidUrlParam)) {
             // running alignment job can take time, we do not want the user to stop polling on page reload
-            const uuid = params.get('uuid')!;
+            const uuid = params.get(uuidUrlParam)!;
             const response = await this._alignment.results(uuid);
             this.processResponse(response);
-        } else if (params.has(urlParamRequestBody)) {
+        } else if (params.has(requestUrlParam)) {
             // request data can be passed as URL parameter
-            const data = params.get(urlParamRequestBody)!;
+            const data = params.get(requestUrlParam)!;
             const json = JSON.parse(data);
             const request = new QueryRequest(json);
+            this.state.data.request.push(request);
             await this.align(request);
-        } else if (params.has(urlParamResponseBody)) {
+        } else if (params.has(responseUrlParam)) {
             // response data can be passed as URL parameter
-            const needsDecoding = params.get(urlParamEncoding) && params.get(urlParamEncoding) === 'true';
-            const data = params.get(urlParamResponseBody)!;
-            const json = (needsDecoding) ? decodeBase64ToJson(data) : JSON.parse(data);
-            this.ready(json);
+            const needsDecoding = params.get(encodingUrlParam) && params.get(encodingUrlParam) === 'true';
+            const data = params.get(responseUrlParam)!;
+            const response = (needsDecoding) ? decodeBase64ToJson(data) : JSON.parse(data);
+            this.processResponse(response);
         }
     }
 
@@ -122,7 +123,7 @@ export class ApplicationContext {
      *
      * @param response alignment API response
      */
-    private async addMissingSequences(response: StructureAlignmentResponse) {
+    private async addPolymerSequences(response: StructureAlignmentResponse) {
         const ids = getCombinedInstanceIds(response.results);
         const data = await this._gql.polymerInstances(ids);
         response.results?.forEach(a => {
@@ -132,8 +133,10 @@ export class ApplicationContext {
                 const name = isEntry(s) ? s.entry_id : s.name;
                 const sele = s.selection as StructureInstanceSelection;
                 if (!a.sequence_alignment[i].sequence) {
-                    const instance = data.filter(d => d.entry_id === name && d.asym_id === sele.asym_id)[0];
-                    a.sequence_alignment[i]['sequence'] = instance.pdbx_seq_one_letter_code;
+                    const instances = data.filter(d => d.entry_id === name && d.asym_id === sele.asym_id);
+                    if (instances.length === 1)
+                        a.sequence_alignment[i]['sequence'] = instances[0].pdbx_seq_one_letter_code_can;
+                    else this.error(`Failed to fetch sequence for [ ${name}.${sele.asym_id} ]`);
                 }
             }
         });
@@ -141,7 +144,7 @@ export class ApplicationContext {
 
     private async processResponse(response: StructureAlignmentResponse) {
         if (response.info.status === 'COMPLETE') {
-            await this.addMissingSequences(response);
+            await this.addPolymerSequences(response);
             await this._manager.init(this._gql, response);
             this.ready(response);
         } else if (response.info.status === 'ERROR') {

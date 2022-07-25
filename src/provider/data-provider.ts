@@ -9,15 +9,17 @@ export type InstanceData = {
     asym_id: string,
     auth_asym_id?: string,
     pdbx_description?: string,
-    pdbx_seq_one_letter_code: string,
+    pdbx_seq_one_letter_code_can: string,
     rcsb_sample_sequence_length: number
 };
 
 type DataProviderConfigs = AppConfigs['service']['data'];
 export class DataProvider {
     private readonly _config: DataProviderConfigs;
-    constructor(config: DataProviderConfigs) {
+    private readonly _errFn: (msg: string) => void;
+    constructor(config: DataProviderConfigs, onError: (msg: string) => void) {
         this._config = config;
+        this._errFn = onError;
         this.asymIds = memoizeOneArgAsync(this.asymIds.bind(this));
         this.polymerInstances = memoizeOneArgAsync(this.polymerInstances.bind(this));
     }
@@ -31,9 +33,21 @@ export class DataProvider {
             method: 'GET',
             headers: this._config.httpHeaders
         }).then(response => response.json())
-            .then(json => json.data as Query);
+            .then(json => {
+                if (json.data)
+                    return json.data as Query;
+                else this._errFn('Failed to fetch data from [ ' + url + ' ]: ' + json.error);
+            });
     }
 
+    /**
+     * Queries Data API to fetch asym IDs for polymer ssequences:
+     * - protein sequences
+     * - at least 10 residues long
+     *
+     * @param entryId entry ID
+     * @returns list of asym ID pairs: _label_asym_id and _auth_asym_id
+     */
     async asymIds(entryId: string): Promise<string[][]> {
         const vars: AsymIdsQueryVariables = { id: entryId };
         const data = await this.fetch<AsymIdsQueryVariables>(asymIdsQuery, vars);
@@ -61,16 +75,18 @@ export class DataProvider {
     async polymerInstances(ids: string[]): Promise<InstanceData[]> {
         const vars: PolymerInstancesQueryVariables = { ids: ids };
         const data = await this.fetch<PolymerInstancesQueryVariables>(polymerInstancesQuery, vars);
-        if (!data || ! data.polymer_entity_instances) return [];
-        return data.polymer_entity_instances.map(i => {
-            return {
-                entry_id: i!.polymer_entity!.entry!.rcsb_id,
-                asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.asym_id as string,
-                auth_asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.auth_asym_id as string,
-                pdbx_description: i!.polymer_entity!.rcsb_polymer_entity?.pdbx_description as string,
-                pdbx_seq_one_letter_code: i!.polymer_entity!.entity_poly!.pdbx_seq_one_letter_code_can as string,
-                rcsb_sample_sequence_length: i!.polymer_entity!.entity_poly!.rcsb_sample_sequence_length as number
-            };
-        });
+        if (data && data.polymer_entity_instances) {
+            return data.polymer_entity_instances.map(i => {
+                return {
+                    entry_id: i!.polymer_entity!.entry!.rcsb_id,
+                    asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.asym_id as string,
+                    auth_asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.auth_asym_id as string,
+                    pdbx_description: i!.polymer_entity!.rcsb_polymer_entity?.pdbx_description as string,
+                    pdbx_seq_one_letter_code_can: i!.polymer_entity!.entity_poly!.pdbx_seq_one_letter_code_can as string,
+                    rcsb_sample_sequence_length: i!.polymer_entity!.entity_poly!.rcsb_sample_sequence_length as number
+                };
+            });
+        }
+        return [];
     }
 }

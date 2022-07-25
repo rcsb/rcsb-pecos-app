@@ -1,29 +1,33 @@
 import './ui/skin/app.css';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { ApplicationContext } from './context';
 import { ApplicationContextContainer } from './ui/plugin';
 
 import { QueryRequest } from './utils/request';
-import React from 'react';
 
 const DefaultAppConfigs = {
     service: {
         data: {
-            base: 'https://data-models.rcsb.org',
+            base: 'https://data.rcsb.org',
             gql: 'graphql',
             httpHeaders: {}
         },
         search: {
-            base: 'https://search-models.rcsb.org/rcsbsearch/v2',
+            base: 'https://search.rcsb.org/rcsbsearch/v2',
             suggest: 'suggest',
             httpHeaders: {}
         },
         alignment: {
-            base: 'http://localhost:8080/api/v1-beta',
+            base: 'https://alignment.rcsb.org/api/v1-beta',
             submit: 'structures/submit',
             results: 'structures/results',
-            httpHeaders: {}
+            httpHeaders: {},
+            // Delay (in milliseconds) between the last retry and next API call to get the results
+            pollingIntervalMs: 1000,
+            // Maximum time (in milliseconds) the application waits to get results from the server
+            timeoutMs: 300 * 1000
         }
     }
 };

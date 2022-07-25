@@ -9,19 +9,23 @@ type AlignmentProviderConfigs = AppConfigs['service']['alignment'];
 export class StructureAlignmentProvider {
 
     private readonly _config;
-    private readonly waitMs = 1000;
-    private readonly timeoutMs = 300 * 1000;
+    // Delay (in milliseconds) between the last retry and next API call to get the results
+    private readonly waitMs;
+    // Maximum time (in milliseconds) the application waits to get results from the server
+    private readonly timeoutMs;
 
     constructor(config: AlignmentProviderConfigs) {
         this._config = config;
+        this.timeoutMs = config.timeoutMs;
+        this.waitMs = config.pollingIntervalMs;
     }
 
     private submitURL() {
-        return this._config.base + '/' + this._config.submit;
+        return `${this._config.base}/${this._config.submit}`;
     }
 
     private resultsURL() {
-        return this._config.base + '/' + this._config.results;
+        return `${this._config.base}/${this._config.results}`;
     }
 
     /**
@@ -40,7 +44,7 @@ export class StructureAlignmentProvider {
             if (response.status === 200)
                 return response.text();
             const error = await response.json();
-            throw new Error(`Failed to submit the job to the server: ${this.submitURL}. HTTP ${error.status}: ${error.message}`);
+            throw new Error(`Failed to submit the job to the server: ${this.submitURL()}. HTTP ${error.status}: ${error.message}`);
         });
     }
 

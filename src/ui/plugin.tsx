@@ -1,8 +1,5 @@
 import { useState } from 'react';
 
-import './skin/tabs.css';
-import Tabs, { TabPane } from 'rc-tabs';
-
 import { Status, ApplicationContext } from '../context';
 import { QueryRequest } from '../utils/request';
 import { useObservable } from '../utils/helper';
@@ -13,6 +10,7 @@ import { SelectCoordsComponent, DownloadAssetsComponent, CopyResultsComponent } 
 import { SequenceViewComponent } from './view/sequence';
 import { AlignmentScoresComponent } from './view/scores';
 import { ErrorMessage } from './view/error';
+import { Summary } from './view/summary';
 
 export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
 
@@ -31,14 +29,10 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                 {state === 'error' && <ErrorMessage ctx={props.ctx}/>}
                 {state === 'ready' && <>
                     <MembersInfoComponent ctx={props.ctx}/>
-                    <Tabs className='tabs-panel' defaultActiveKey='1'>
-                        <TabPane tab="SEQUENCE ALIGNMENT" key='1' id='1'>
-                            <SequenceViewComponent ctx={props.ctx}/>
-                        </TabPane>
-                        <TabPane tab="SUMMARY" key='2' id='2'>
-                            <AlignmentScoresComponent ctx={props.ctx}/>
-                        </TabPane>
-                    </Tabs>
+                    <Summary items={[
+                        { name: 'SEQUENCE ALIGNMENT', component: <SequenceViewComponent ctx={props.ctx}/> },
+                        { name: 'SUMMARY', component: <AlignmentScoresComponent ctx={props.ctx}/> }
+                    ]}/>
                     <div className='box-row inp-space inp-space-horizontal' style={{ justifyContent: 'flex-end' }}>
                         <SelectCoordsComponent ctx={props.ctx}/>
                         <DownloadAssetsComponent ctx={props.ctx}/>

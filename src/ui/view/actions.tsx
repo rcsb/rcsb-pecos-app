@@ -6,10 +6,10 @@ import { SelectEventHandler, SelectInfo } from 'rc-menu/lib/interface';
 import { encodeJsonToBase64 } from '../../utils/encoding';
 import { ApplicationContext, SelectionOptions, DownloadOptions } from '../../context';
 import { CopySvg, Icon, SolidArrowDownSvg, WarningSvg, DownloadSvg } from '../icons';
-import { urlParamEncoding, urlParamResponseBody } from '../../utils/constants';
+import { encodingUrlParam, responseUrlParam } from '../../utils/constants';
 import { exportSequenceAlignment, exportTransformations } from '../../utils/download';
 
-const bStyle: React.CSSProperties = { width: '150px' };
+const style: React.CSSProperties = { width: '150px' };
 
 type SelectionOptionsKeys = Exclude<SelectionOptions, undefined>
 const rigidOptions = new Map<SelectionOptionsKeys, string>([
@@ -65,7 +65,7 @@ export function SelectCoordsComponent(props: { ctx: ApplicationContext }) {
             visible={isVisible}
             overlay={menu}
             animation='slide-up'>
-            <button className='btn-action btn-submit' style={bStyle}>
+            <button className='btn-action btn-submit' style={style}>
                 Select View
                 <Icon svg={SolidArrowDownSvg} className='arrow-drop-down-icon'/>
             </button>
@@ -124,7 +124,7 @@ export function DownloadAssetsComponent(props: { ctx: ApplicationContext }) {
             onVisibleChange={setVisiblity}
             overlay={menu}
             animation='slide-up' >
-            <button className='btn-action btn-submit' style={bStyle}>
+            <button className='btn-action btn-submit' style={style}>
                 <Icon svg={DownloadSvg} className='download-icon'/>
                     Export
                 <Icon svg={SolidArrowDownSvg} className='arrow-drop-down-icon'/>
@@ -156,9 +156,9 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
 
     function createLink() {
         const baseURL = window.location.href.split('?')[0];
-        const encodeParam = `${urlParamEncoding}=true`;
+        const encodeParam = `${encodingUrlParam}=true`;
         const b64 = encodeJsonToBase64(props.ctx.state.data.response.state);
-        const bodyParam = `${urlParamResponseBody}=${encodeURIComponent(b64)}`;
+        const bodyParam = `${responseUrlParam}=${encodeURIComponent(b64)}`;
         return baseURL + '?' + bodyParam + '&' + encodeParam;
     }
 
@@ -199,12 +199,12 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
         {isBookmarkable() &&
             <span title='This is an experimental feature and stored URLs might not be openable in a future version'>
                 {copied &&
-                <button id='copy-link-button' className='btn-action btn-submit' style={bStyle}>
+                <button id='copy-link-button' className='btn-action btn-submit' style={style}>
                     Link Copied!
                 </button>
                 }
                 {!copied &&
-                <button id='copy-link-button' className='btn-action btn-submit' style={bStyle}
+                <button id='copy-link-button' className='btn-action btn-submit' style={style}
                     onClick={() => copyLinkToClipboard()}>
                     <Icon svg={CopySvg} className='copy-icon' />
                         Copy Link

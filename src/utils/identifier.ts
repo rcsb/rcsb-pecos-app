@@ -28,7 +28,7 @@ function isValidModelId(modelId: string) {
  * @returns string representation of instance identifier
  */
 export function getCombinedInstanceId(entryId: string, asymId: string) {
-    return `${entryId}$.${asymId}`;
+    return `${entryId}.${asymId}`;
 }
 
 export function getCombinedInstanceIds(results?: Alignment[]) {

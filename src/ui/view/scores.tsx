@@ -54,8 +54,8 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                         {data.simscore && <td>{round(data.simscore)}</td>}
                         {data.identity && <td>{round(data.identity * 100)}</td>}
                         {data.similarity && <td>{round(data.similarity * 100)}</td>}
-                        {data.length && <td>{length}</td>}
-                        {data.coverage && <td>{data.coverage[0]}%/{data.coverage[1]}%</td>}
+                        {data.length && <td>{data.length}</td>}
+                        {data.coverage && <td>{data.coverage[0]}% / {data.coverage[1]}%</td>}
                     </tr>
                 </tbody>
             </table>

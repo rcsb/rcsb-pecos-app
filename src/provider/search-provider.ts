@@ -14,7 +14,7 @@ export class SearchProvider {
     private async fetch(query: SuggestQuery) {
         const url = this._config.base + '/' + this._config.suggest +
         '?json=' + encodeURIComponent(JSON.stringify(query));
-        const errorMessage = `Failed to fetch data from for [ ${url} ]'`;
+        const errorMessage = `Failed to fetch data from [ ${url} ]'`;
         return fetch(url, {
             method: 'GET',
             headers: this._config.httpHeaders
@@ -34,8 +34,8 @@ export class SearchProvider {
                 text: input,
                 completion: [{ attribute: 'rcsb_entry_container_identifiers.entry_id' }],
                 size: 10
-            },
-            results_content_type: ['experimental', 'computational']
+            }
+            // results_content_type: ['experimental', 'computational']
         };
         const data = await this.fetch(query);
         if (!data) return [];

@@ -667,7 +667,7 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
 
     const renderAddControls = () => {
         const count = handler.state.query.context.structures.length;
-        const disabled = false;
+        const disabled = count === 10;
         return <div className={horizontal}>
             {
                 disabled &&

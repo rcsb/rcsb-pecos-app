@@ -1,13 +1,13 @@
 {
   "name": "rcsb-pecos-app",
-  "version": "0.1.0",
-  "description": "RCSB 3D Structure Alignment Web App",
+  "version": "0.1.0-dev.1",
+  "description": "RCSB 3D Structure Alignment Application",
   "license": "MIT",
   "repository": {
     "type": "git"
   },
   "dependencies": {
-    "@rcsb/rcsb-molstar": "^2.5.0-dev.1",
+    "@rcsb/rcsb-molstar": "^2.5.3",
     "@rcsb/rcsb-saguaro": "^2.0.0",
     "@types/react": "17.0.39",
     "@types/react-dom": "17.0.11",
