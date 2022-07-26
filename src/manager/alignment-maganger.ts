@@ -409,7 +409,7 @@ const createRowConfig = (alignments: SequenceAlignmentRepresentation[]) => {
 
 const createBoardConfig = (size: number) => {
     return {
-        width: '100%',
+        trackWidth: 1000,
         range: {
             min: 1,
             max: size
