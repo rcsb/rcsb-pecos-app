@@ -19,7 +19,8 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
-    "build/"
+    "build/",
+    "lib/config.js"
   ],
   "dependencies": {
     "@rcsb/rcsb-molstar": "^2.5.3",
