@@ -118,3 +118,8 @@ export function mergeIntervals(intervals: number[][]) {
     result.push(previous);
     return result;
 }
+
+export function trimTrailingChars(value: string, char: string) {
+    const regExp = new RegExp(char + '+$');
+    return value.replace(regExp, '');
+}

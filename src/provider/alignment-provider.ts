@@ -2,7 +2,7 @@
 import { AppConfigs } from '..';
 import { StructureAlignmentQuery } from '../auto/alignment/alignment-request';
 import { StructureAlignmentResponse } from '../auto/alignment/alignment-response';
-import { isEntry } from '../utils/helper';
+import { isEntry, trimTrailingChars } from '../utils/helper';
 import { QueryOptionsImpl, QueryRequest } from '../utils/request';
 
 type AlignmentProviderConfigs = AppConfigs['service']['alignment'];
@@ -21,11 +21,13 @@ export class StructureAlignmentProvider {
     }
 
     private submitURL() {
-        return `${this._config.base}/${this._config.submit}`;
+        const base = trimTrailingChars(this._config.base, '/');
+        return `${base}/${this._config.submit}`;
     }
 
     private resultsURL() {
-        return `${this._config.base}/${this._config.results}`;
+        const base = trimTrailingChars(this._config.base, '/');
+        return `${base}/${this._config.results}`;
     }
 
     /**

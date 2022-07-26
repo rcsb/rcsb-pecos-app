@@ -1,6 +1,7 @@
 import { AppConfigs } from '..';
 import { SuggestQuery } from '../auto/search/suggest-request';
 import { SuggesterResponse } from '../auto/search/suggest-response';
+import { trimTrailingChars } from '../utils/helper';
 
 type SearchProviderConfigs = AppConfigs['service']['search'];
 export class SearchProvider {
@@ -12,7 +13,7 @@ export class SearchProvider {
     }
 
     private async fetch(query: SuggestQuery) {
-        const url = this._config.base + '/' + this._config.suggest +
+        const url = trimTrailingChars(this._config.base, '/') + '/' + this._config.suggest +
         '?json=' + encodeURIComponent(JSON.stringify(query));
         const errorMessage = `Failed to fetch data from [ ${url} ]'`;
         return fetch(url, {

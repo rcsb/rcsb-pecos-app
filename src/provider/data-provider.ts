@@ -2,7 +2,7 @@
 import { AppConfigs } from '..';
 import { AsymIdsQueryVariables, PolymerInstancesQueryVariables, Query } from '../auto/data/graphql';
 import { asymIdsQuery, polymerInstancesQuery } from '../auto/data/query.gql';
-import { memoizeOneArgAsync } from '../utils/helper';
+import { memoizeOneArgAsync, trimTrailingChars } from '../utils/helper';
 
 export type InstanceData = {
     entry_id: string,
@@ -26,7 +26,7 @@ export class DataProvider {
 
     private async fetch<V>(query: string, variables: V) {
         // Issuing GET request helps avoiding costly pre-flight CORS requests
-        const url = this._config.base + '/' + this._config.gql +
+        const url = trimTrailingChars(this._config.base, '/') + '/' + this._config.gql +
         '?query=' + encodeURIComponent(query) +
         '&variables=' + encodeURIComponent(JSON.stringify(variables));
         return fetch(url, {
