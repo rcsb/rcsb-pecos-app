@@ -6,6 +6,8 @@ import { ApplicationContext } from './context';
 import { ApplicationContextContainer } from './ui/plugin';
 
 import { QueryRequest } from './utils/request';
+import { deepMerge } from './utils/helper';
+import { RecursivePartial } from './utils/types';
 
 const DefaultAppConfigs = {
     service: {
@@ -38,12 +40,12 @@ export class Application {
 
     private readonly _context: ApplicationContext;
 
-    constructor(elementOrId: string | HTMLElement, configs: Partial<AppConfigs> = {}) {
+    constructor(elementOrId: string | HTMLElement, configs: RecursivePartial<AppConfigs> = {}) {
 
         const element = typeof elementOrId === 'string' ? this.getElementById(elementOrId) : elementOrId;
         if (!element) throw new Error(`Could not get element with id '${elementOrId}'`);
 
-        const appConfig = { ...DefaultAppConfigs, ...configs };
+        const appConfig = deepMerge(DefaultAppConfigs, configs) as AppConfigs;
         this._context = new ApplicationContext(appConfig);
         this._context.init();
 
@@ -60,6 +62,6 @@ export class Application {
     }
 }
 
-export async function createApp(elementOrId: string | HTMLElement, configs: Partial<AppConfigs> = {}): Promise<Application> {
+export async function createApp(elementOrId: string | HTMLElement, configs: RecursivePartial<AppConfigs> = {}): Promise<Application> {
     return new Application(elementOrId, configs);
 }
