@@ -1,3 +1,3 @@
 import * as path from 'path';
 
-export const rcsbAlignmentAppPath = path.resolve(path.join(__dirname, '..', 'bulid'));
+export const rcsbAlignmentAppPath = path.resolve(path.join(__dirname, '..', 'build'));
