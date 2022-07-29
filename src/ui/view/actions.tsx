@@ -75,9 +75,9 @@ export function SelectCoordsComponent(props: { ctx: ApplicationContext }) {
 
 type DownloadOptionsKeys = Exclude<DownloadOptions, undefined>
 const downloadOptions = new Map<DownloadOptionsKeys, string>([
-    ['structure', 'Superposed structures (mmCIF)'],
-    ['sequence', 'Sequence alignment (FASTA)'],
-    ['transform', 'Transformation matrices (JSON)'],
+    ['structure', 'Superposed Structures (mmCIF)'],
+    ['sequence', 'Sequence Alignment (FASTA)'],
+    ['transform', 'Transformation Matrices (JSON)'],
     ['all', 'Download All']
 ]);
 

@@ -31,7 +31,7 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                     <MembersInfoComponent ctx={props.ctx}/>
                     <Summary items={[
                         { name: 'SEQUENCE ALIGNMENT', component: <SequenceViewComponent ctx={props.ctx}/> },
-                        { name: 'SUMMARY', component: <AlignmentScoresComponent ctx={props.ctx}/> }
+                        { name: 'SCORES', component: <AlignmentScoresComponent ctx={props.ctx}/> }
                     ]}/>
                     <div className='box-row inp-space inp-space-horizontal' style={{ justifyContent: 'flex-end' }}>
                         <SelectCoordsComponent ctx={props.ctx}/>

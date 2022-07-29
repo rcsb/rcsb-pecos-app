@@ -44,7 +44,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                         {data.identity && <th>SI%</th>}
                         {data.similarity && <th>SS%</th>}
                         {data.length && <th>Length</th>}
-                        {data.coverage && <th>Coverage (Query/Target)</th>}
+                        {data.coverage && <th>Coverage</th>}
                     </tr>
                 </thead>
                 <tbody>
