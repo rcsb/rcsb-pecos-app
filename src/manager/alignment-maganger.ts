@@ -285,23 +285,29 @@ const isAlignmentRegion = (r: AlignmentRegion | AlignmentGap): r is AlignmentReg
     return 'beg_seq_id' in r;
 };
 
+const getAlignmentPosition = (p: Position) => {
+    return p.index + 1;
+};
+
 const toAlignmentBlocks = (positions: Position[]) => {
     const regions: DisplayAlignmentRegion[] = [];
-    let startNew = true;
+    let startNewBlock = true;
     for (let i = 0; i < positions.length; i++) {
         const p = positions[i];
         if (p.isEQR) {
-            if (startNew) {
-                regions.push({ begin: p.index });
-                startNew = false;
+            if (startNewBlock) {
+                regions.push({ begin: getAlignmentPosition(p) });
+                startNewBlock = false;
             } else if (i === positions.length - 1) {
-                regions[regions.length - 1].end = p.index;
+                regions[regions.length - 1].end = getAlignmentPosition(p);
             }
-        } else if (!p.isEQR && !startNew) {
-            regions[regions.length - 1].end = p.index - 1;
-            startNew = true;
+        } else if (!p.isEQR && !startNewBlock) {
+            regions[regions.length - 1].end = getAlignmentPosition(p) - 1;
+            startNewBlock = true;
         }
     }
+    if (!regions[regions.length - 1].end)
+        regions[regions.length - 1].end = regions[regions.length - 1].begin;
     return regions;
 };
 
@@ -322,7 +328,7 @@ const annotateEQRs = (positions: Position[], blocks: StructureAlignmentBlock[], 
 const toSequence = (positions: Position[], label: string) => {
     return positions.map((p) => {
         return {
-            begin: p.index,
+            begin: getAlignmentPosition(p),
             value: p.code!,
             oriBegin: p.seq_id,
             source: p.code ? label : undefined,
