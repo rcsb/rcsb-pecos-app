@@ -9,8 +9,9 @@ export type InstanceData = {
     asym_id: string,
     auth_asym_id?: string,
     pdbx_description?: string,
-    pdbx_seq_one_letter_code_can: string,
-    rcsb_sample_sequence_length: number
+    ncbi_scientific_name?: string,
+    pdbx_seq_one_letter_code_can?: string,
+    rcsb_sample_sequence_length?: number
 };
 
 type DataProviderConfigs = AppConfigs['service']['data'];
@@ -77,11 +78,15 @@ export class DataProvider {
         const data = await this.fetch<PolymerInstancesQueryVariables>(polymerInstancesQuery, vars);
         if (data && data.polymer_entity_instances) {
             return data.polymer_entity_instances.map(i => {
+                const organisms: string[] = [];
+                i!.polymer_entity!.rcsb_entity_source_organism?.forEach(o => { if (o && o!.ncbi_scientific_name) organisms.push(o!.ncbi_scientific_name); });
+                const scientificName = (organisms.length > 0) ? organisms.join(',') : undefined;
                 return {
                     entry_id: i!.polymer_entity!.entry!.rcsb_id,
                     asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.asym_id as string,
                     auth_asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.auth_asym_id as string,
                     pdbx_description: i!.polymer_entity!.rcsb_polymer_entity?.pdbx_description as string,
+                    ncbi_scientific_name: scientificName,
                     pdbx_seq_one_letter_code_can: i!.polymer_entity!.entity_poly!.pdbx_seq_one_letter_code_can as string,
                     rcsb_sample_sequence_length: i!.polymer_entity!.entity_poly!.rcsb_sample_sequence_length as number
                 };

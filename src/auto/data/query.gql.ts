@@ -35,6 +35,9 @@ query polymerInstances($ids: [String]!) {
         pdbx_seq_one_letter_code_can
         rcsb_sample_sequence_length
       }
+      rcsb_entity_source_organism {
+        ncbi_scientific_name
+      }
     }
   }
 }
