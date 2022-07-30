@@ -64,7 +64,7 @@ export function MembersInfoComponent(props: { ctx: ApplicationContext }) {
 
     function view(index: number) {
         if (index === 0) {
-            return <input type='radio' disabled />;
+            return <input type='radio' disabled checked/>;
         } else {
             return <input type='radio'
                 checked={activeView === index - 1}
@@ -84,7 +84,7 @@ export function MembersInfoComponent(props: { ctx: ApplicationContext }) {
                     <td>{member.ncbi_scientific_name || 'N/A'}</td>
                     <td style={{ textAlign: 'center' }}>{member.rcsb_sample_sequence_length || 'N/A'}</td>
                     <td style={{ textAlign: 'center' }}>{member.modeled_residues_length}</td>
-                    <td style={{ textAlign: 'center' }}>{view(index)}</td>
+                    {data.length > 2 && <td style={{ textAlign: 'center' }}>{view(index)}</td>}
                 </tr>
             );
         });
@@ -102,7 +102,7 @@ export function MembersInfoComponent(props: { ctx: ApplicationContext }) {
                     <th>Organism</th>
                     <th style={{ textAlign: 'center' }}>Sequence Length</th>
                     <th style={{ textAlign: 'center' }}>Modeled Residues</th>
-                    <th style={{ textAlign: 'center' }}>View Sequence</th>
+                    {data.length > 2 && <th style={{ textAlign: 'center' }}>View Sequence</th>}
                 </tr>
             </thead>
             <tbody>{members(data)}</tbody>
