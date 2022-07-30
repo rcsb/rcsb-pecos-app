@@ -22,17 +22,19 @@ export function AutosuggestControl(props: AutosuggestControlProps) {
 
     const onRenderAction = (value: string): JSX.Element => <div>{value}</div>;
 
-    function onChangeAction(event: React.FormEvent<HTMLElement>, change: ChangeEvent): void {
+    function onSelectAction(_: React.FormEvent<HTMLElement>, data: Autosuggest.SuggestionSelectedEventData<string>): void {
+        const v = data.suggestion;
+        if (props.value !== v) props.onChange(v);
+    }
+
+    function onChangeAction(_: React.FormEvent<HTMLElement>, change: ChangeEvent): void {
         const v = change.newValue?.trim().toUpperCase() || '';
         if (props.value !== v) props.onChange(v);
     }
 
     function onFetchAction(request: SuggestionsFetchRequestedParams): void {
         props.suggestHandler(request.value).then((values) => {
-            if (values.length === 1) {
-                props.onChange(values[0]);
-                setSuggestions([]);
-            } else if (values.length > 1) {
+            if (values.length > 0) {
                 setSuggestions(values);
             } else { // clear suggestions
                 setSuggestions([]);
@@ -51,6 +53,7 @@ export function AutosuggestControl(props: AutosuggestControlProps) {
         suggestions={suggestions}
         onSuggestionsFetchRequested={onFetchAction}
         onSuggestionsClearRequested={() => setSuggestions([])}
+        onSuggestionSelected={onSelectAction}
         getSuggestionValue={() => props.value}
         renderSuggestion={onRenderAction}
         inputProps={inputProps}
