@@ -80,7 +80,7 @@ export class DataProvider {
             return data.polymer_entity_instances.map(i => {
                 const organisms: string[] = [];
                 i!.polymer_entity!.rcsb_entity_source_organism?.forEach(o => { if (o && o!.ncbi_scientific_name) organisms.push(o!.ncbi_scientific_name); });
-                const scientificName = (organisms.length > 0) ? organisms.join(',') : undefined;
+                const scientificName = (organisms.length > 0) ? organisms.join(', ') : undefined;
                 return {
                     entry_id: i!.polymer_entity!.entry!.rcsb_id,
                     asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.asym_id as string,
