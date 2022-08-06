@@ -23,6 +23,8 @@
   background-repeat: no-repeat;
   background-position: 10px center;
 	background-color: #FFBABA;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* BUTTONS */
