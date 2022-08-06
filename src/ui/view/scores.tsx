@@ -44,22 +44,20 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                     <tr key={0}>
                         {defined(data.rmsd) && <th>RMSD</th>}
                         {defined(data.tmscore) && <th>TM-score</th>}
-                        {defined(data.simscore) && <th>Score</th>}
-                        {defined(data.identity) && <th>SI%</th>}
-                        {defined(data.similarity) && <th>SS%</th>}
+                        {defined(data.identity) && <th>Sequence Identity</th>}
                         {defined(data.length) && <th>Length</th>}
-                        {defined(data.coverage) && <th>Coverage</th>}
+                        {defined(data.coverage) && <th>Reference Coverage</th>}
+                        {defined(data.coverage) && <th>Target Coverage</th>}
                     </tr>
                 </thead>
                 <tbody>
                     <tr key={1}>
                         {defined(data.rmsd) && <td>{round(data.rmsd!)}</td>}
                         {defined(data.tmscore) && <td>{round(data.tmscore!)}</td>}
-                        {defined(data.simscore) && <td>{round(data.simscore!)}</td>}
-                        {defined(data.identity) && <td>{round(data.identity! * 100)}</td>}
-                        {defined(data.similarity) && <td>{round(data.similarity! * 100)}</td>}
+                        {defined(data.identity) && <td>{round(data.identity! * 100)}%</td>}
                         {defined(data.length) && <td>{data.length}</td>}
-                        {defined(data.coverage) && <td>{data.coverage![0]}% / {data.coverage![1]}%</td>}
+                        {defined(data.coverage) && <td>{data.coverage![0]}%</td>}
+                        {defined(data.coverage) && <td>{data.coverage![1]}%</td>}
                     </tr>
                 </tbody>
             </table>
