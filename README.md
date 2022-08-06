@@ -40,3 +40,8 @@ and navigate to `build/`
 ### Release
     npm version 0.X.0 # provide valid semver string
     npm publish
+
+### Code generation
+
+Find detailed instructions in:
+    ./src/auto/README.md
