@@ -45,7 +45,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                         {defined(data.rmsd) && <th>RMSD</th>}
                         {defined(data.tmscore) && <th>TM-score</th>}
                         {defined(data.identity) && <th>Sequence Identity</th>}
-                        {defined(data.length) && <th>Length</th>}
+                        {defined(data.length) && <th>Equivalent Residues</th>}
                         {defined(data.coverage) && <th>Reference Coverage</th>}
                         {defined(data.coverage) && <th>Target Coverage</th>}
                     </tr>
