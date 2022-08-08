@@ -2,7 +2,7 @@
 import { AppConfigs } from '..';
 import { StructureAlignmentQuery } from '../auto/alignment/alignment-request';
 import { StructureAlignmentResponse } from '../auto/alignment/alignment-response';
-import { isEntry, trimTrailingChars } from '../utils/helper';
+import { buildError, isEntry, trimTrailingChars } from '../utils/helper';
 import { QueryOptionsImpl, QueryRequest } from '../utils/request';
 
 type AlignmentProviderConfigs = AppConfigs['service']['alignment'];
@@ -47,6 +47,8 @@ export class StructureAlignmentProvider {
                 return response.text();
             const error = await response.json();
             throw new Error(`Failed to submit the job to the server: ${this.submitURL()}. HTTP ${error.status}: ${error.message}`);
+        }).catch(error => {
+            throw new Error(`Failed to submit the job to the server: ${this.submitURL()}. Error: ${(error as Error).message}`);
         });
     }
 
@@ -77,14 +79,21 @@ export class StructureAlignmentProvider {
 
     private async poll(uuid: string): Promise<StructureAlignmentResponse> {
         const url = this.resultsURL() + '?uuid=' + uuid;
-        const response = await fetch(url, { method: 'get' });
-        if (response.ok) {
-            return await response.json();
-        } else if (response.status === 404) {
-            throw new Error(`The job results are unavailable. UUID: [ ${uuid} ] can be wrong or the results were already claimed`);
-        } else {
-            throw new Error(`Fatal error occurred: ${response.statusText}`);
-        }
+        return fetch(url, { method: 'get' })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    let msg;
+                    if (response.status === 404) {
+                        msg = `The job results are unavailable. UUID: [ ${uuid} ] can be wrong or the results were already claimed`;
+                    } else {
+                        msg = `Fatal error occurred: ${response.statusText}`;
+                    }
+                    return buildError(uuid, msg);
+                }
+            })
+            .catch(error => buildError(uuid, `Failed to fetch results from ${url}: ${(error as Error).message}`));
     }
 
     private sleep() {

@@ -8,6 +8,7 @@ import {
     StructureWebLink
 } from '../auto/alignment/alignment-request';
 import { Structure } from './request';
+import { StructureAlignmentResponse } from '../auto/alignment/alignment-response';
 
 // STRUCTURE
 
@@ -177,4 +178,14 @@ export function mergeIntervals(intervals: number[][]) {
 export function trimTrailingChars(value: string, char: string) {
     const regExp = new RegExp(char + '+$');
     return value.replace(regExp, '');
+}
+
+export function buildError(uuid: string, msg: string): StructureAlignmentResponse {
+    return {
+        info: {
+            uuid: uuid,
+            status: 'ERROR',
+            message: msg
+        }
+    };
 }

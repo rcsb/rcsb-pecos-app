@@ -9,7 +9,7 @@ import { DataProvider } from './provider/data-provider';
 import { SearchProvider } from './provider/search-provider';
 import { StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
-import { isEntry } from './utils/helper';
+import { isEntry, buildError } from './utils/helper';
 import { AlignmentManager } from './manager/alignment-maganger';
 import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
@@ -105,13 +105,8 @@ export class ApplicationContext {
     }
 
     private error(message: string) {
-        const response: StructureAlignmentResponse = {
-            info: {
-                uuid: '',
-                status: 'ERROR',
-                message: message
-            }
-        };
+
+        const response = buildError('', message);
         this.state.data.response.push(response);
         this.state.events.status.next('error');
         updateWindowURL();
@@ -155,11 +150,14 @@ export class ApplicationContext {
 
     public async align(request: QueryRequest) {
         this.loading();
-        const uuid = await this._alignment.submit(request);
-        updateWindowURL('?uuid=' + uuid);
-
-        const response = await this._alignment.results(uuid);
-        this.processResponse(response);
+        try {
+            const uuid = await this._alignment.submit(request);
+            updateWindowURL('?uuid=' + uuid);
+            const response = await this._alignment.results(uuid);
+            this.processResponse(response);
+        } catch (e) {
+            this.error((e as Error).message);
+        }
     }
 }
 
