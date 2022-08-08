@@ -130,7 +130,7 @@ export function FileInputComponent(props: FileUploadProps) {
     if (!props.value) {
         return <FileUploadControl
             acceptFormats={['cif', 'bcif', 'pdb', 'ent']}
-            allowCompressed={true}
+            allowCompressed={false}
             label='Upload File'
             onChange={props.onUpdate}
             onValidationError={props.onError}
