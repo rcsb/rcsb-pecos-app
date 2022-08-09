@@ -30,7 +30,7 @@ export function EntryInputComponent(props: BaseProps & {
 }) {
     return <AutosuggestControl
         value={String(props.value)}
-        label='Entry ID'
+        label={props.label}
         onChange={props.onChange}
         suggestHandler={props.suggestFn}
         className={classNames('inp', 'inp-entry')}

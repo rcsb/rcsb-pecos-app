@@ -756,7 +756,8 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
         return <>
             <EntryInputComponent
                 value={struct.entry_id}
-                suggestFn={ctx.search().suggestEntries.bind(ctx.search())}
+                label='Entry ID'
+                suggestFn={ctx.search().suggestEntriesByID.bind(ctx.search())}
                 onChange={(v) => updateEntryId(v)}
             />
             {renderSelection(index, 'selection')}

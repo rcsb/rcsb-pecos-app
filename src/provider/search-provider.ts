@@ -28,19 +28,24 @@ export class SearchProvider {
         });
     }
 
-    async suggestEntries(input: string): Promise<string[]> {
+    private async returnSuggestions(query: SuggestQuery, name: string) {
+        const data = await this.fetch(query);
+        if (!data) return [];
+        return (data as SuggesterResponse).suggestions[name]
+            .map(item => item.text.replace(/<em>/g, '').replace(/<\/em>/g, ''));
+    }
+
+    async suggestEntriesByID(input: string): Promise<string[]> {
+        const attribute = 'rcsb_entry_container_identifiers.entry_id';
         const query: SuggestQuery = {
             type: 'term',
             suggest: {
                 text: input,
-                completion: [{ attribute: 'rcsb_entry_container_identifiers.entry_id' }],
+                completion: [{ attribute: attribute }],
                 size: 10
             },
             results_content_type: ['experimental', 'computational']
         };
-        const data = await this.fetch(query);
-        if (!data) return [];
-        return (data as SuggesterResponse).suggestions['rcsb_entry_container_identifiers.entry_id']
-            .map(item => item.text.replace(/<em>/g, '').replace(/<\/em>/g, ''));
+        return this.returnSuggestions(query, attribute);
     }
 }
