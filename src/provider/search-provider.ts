@@ -35,8 +35,8 @@ export class SearchProvider {
                 text: input,
                 completion: [{ attribute: 'rcsb_entry_container_identifiers.entry_id' }],
                 size: 10
-            }
-            // results_content_type: ['experimental', 'computational']
+            },
+            results_content_type: ['experimental', 'computational']
         };
         const data = await this.fetch(query);
         if (!data) return [];
