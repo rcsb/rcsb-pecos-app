@@ -1,6 +1,5 @@
 import { Subscription } from 'rxjs';
 import { useEffect, createRef } from 'react';
-import '@rcsb/rcsb-molstar/build/dist/viewer/rcsb-molstar.css';
 import {
     Viewer,
     ViewerProps

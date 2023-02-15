@@ -1,4 +1,4 @@
-/* Global Application Styles */
+@import '@rcsb/rcsb-molstar/build/dist/viewer/rcsb-molstar.css';
 
 #app-container {
   padding-top: 2em;
