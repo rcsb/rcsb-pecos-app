@@ -1,6 +1,6 @@
 {
   "name": "@rcsb/rcsb-pecos-app",
-  "version": "2.0.0-rcsb-saguaro.2",
+  "version": "2.0.0-rcsb-saguaro.3",
   "description": "RCSB 3D Structure Alignment Application",
   "license": "MIT",
   "homepage": "https://github.com/rcsb/rcsb-pecos-app#readme",
@@ -25,11 +25,13 @@
   "dependencies": {
     "@rcsb/rcsb-api-tools": "^4.1.1",
     "@rcsb/rcsb-molstar": "^2.5.3",
-    "@rcsb/rcsb-saguaro-3d": "^2.4.0-data-provider.7",
+    "@rcsb/rcsb-saguaro-3d": "^2.4.0-data-provider.12",
+    "@rcsb/rcsb-saguaro-app": "^4.6.0-data-provider.10",
     "@types/react": "17.0.39",
     "@types/react-dom": "17.0.11",
     "classnames": "^2.3.1",
     "lodash.clonedeep": "^4.5.0",
+    "molstar": "^3.31.4",
     "pako": "^2.0.3",
     "rc-collapse": "^2.1.0",
     "rc-dropdown": "^3.2.0",
@@ -59,6 +61,7 @@
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/pako": "^2.0.0",
     "@types/react-autosuggest": "^10.1.5",
+    "@types/uniqid": "^5.3.2",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "argparse": "^2.0.1",
@@ -80,6 +83,7 @@
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.2",
     "typescript": "^4.5.2",
+    "uniqid": "^5.4.0",
     "webpack": "^5.64.4",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.11.1"

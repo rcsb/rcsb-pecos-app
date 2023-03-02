@@ -889,3 +889,7 @@
   border-right: 2px solid transparent;
   animation: spinner .6s linear infinite;
 }
+
+.msp-highlight-toast-wrapper{
+  visibility: hidden;
+}

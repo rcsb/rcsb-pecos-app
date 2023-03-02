@@ -1,23 +1,28 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Status, ApplicationContext } from '../context';
 import { QueryRequest } from '../utils/request';
 import { useObservable } from '../utils/helper';
 import { InputUIComponent } from './form/input-form';
-import { MembersInfoComponent } from './view/members';
 import { ErrorMessage } from './view/error';
 import {
     RcsbModuleDataProviderInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvModule/RcsbFvModuleInterface';
 import {
+    alignmentCloseResidues, entryColors,
     RcsbStructuralAlignmentProvider,
     RcsbStructuralTransformProvider, RcsbStructureLocationProvider
 } from '../saguaro-3d/ExternalAlignmentProvider';
 import { GroupReference, SequenceReference } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
-import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d';
 import { ColorLists, convertHexToRgb } from '../utils/color';
-import { Summary } from './view/summary';
 import { AlignmentScoresComponent } from './view/scores';
+import { AlignmentTrackFactory } from '../saguaro-3d/AlignmentTrackFactory';
+import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d';
+import { getTrajectoryPresetProvider } from '../saguaro-3d/molstar-trajectory/AlignmentTrajectoryPresetProvider';
+import { closeResidueColoring } from '../saguaro-3d/molstar-trajectory/Coloring';
+import { CopyResultsComponent, DownloadAssetsComponent, SelectCoordsComponent } from './view/actions';
+import { Subscription } from 'rxjs';
+import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
 
 let panel3D: RcsbFv3DAlignmentProvider;
 export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
@@ -34,11 +39,15 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                         queryId: 'structural-alignment',
                         group: GroupReference.MatchingUniprotAccession,
                         to: SequenceReference.PdbInstance
+                    },
+                    trackFactories: {
+                        alignmentTrackFactory: new AlignmentTrackFactory(alignmentCloseResidues(structAlignResponse.results ?? []))
                     }
                 }
             };
             const transformProvider = new RcsbStructuralTransformProvider(structAlignResponse);
             const structureLocationProvider = new RcsbStructureLocationProvider(structAlignResponse);
+            const residueColoring = closeResidueColoring(alignmentCloseResidues(structAlignResponse.results ?? []), entryColors(structAlignResponse.results ?? []));
             panel3D?.unmount();
             let index = 0;
             panel3D = new RcsbFv3DAlignmentProvider({
@@ -61,12 +70,23 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                                 titleFlagColor: color
                             }));
                         }
+                    },
+                    externalUiComponents: {
+                        replace: []
                     }
-                }
+                },
+                trajectoryProvider: getTrajectoryPresetProvider(residueColoring)
             });
-            panel3D.render();
+            panel3D.render().then(()=>{
+                panel3D.pluginCall(plugin=>{
+                    if (residueColoring.colorThemeProvider)
+                        plugin.representation.structure.themes.colorThemeRegistry.add(residueColoring.colorThemeProvider);
+                    (panel3D as any).downloadSubscription = props.ctx.state.events.download.subscribe((e) => exportHierarchy(plugin, { format: 'cif' }));
+                });
+            });
         } else {
             panel3D?.unmount();
+            (panel3D as any)?.downloadSubscription?.unsubscribe();
         }
     });
 
@@ -82,10 +102,11 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                     {state === 'loading' && <div className="spinner"></div>}
                     {state === 'error' && <ErrorMessage ctx={props.ctx}/>}
                     {state === 'ready' && <>
-                        <Summary items={[
-                            { name: 'INFO', component: <MembersInfoComponent ctx={props.ctx}/> },
-                            { name: 'SCORES', component: <AlignmentScoresComponent ctx={props.ctx}/> }
-                        ]}/>
+                        <AlignmentScoresComponent ctx={props.ctx}/>
+                        <div className='box-row inp-space inp-space-horizontal' style={{ justifyContent: 'flex-end' }}>
+                            <DownloadAssetsComponent ctx={props.ctx}/>
+                            <CopyResultsComponent ctx={props.ctx}/>
+                        </div>
                     </>}
                 </div>
             </div>

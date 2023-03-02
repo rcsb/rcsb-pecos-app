@@ -18,6 +18,7 @@ import {
     InstanceSequenceInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
 import { Alignment, AlignmentRegion, StructureAlignmentResponse } from '../auto/alignment/alignment-response';
+import {ColorLists, convertHexToRgb} from "../utils/color";
 
 export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterface {
 
@@ -147,8 +148,17 @@ function getInstanceId(result: Alignment, index: 0|1 = 1): string {
     const res = result.structures[index];
     if ('entry_id' in res && res.entry_id && res.selection && 'asym_id' in res.selection)
         return `${res.entry_id}.${res.selection.asym_id}`;
-    else if ('name' in res && res.selection && 'asym_id' in res.selection)
+    else if ('name' in res && res.name && res.selection && 'asym_id' in res.selection)
         return `${res.name}.${res.selection.asym_id}`;
+    throw new Error('Missing entry_id and name from result');
+}
+
+function getEntryId(result: Alignment, index: 0|1 = 1): string {
+    const res = result.structures[index];
+    if ('entry_id' in res && res.entry_id && res.selection && 'asym_id' in res.selection)
+        return res.entry_id;
+    else if ('name' in res && res.name && res.selection && 'asym_id' in res.selection)
+        return res.name;
     throw new Error('Missing entry_id and name from result');
 }
 
@@ -195,5 +205,43 @@ async function getSequences(results: Alignment[]): Promise<InstanceSequenceInter
         }
     });
     return out.concat(await RcsbRequestContextManager.getInstanceSequences(missingIds));
+}
+
+export function alignmentCloseResidues(results: Alignment[]): Map<string, Set<number>> {
+    const out: Map<string, Set<number>> = new Map<string, Set<number>>();
+    results.forEach(res=>{
+        const instanceId = getInstanceId(res);
+        if (!out.has(instanceId))
+            out.set(instanceId, new Set<number>());
+        res.structure_alignment.map(sa => sa.regions?.[1]).flat().forEach(reg=>{
+            if (!reg)
+                return;
+            for (let n = 0; n < reg.length; n++) {
+                out.get(instanceId)?.add(reg.beg_seq_id + n);
+            }
+        });
+        const refId = getInstanceId(res, 0);
+        if (!out.has(refId))
+            out.set(refId, new Set<number>());
+        res.structure_alignment.map(sa => sa.regions?.[0]).flat().forEach(reg=>{
+            if (!reg)
+                return;
+            for (let n = 0; n < reg.length; n++) {
+                out.get(refId)?.add(reg.beg_seq_id + n);
+            }
+        });
+    });
+    return out;
+}
+
+export function entryColors(results: Alignment[]): Map<string, number> {
+    const out: Map<string, number> = new Map<string, number>();
+    const instanceId = getInstanceId(results[0], 0);
+    out.set(instanceId, ColorLists['set-1'][0]);
+    results.forEach((res, n)=>{
+        const instanceId = getInstanceId(res)
+        out.set(instanceId, ColorLists['set-1'][n + 1]);
+    });
+    return out;
 }
 
