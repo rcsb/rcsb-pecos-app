@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import Dropdown from 'rc-dropdown';
 import Menu, { Divider, Item as MenuItem } from 'rc-menu';
-import { SelectEventHandler, SelectInfo } from 'rc-menu/lib/interface';
 
 import { encodeJsonToBase64 } from '../../utils/encoding';
 import { ApplicationContext, SelectionOptions, DownloadOptions } from '../../context';
 import { CopySvg, Icon, SolidArrowDownSvg, WarningSvg, DownloadSvg } from '../icons';
 import { encodingUrlParam, responseUrlParam } from '../../utils/constants';
 import { exportSequenceAlignment, exportTransformations } from '../../utils/download';
+import {SelectEventHandler, MenuInfo, MenuClickEventHandler} from 'rc-menu/es/interface';
 
 const style: React.CSSProperties = { width: '150px' };
 
@@ -26,7 +26,7 @@ export function SelectCoordsComponent(props: { ctx: ApplicationContext }) {
 
     const [isVisible, setVisiblity] = useState(false);
 
-    const selectHandler: SelectEventHandler = (info: SelectInfo) => {
+    const selectHandler: SelectEventHandler = (info: MenuInfo) => {
         setVisiblity(false);
         props.ctx.state.events.selection.next(info.key as SelectionOptionsKeys);
     };
@@ -85,7 +85,7 @@ export function DownloadAssetsComponent(props: { ctx: ApplicationContext }) {
 
     const [isVisible, setVisiblity] = useState(false);
 
-    const selectHandler: SelectEventHandler = (info: SelectInfo) => {
+    const selectHandler: MenuClickEventHandler = (info: MenuInfo) => {
         setVisiblity(false);
         const opt = info.key as DownloadOptionsKeys;
         if (opt === 'all' || opt === 'transform')
@@ -112,7 +112,8 @@ export function DownloadAssetsComponent(props: { ctx: ApplicationContext }) {
 
     const menu = (
         <Menu className='files-download-menu'
-            onClick={selectHandler}>
+            onClick={selectHandler}
+        >
             {menuList()}
         </Menu>
     );

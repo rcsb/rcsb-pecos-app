@@ -6,7 +6,7 @@ import { TagDelimiter } from '@rcsb/rcsb-saguaro-app';
 export function closeResidueColoring(closeResidues: Map<string, Set<number>>, colors: Map<string, number>) {
     return CustomElementProperty.create<[number, boolean]>({
         label: 'Residue Stripes',
-        name: 'basic-wrapper-residue-striping',
+        name: 'close-residue-color',
         getData(model: Model) {
             const map = new Map<ElementIndex, [number, boolean]>();
             for (let i = 0; i < model.atomicHierarchy.atoms._rowCount; i++) {

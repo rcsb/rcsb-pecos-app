@@ -7,17 +7,13 @@ import {
     StructureRepresentationPresetProvider
 } from 'molstar/lib/mol-plugin-state/builder/structure/representation-preset';
 import { PluginContext } from 'molstar/lib/mol-plugin/context';
-import { PluginStateObject, PluginStateTransform } from 'molstar/lib/mol-plugin-state/objects';
-import { StateObjectRef, StateSelection, StateTransformer } from 'molstar/lib/mol-state';
+import { PluginStateObject } from 'molstar/lib/mol-plugin-state/objects';
+import { StateObjectRef } from 'molstar/lib/mol-state';
 import {
-    Model,
-    QueryContext, ResidueIndex,
-    Structure,
     StructureElement,
-    StructureProperties as SP,
-    StructureSelection,
-    Unit
+    StructureProperties as SP
 } from 'molstar/lib/mol-model/structure';
+
 import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder';
 import uniqid from 'uniqid';
 import { PLDDTConfidenceColorThemeProvider } from 'molstar/lib/extensions/model-archive/quality-assessment/color/plddt';
@@ -32,18 +28,18 @@ import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
 import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure';
 import { StructureRepresentationBuilder } from 'molstar/lib/mol-plugin-state/builder/structure/representation';
 import { StateTransform } from 'molstar/lib/mol-state/transform';
-import { TransformMatrixType } from '@rcsb/rcsb-saguaro-3d/build/dist/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { TransformStructureConformation } from '@rcsb/rcsb-saguaro-3d';
+import {
+    RigidTransformType,
+    TransformMatrixType
+} from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
 import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
+import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
 
 
 type RepresentationParamsType = {
     pdb?: { entryId: string; entityId: string; } | { entryId: string; instanceId: string; };
-    matrix?: TransformMatrixType;
-    targetAlignment?: TargetAlignment;
+    transform: RigidTransformType[]|undefined;
 }
-
-let refParams: StructureAlignmentParamsType | undefined = undefined;
 
 type ComponentType = Awaited<ReturnType<InstanceType<typeof StructureBuilder>['tryCreateComponentFromExpression']>>;
 type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentationBuilder>['buildRepresentation']>;
@@ -59,9 +55,7 @@ export function representationPresetProvider(residueColoring: CustomElementPrope
         isApplicable: (structureRef: PluginStateObject.Molecule.Structure, plugin: PluginContext): boolean => true,
         params: (structureRef: PluginStateObject.Molecule.Structure | undefined, plugin: PluginContext) => ({
             pdb: PD.Value<{ entryId: string; entityId: string; } | { entryId: string; instanceId: string; } | undefined>(undefined),
-            targetAlignment: PD.Value<TargetAlignment | undefined>(undefined),
-            matrix: PD.Value<TransformMatrixType | undefined>(undefined),
-            ...StructureRepresentationPresetProvider.CommonParams
+            transform: PD.Value<RigidTransformType[] | undefined>(undefined),
         }),
         apply: async (structureRef: StateObjectRef<PluginStateObject.Molecule.Structure>, params: RepresentationParamsType, plugin: PluginContext) => {
             const structureCell = StateObjectRef.resolveAndCheck(plugin.state.data, structureRef);
@@ -95,16 +89,8 @@ export function representationPresetProvider(residueColoring: CustomElementPrope
                     if (alignedOperators.length === 0) alignedOperators.push('0');
                     if (alignedType !== 'polymer')
                         return {};
-                    if (plugin.managers.structure.hierarchy.current.structures.length === 1) {
-                        refParams = {
-                            entryId: entryId,
-                            labelAsymId: alignedAsymId,
-                            operatorName: alignedOperatorName,
-                            targetAlignment: params.targetAlignment!
-                        };
-                    }
-                    if (params.matrix) {
-                        await matrixAlign(plugin, structureRef, params.matrix);
+                    if (params.transform?.[0].transform) {
+                        await matrixAlign(plugin, structureRef, params.transform?.[0].transform);
                     }
                     const comp = await plugin.builders.structure.tryCreateComponentFromExpression(
                         structureCell,

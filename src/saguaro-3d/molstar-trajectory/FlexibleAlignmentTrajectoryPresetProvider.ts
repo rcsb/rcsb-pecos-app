@@ -7,23 +7,26 @@ import { TrajectoryHierarchyPresetProvider } from 'molstar/lib/mol-plugin-state/
 import { PluginContext } from 'molstar/lib/mol-plugin/context';
 import { PluginStateObject } from 'molstar/lib/mol-plugin-state/objects';
 import { ParamDefinition, ParamDefinition as PD } from 'molstar/lib/mol-util/param-definition';
-import { StateObjectRef } from 'molstar/lib/mol-state';
+import { StateObjectRef, StateObjectSelector } from 'molstar/lib/mol-state';
 import { RootStructureDefinition } from 'molstar/lib/mol-plugin-state/helpers/root-structure';
+import { StateTransformer } from 'molstar/lib/mol-state/transformer';
 import { StateObject } from 'molstar/lib/mol-state/object';
-
 import { Structure, StructureElement, StructureProperties as SP } from 'molstar/lib/mol-model/structure';
-import {
-    RigidTransformType
-} from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { representationPresetProvider } from './AlignmentRepresentationPresetProvider';
+import { RigidTransformType } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
+import { FlexibleAlignmentBuiltIn } from './FlexibleAlignmentBuiltIn';
 import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
+import { representationPresetProvider } from './FlexibleAlignmentRepresentationPresetProvider';
 
 
-export type AlignmentTrajectoryParamsType = {
+
+export type FelxibleAlignmentTrajectoryParamsType = {
     pdb?: {entryId: string;entityId: string;}|{entryId: string;instanceId: string;};
     transform?: RigidTransformType[];
     modelIndex?: number;
 }
+
+type StructureObject = StateObjectSelector<PluginStateObject.Molecule.Structure, StateTransformer<StateObject<any, StateObject.Type<any>>, StateObject<any, StateObject.Type<any>>, any>>
+
 
 export function getTrajectoryPresetProvider(residueColoring: CustomElementProperty<any>) {
     return TrajectoryHierarchyPresetProvider({
@@ -32,12 +35,12 @@ export function getTrajectoryPresetProvider(residueColoring: CustomElementProper
             name: 'Alignment to Reference'
         },
         isApplicable: (trajectory: PluginStateObject.Molecule.Trajectory, plugin: PluginContext): boolean => true,
-        params: (trajectory: PluginStateObject.Molecule.Trajectory | undefined, plugin: PluginContext): ParamDefinition.For<AlignmentTrajectoryParamsType> => ({
+        params: (trajectory: PluginStateObject.Molecule.Trajectory | undefined, plugin: PluginContext): ParamDefinition.For<FelxibleAlignmentTrajectoryParamsType> => ({
             pdb: PD.Value<{entryId: string;entityId: string;}|{entryId: string;instanceId: string;}|undefined>(undefined),
             modelIndex: PD.Value<number|undefined>(undefined),
             transform: PD.Value<RigidTransformType[]|undefined>(undefined)
         }),
-        apply: async (trajectory: StateObjectRef<PluginStateObject.Molecule.Trajectory>, params: AlignmentTrajectoryParamsType, plugin: PluginContext) => {
+        apply: async (trajectory: StateObjectRef<PluginStateObject.Molecule.Trajectory>, params: FelxibleAlignmentTrajectoryParamsType, plugin: PluginContext) => {
             if (!params.pdb)
                 return {};
             const modelParams = { modelIndex: params.modelIndex || 0 };
@@ -74,15 +77,21 @@ export function getTrajectoryPresetProvider(residueColoring: CustomElementProper
                         plugin.managers.structure.hierarchy.current.structures[plugin.managers.structure.hierarchy.current.structures.length - 1]
                     ]);
             } while (!entityCheck);
+            if (params.transform) {
+                plugin.managers.structure.hierarchy.remove([
+                    plugin.managers.structure.hierarchy.current.structures[plugin.managers.structure.hierarchy.current.structures.length - 1]
+                ]);
+                structure = await plugin.state.data.build().to(modelProperties).apply(FlexibleAlignmentBuiltIn, {
+                    pdb: params.pdb,
+                    transform: params.transform
+                }).commit();
+            }
+
 
             const structureProperties = await builder.insertStructureProperties(structure);
             const representation = await plugin.builders.structure.representation.applyPreset(
-                structureProperties,
-                representationPresetProvider(residueColoring),
-                {
-                    pdb: params.pdb,
-                    transform: params.transform
-                }
+                structure,
+                representationPresetProvider(residueColoring)
             );
             // TODO what is the purpose of this return?
             return {

@@ -13,12 +13,12 @@ import {
     LocationProviderInterface,
     RigidTransformType, TransformMatrixType,
     TransformProviderInterface
-} from '@rcsb/rcsb-saguaro-3d/build/dist/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
+} from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
 import {
     InstanceSequenceInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
 import { Alignment, AlignmentRegion, StructureAlignmentResponse } from '../auto/alignment/alignment-response';
-import {ColorLists, convertHexToRgb} from "../utils/color";
+import { ColorLists } from '../utils/color';
 
 export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterface {
 
@@ -239,7 +239,7 @@ export function entryColors(results: Alignment[]): Map<string, number> {
     const instanceId = getInstanceId(results[0], 0);
     out.set(instanceId, ColorLists['set-1'][0]);
     results.forEach((res, n)=>{
-        const instanceId = getInstanceId(res)
+        const instanceId = getInstanceId(res);
         out.set(instanceId, ColorLists['set-1'][n + 1]);
     });
     return out;

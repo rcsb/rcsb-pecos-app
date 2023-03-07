@@ -1,15 +1,16 @@
 import '../skin/tabs.css';
-import Tabs, { TabPane } from 'rc-tabs';
+import Tabs from 'rc-tabs';
+
 
 export function Summary(props: { items: {
     name: string,
     component: JSX.Element
 }[] }) {
-    return <Tabs className='tabs-panel' defaultActiveKey='0'>
-        {props.items.length > 0 && props.items.map((item, index) => {
-            return <TabPane tab={item.name} key={index.toString()} id={index.toString()}>
-                {item.component}
-            </TabPane>;
-        })}
-    </Tabs>;
+    return <Tabs className='tabs-panel' defaultActiveKey='0' items={
+        (props.items ?? []).map((item, index) => ({
+            key: index.toString(),
+            tabKey: item.name,
+            label: item.component
+        }))
+    }/>;
 }

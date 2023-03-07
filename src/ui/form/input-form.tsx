@@ -612,15 +612,15 @@ interface InputUIComponentProps {
 
 export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponentProps) {
 
-    const [activeKey, updateKey] = useState('0');
-    useEffect(() => { if (isCollapsed) updateKey(''); }, [isCollapsed]);
+    const [activeKey, updateKey] = useState(['0']);
+    useEffect(() => { if (isCollapsed) updateKey([]); }, [isCollapsed]);
 
     const handler = ctx.state.data.request;
     const [request, setRequest] = useState(handler.state);
     useObservable<QueryRequest>(handler.subject, setRequest);
 
     const onPanelChange = (key: React.Key | React.Key[]) => {
-        updateKey(key.toString());
+        updateKey(key as string[]);
     };
 
     const updateStructure = (index: number, strucFactory: () => Structure) => {
@@ -840,7 +840,8 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
             <Collapse
                 activeKey={activeKey}
                 className='panel-input-form'
-                onChange={onPanelChange}>
+                onChange={onPanelChange}
+            >
                 <Panel header='Compare Protein Structures'>
                     <div className={vertical}>
                         {renderStructureSelection()}

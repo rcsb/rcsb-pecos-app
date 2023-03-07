@@ -1,6 +1,6 @@
 import './ui/skin/app.css';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 import { ApplicationContext } from './context';
 import { ApplicationContextContainer } from './ui/plugin';
@@ -50,7 +50,8 @@ export class Application {
         this._context.init();
 
         const component = React.createElement(ApplicationContextContainer, { ctx: this._context });
-        ReactDOM.render(component, element);
+        const root = createRoot(element);
+        root.render(component);
     }
 
     private getElementById(elementId: string): HTMLElement {
