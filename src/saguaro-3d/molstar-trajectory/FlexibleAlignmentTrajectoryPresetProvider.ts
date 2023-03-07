@@ -30,7 +30,7 @@ type StructureObject = StateObjectSelector<PluginStateObject.Molecule.Structure,
 
 export function getTrajectoryPresetProvider(residueColoring: CustomElementProperty<any>) {
     return TrajectoryHierarchyPresetProvider({
-        id: 'alignment-to-reference',
+        id: 'flexible-alignment-to-reference',
         display: {
             name: 'Alignment to Reference'
         },
