@@ -1,6 +1,4 @@
 const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const ExtraWatchWebpackPlugin = require('extra-watch-webpack-plugin');
 
 const configOptions = {
     module: {
@@ -13,23 +11,11 @@ const configOptions = {
                 }]
             },
             {
-                test: /\.(s*)css$/,
-                use: [
-                    MiniCssExtractPlugin.loader,
-                    { loader: 'css-loader', options: { sourceMap: false } }
-                ]
+                test: /\.s?css$/,
+                use: ['style-loader', 'css-loader', 'sass-loader']
             }
         ]
     },
-    plugins: [
-        new ExtraWatchWebpackPlugin({
-            files: [
-                './lib/**/*.css',
-                './lib/**/*.html'
-            ],
-        }),
-        new MiniCssExtractPlugin({ filename: 'rcsb-pecos-app.css' })
-    ],
     resolve: {
         modules: [
             'node_modules',
