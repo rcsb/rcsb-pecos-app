@@ -3,75 +3,13 @@ import Dropdown from 'rc-dropdown';
 import Menu, { Divider, Item as MenuItem } from 'rc-menu';
 
 import { encodeJsonToBase64 } from '../../utils/encoding';
-import { ApplicationContext, SelectionOptions, DownloadOptions } from '../../context';
+import { ApplicationContext, DownloadOptions } from '../../context';
 import { CopySvg, Icon, SolidArrowDownSvg, WarningSvg, DownloadSvg } from '../icons';
 import { encodingUrlParam, responseUrlParam } from '../../utils/constants';
 import { exportSequenceAlignment, exportTransformations } from '../../utils/download';
-import {SelectEventHandler, MenuInfo, MenuClickEventHandler} from 'rc-menu/es/interface';
+import { MenuInfo, MenuClickEventHandler } from 'rc-menu/es/interface';
 
 const style: React.CSSProperties = { width: '150px' };
-
-type SelectionOptionsKeys = Exclude<SelectionOptions, undefined>
-const rigidOptions = new Map<SelectionOptionsKeys, string>([
-    ['residues', 'Aligned Residues'],
-    ['polymer', 'Polymer Chains'],
-    ['structure', 'Structures']
-]);
-
-const flexOptions = new Map<SelectionOptionsKeys, string>([
-    ['residues', 'Aligned Residues']
-]);
-
-export function SelectCoordsComponent(props: { ctx: ApplicationContext }) {
-
-    const [isVisible, setVisiblity] = useState(false);
-
-    const selectHandler: SelectEventHandler = (info: MenuInfo) => {
-        setVisiblity(false);
-        props.ctx.state.events.selection.next(info.key as SelectionOptionsKeys);
-    };
-
-    const options = (ctx: ApplicationContext): Map<string, string> => {
-        const method = ctx.state.data.request.state.query.context.method.name;
-        if (method === 'fatcat-flexible' || method === 'ce-cp')
-            return flexOptions;
-        else return rigidOptions;
-    };
-
-    const menuList = () => {
-        const menu = [];
-        const map = options(props.ctx);
-        for (const k of map.keys()) {
-            menu.push(
-                <MenuItem key={k}>
-                    <span>{map.get(k)}</span>
-                </MenuItem>
-            );
-        }
-        return menu;
-    };
-
-    const menu = (
-        <Menu className='files-download-menu'
-            onSelect={selectHandler}>
-            {menuList()}
-        </Menu>
-    );
-
-    return (
-        <Dropdown
-            trigger={['click']}
-            onVisibleChange={setVisiblity}
-            visible={isVisible}
-            overlay={menu}
-            animation='slide-up'>
-            <button className='btn-action btn-submit' style={style}>
-                Select View
-                <Icon svg={SolidArrowDownSvg} className='arrow-drop-down-icon'/>
-            </button>
-        </Dropdown>
-    );
-}
 
 type DownloadOptionsKeys = Exclude<DownloadOptions, undefined>
 const downloadOptions = new Map<DownloadOptionsKeys, string>([

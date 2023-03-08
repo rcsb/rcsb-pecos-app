@@ -1,6 +1,7 @@
-import './ui/skin/app.css';
+import './assets';
+
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 
 import { ApplicationContext } from './context';
 import { ApplicationContextContainer } from './ui/plugin';

@@ -6,7 +6,7 @@ import { ApplicationContext } from '../../context';
 import { ColorLists, convertHexToRgb } from '../../utils/color';
 
 function round(value: number | undefined) {
-    if (!value)
+    if (!value && value !== 0)
         return 'NA';
     return Math.round(value * 100) / 100;
 }

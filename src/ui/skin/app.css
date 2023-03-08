@@ -467,7 +467,7 @@
   display: none;
 }
 
-.rc-dropdown-menu {
+.rc-menu-root {
   font-size: 14px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
@@ -487,12 +487,12 @@
   border: 1px solid #d9d9d9;
 }
 
-.rc-dropdown-menu > li {
+.rc-menu-root > li {
   margin: 0;
   padding: 0;
 }
 
-.rc-dropdown-menu:before {
+.rc-menu-root:before {
   content: '';
   position: absolute;
   top: -4px;
@@ -503,7 +503,7 @@
   background: rgba(255, 255, 255, 0.01);
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item {
+.rc-menu-root > .rc-menu-item {
   position: relative;
   display: block;
   padding: 7px 10px;
@@ -514,18 +514,18 @@
   white-space: nowrap;
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item:hover,
-.rc-dropdown-menu > .rc-dropdown-menu-item-active,
-.rc-dropdown-menu > .rc-dropdown-menu-item-selected {
+.rc-menu-root > .rc-menu-item:hover,
+.rc-menu-root > .rc-menu-item-active,
+.rc-menu-root > .rc-menu-item-selected {
   background-color: #f5f5f5;
   cursor: pointer;
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item-selected {
+.rc-menu-root > .rc-menu-item-selected {
   position: relative;
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item-selected:after {
+.rc-menu-root > .rc-menu-item-selected:after {
   content: '';
   font-weight: bold;
   position: absolute;
@@ -534,29 +534,29 @@
   color: #2b2828;
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item-disabled {
+.rc-menu-root > .rc-menu-item-disabled {
   color: #ccc;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item-disabled:hover {
+.rc-menu-root > .rc-menu-item-disabled:hover {
   color: #ccc;
   background-color: #fff;
   cursor: not-allowed;
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item:last-child {
+.rc-menu-root > .rc-menu-item:last-child {
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item:first-child {
+.rc-menu-root > .rc-menu-item:first-child {
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
 }
 
-.rc-dropdown-menu > .rc-dropdown-menu-item-divider {
+.rc-menu-root > .rc-menu-item-divider {
   height: 1px;
   margin: 1px 0;
   overflow: hidden;

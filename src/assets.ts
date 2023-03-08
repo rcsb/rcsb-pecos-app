@@ -1,7 +1,6 @@
-import './index.html';
-require('./ui/skin/app.css');
-require('./ui/skin/tabs.css');
-require('./ui/skin/collapse.css');
-require('./ui/skin/selector.css');
-require('./ui/skin/suggestions.css');
-require('@rcsb/rcsb-molstar/build/dist/viewer/rcsb-molstar.css');
+import './ui/skin/app.css';
+import './ui/skin/tabs.css';
+import './ui/skin/collapse.css';
+import './ui/skin/selector.css';
+import './ui/skin/suggestions.css';
+import '@rcsb/rcsb-molstar/build/dist/viewer/rcsb-molstar.css';
