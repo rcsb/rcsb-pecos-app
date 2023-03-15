@@ -21,6 +21,7 @@ import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
 import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure';
 import { StructureRepresentationBuilder } from 'molstar/lib/mol-plugin-state/builder/structure/representation';
 import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
+import {closeResidueColoring} from "./Coloring";
 
 
 type ComponentType = Awaited<ReturnType<InstanceType<typeof StructureBuilder>['tryCreateComponentFromExpression']>>;
@@ -28,7 +29,7 @@ type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentation
 type ComponentMapType = Record<string, ComponentType>;
 type RepresentationMapType = Record<string, RepresentationType>;
 
-export function representationPresetProvider(residueColoring: CustomElementProperty<any>) {
+export function representationPresetProvider(alignmentId: string, closeResidues?: Set<number>, color?: number) {
     return StructureRepresentationPresetProvider({
         id: 'alignment-to-reference',
         display: {
@@ -77,8 +78,13 @@ export function representationPresetProvider(residueColoring: CustomElementPrope
                 ignoreLight: false,
                 quality: 'auto'
             });
+            const residueColoring: CustomElementProperty<any> = closeResidueColoring(alignmentId, closeResidues, color);
+            if (residueColoring?.colorThemeProvider && !plugin.representation.structure.themes.colorThemeRegistry.has(residueColoring.colorThemeProvider))
+                plugin.representation.structure.themes.colorThemeRegistry.remove(residueColoring.colorThemeProvider);
+            if (residueColoring?.colorThemeProvider)
+                plugin.representation.structure.themes.colorThemeRegistry.add(residueColoring.colorThemeProvider);
             representationMap['aligned'] = builder.buildRepresentation(update, comp, {
-                color: residueColoring.propertyProvider.descriptor.name as ColorTheme.BuiltIn,
+                color: residueColoring?.propertyProvider.descriptor.name as ColorTheme.BuiltIn ?? undefined,
                 type: 'cartoon'
             });
             await update.commit({ revertOnError: false });

@@ -3,6 +3,11 @@ import {
     AlignedRegion,
     AlignmentResponse,
 } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
+import { RcsbRequestContextManager, TagDelimiter } from '@rcsb/rcsb-saguaro-app';
+import {
+    InstanceSequenceInterface
+} from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
+import {Alignment, AlignmentRegion} from '../auto/alignment/alignment-response';
 
 type AlignmentRefType = (number|undefined)[];
 type AlignmentMemberType = {
@@ -11,16 +16,28 @@ type AlignmentMemberType = {
     ref: AlignmentRefType;
     target: AlignmentRefType;
 };
-export class AlignmentReference {
-    private readonly alignmentRefMap: AlignmentRefType;
-    private readonly refId: string;
-    private readonly alignmentRefGaps: Record<number, number>;
-    private readonly memberRefList: AlignmentMemberType[] = [];
 
-    constructor(refId: string, length: number) {
-        this.alignmentRefMap = Array(length).fill(0).map((v, n)=>n + 1);
+export type AlignmentMapType = {entryId: string; instanceId: string; alignmentId: string; sequence: string; alignmentIndex: number; pairIndex: number; alignment: Alignment;};
+export class AlignmentReference {
+    private alignmentRefMap: AlignmentRefType = [];
+    private refId = 'none';
+    private alignmentRefGaps: Record<number, number> = {};
+    private memberRefList: AlignmentMemberType[] = [];
+
+    private readonly alignmentMap = new Map<string, AlignmentMapType>();
+
+    public async init(results: Alignment[]) {
+        this.alignmentMap.clear();
+        this.alignmentRefMap = [];
         this.alignmentRefGaps = {};
-        this.refId = refId;
+        const result = results[0];
+        this.refId = this.addUniqueAlignmentId(result, 0, 0);
+        const length = (await this.getSequences())[0].sequence.length;
+        this.alignmentRefMap = Array(length).fill(0).map((v, n)=>n + 1);
+        results.forEach((result, n) => {
+            this.addUniqueAlignmentId(result, n);
+        });
+        await this.mergeAlignments(results);
     }
 
     public addAlignment(id: string, alignment: AlignmentRefType, target: AlignmentRefType): void {
@@ -42,7 +59,77 @@ export class AlignmentReference {
     }
 
     public buildAlignments(): AlignmentResponse {
-        return buildAlignments(this.refId, this.alignmentRefMap, this.memberRefList);
+        return buildAlignments(this.refId, this.alignmentRefMap, this.memberRefList.slice(1));
+    }
+
+    private addUniqueAlignmentId(result: Alignment, alignmentIndex: number, pairIndex: 0|1 = 1): string {
+        const res = result.structures[pairIndex];
+        if (!res.selection)
+            throw new Error('Missing entry_id and name from result');
+        let entryId: string | undefined = undefined;
+        const asymId = 'asym_id' in res.selection ? res.selection.asym_id : undefined;
+        if ('entry_id' in res && res.entry_id && res.selection && 'asym_id' in res.selection)
+            entryId = res.entry_id;
+        else if ('name' in res && res.selection && 'asym_id' in res.selection)
+            entryId = res.name;
+        if (!entryId || !asymId)
+            throw new Error('Missing entry_id and name from result');
+        if (!this.alignmentMap.has(`${entryId}${TagDelimiter.instance}${asymId}`)) {
+            this.alignmentMap.set(`${entryId}${TagDelimiter.instance}${asymId}`, {
+                entryId,
+                instanceId: asymId,
+                sequence: result.sequence_alignment?.[pairIndex].sequence ?? '',
+                alignmentIndex: alignmentIndex,
+                pairIndex: pairIndex,
+                alignmentId: `${entryId}${TagDelimiter.instance}${asymId}`,
+                alignment: result
+            });
+            return `${entryId}${TagDelimiter.instance}${asymId}`;
+        } else {
+            let tag = 1;
+            while (this.alignmentMap.has(`${entryId}[${tag}]${TagDelimiter.instance}${asymId}`)) {
+                tag ++;
+            }
+            this.alignmentMap.set(`${entryId}[${tag}]${TagDelimiter.instance}${asymId}`, {
+                entryId,
+                instanceId: asymId,
+                sequence: result.sequence_alignment?.[pairIndex].sequence ?? '',
+                alignmentIndex: alignmentIndex,
+                pairIndex: pairIndex,
+                alignmentId: `${entryId}[${tag}]${TagDelimiter.instance}${asymId}`,
+                alignment: result
+            });
+            return `${entryId}[${tag}]${TagDelimiter.instance}${asymId}`;
+        }
+    }
+
+    public getAlignmentEntry(alignmentId: string): AlignmentMapType {
+        const pdb = this.alignmentMap.get(alignmentId);
+        if (pdb)
+            return pdb;
+        throw new Error('Alignment Id not found');
+    }
+
+    public getMapAlignments(): AlignmentMapType[] {
+        return Array.from(this.alignmentMap.values());
+    }
+
+    public async getSequences(): Promise<InstanceSequenceInterface[]> {
+        const out = Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length > 0).map(v=>({
+            rcsbId: v.alignmentId,
+            sequence: v.sequence
+        }));
+        const missingSeq = await RcsbRequestContextManager.getInstanceSequences(
+            Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length === 0).map(
+                v=>`${v.entryId}${TagDelimiter.instance}${v.instanceId}`
+            ).filter((value, index, list)=> list.indexOf(value) === index)
+        );
+        return out.concat(
+            Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length === 0).map(v=>({
+                rcsbId: v.alignmentId,
+                sequence: missingSeq.find(s=>s.rcsbId === `${v.entryId}${TagDelimiter.instance}${v.instanceId}`)?.sequence ?? ''
+            }))
+        );
     }
 
     private addRef(id: string, alignment: AlignmentRefType, target: AlignmentRefType): void {
@@ -105,6 +192,40 @@ export class AlignmentReference {
         });
     }
 
+    private async mergeAlignments(results: Alignment[]): Promise<void> {
+        const result = results[0];
+        if (!result)
+            throw new Error('Results not available');
+        this.getMapAlignments().forEach((alignment, n)=>{
+            const result = alignment.alignment;
+            const alignmentId = alignment.alignmentId;
+            if (result.sequence_alignment)
+                this.addAlignment(alignmentId, transformToGapedDomain(result.sequence_alignment[0].regions), transformToGapedDomain(result.sequence_alignment[1].regions));
+            else if (result.structure_alignment && result.structure_alignment[0].regions && result.structure_alignment[1].regions)
+                this.addAlignment(alignmentId, transformToGapedDomain(result.structure_alignment[0].regions.flat()), transformToGapedDomain(result.structure_alignment[1].regions.flat()));
+        });
+    }
+
+}
+
+function transformToGapedDomain(regions: AlignmentRegion[]): (number|undefined)[] {
+    const out: (number|undefined)[] = [];
+    let prevRegionEnd = 0;
+    regions.forEach(region=>{
+        const beg = region.beg_index + 1;
+        const end = region.beg_index + region.length;
+        if (beg > (prevRegionEnd + 1)) {
+            const nGaps = beg - (prevRegionEnd + 1);
+            out.push(...Array(nGaps).fill(undefined));
+        }
+        prevRegionEnd = end;
+        const seqBeg = region.beg_seq_id;
+        const seqEnd = region.beg_seq_id + region.length - 1;
+        for (let i = seqBeg; i <= seqEnd; i++) {
+            out.push(i);
+        }
+    });
+    return out;
 }
 
 function buildAlignments(refId: string, alignmentRefMap: AlignmentRefType, alignmentMembers: AlignmentMemberType[]): AlignmentResponse {

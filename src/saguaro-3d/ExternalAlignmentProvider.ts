@@ -5,27 +5,41 @@ import {
     AlignmentCollectConfig,
     AlignmentCollectorInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/AlignmentCollector/AlignmentCollectorInterface';
-import { RcsbRequestContextManager } from '@rcsb/rcsb-saguaro-app';
+import { TagDelimiter } from '@rcsb/rcsb-saguaro-app';
 
 
-import { AlignmentReference } from './AlignmentReference';
+import { AlignmentMapType, AlignmentReference } from './AlignmentReference';
 import {
-    LocationProviderInterface,
-    RigidTransformType, TransformMatrixType,
-    TransformProviderInterface
-} from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
+    LoadParamsProviderInterface,
+    RigidTransformType,
+    TransformMatrixType
+} from '@rcsb/rcsb-saguaro-3d/lib//RcsbFvStructure/StructureUtils/StructureLoaderInterface';
+
 import {
-    InstanceSequenceInterface
-} from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
-import { Alignment, AlignmentRegion, StructureAlignmentResponse } from '../auto/alignment/alignment-response';
+    StructureAlignmentResponse,
+    StructureEntry,
+    StructureURL
+} from '../auto/alignment/alignment-response';
+import {
+    LoadMethod,
+    LoadMolstarInterface,
+    LoadMolstarReturnType
+} from '@rcsb/rcsb-saguaro-3d/lib//RcsbFvStructure/StructureViewers/MolstarViewer/MolstarActionManager';
+import {
+    AlignmentTrajectoryParamsType
+} from './molstar-trajectory/AlignmentTrajectoryPresetProvider';
 import { ColorLists } from '../utils/color';
+import { getTrajectoryPresetProvider as alignmentTrajectory } from './molstar-trajectory/AlignmentTrajectoryPresetProvider';
+import { getTrajectoryPresetProvider as flexibleTrajectory } from './molstar-trajectory/FlexibleAlignmentTrajectoryPresetProvider';
 
 export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterface {
 
     private alignmentResponse: AlignmentResponse | undefined = undefined;
     private readonly alignment: StructureAlignmentResponse;
-    constructor(alignment: StructureAlignmentResponse) {
+    private readonly alignmentReference: AlignmentReference;
+    constructor(alignment: StructureAlignmentResponse, alignmentReference: AlignmentReference) {
         this.alignment = alignment;
+        this.alignmentReference = alignmentReference;
     }
 
     async collect(requestConfig: AlignmentCollectConfig, filter?: Array<string>): Promise<AlignmentResponse> {
@@ -55,7 +69,7 @@ export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterf
         if (this.alignmentResponse)
             return this.alignmentResponse;
         return new Promise((resolve)=>{
-            alignmentTransform(this.alignment).then(ar=>{
+            alignmentTransform(this.alignment, this.alignmentReference).then(ar=>{
                 this.alignmentResponse = ar;
                 resolve(ar);
             });
@@ -64,26 +78,24 @@ export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterf
 
 }
 
-export class RcsbStructuralTransformProvider implements TransformProviderInterface {
+class RcsbStructuralTransformProvider {
 
     private readonly alignment: StructureAlignmentResponse;
     constructor(alignment: StructureAlignmentResponse) {
         this.alignment = alignment;
     }
 
-    get(entryId: string, asymId?: string): RigidTransformType[] {
-        const res = this.alignment.results?.find(res=>{
-            const r = res.structures[1];
-            return ('entry_id' in r && r.entry_id === entryId && r.selection && 'asym_id' in r.selection && r.selection.asym_id === asymId) || ('name' in r && r.name === entryId && r.selection && 'asym_id' in r.selection && r.selection.asym_id === asymId);
-        });
+    get(alignmentIndex: number, pairIndex: number): RigidTransformType[] {
+
+        const res = this.alignment.results?.[alignmentIndex];
         if (res?.structure_alignment.length === 1) {
             return [{
-                transform: res.structure_alignment[0].transformations[1] as TransformMatrixType
+                transform: res.structure_alignment[0].transformations[pairIndex] as TransformMatrixType
             }];
         } else if (res?.structure_alignment.length && res?.structure_alignment.length > 1) {
             return res.structure_alignment.map(sa=>({
-                transform: sa.transformations[1] as TransformMatrixType,
-                regions: sa.regions?.[1].map(r=>[r.beg_seq_id, r.beg_seq_id + r.length - 1])
+                transform: sa.transformations[pairIndex] as TransformMatrixType,
+                regions: sa.regions?.[pairIndex].map(r=>[r.beg_seq_id, r.beg_seq_id + r.length - 1])
             }));
         } else {
             return [{
@@ -94,33 +106,63 @@ export class RcsbStructuralTransformProvider implements TransformProviderInterfa
 
 }
 
-export class RcsbStructureLocationProvider implements LocationProviderInterface {
+export class RcsbLoadParamsProvider implements LoadParamsProviderInterface<{entryId: string; instanceId: string;}, LoadMolstarInterface<AlignmentTrajectoryParamsType, LoadMolstarReturnType>> {
 
     private readonly alignment: StructureAlignmentResponse;
-    constructor(alignment: StructureAlignmentResponse) {
+    private readonly transformProvider: RcsbStructuralTransformProvider;
+    private readonly alignmentReference: AlignmentReference;
+    private readonly colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;};
+    constructor(alignment: StructureAlignmentResponse, alignmentReference: AlignmentReference, colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;}) {
         this.alignment = alignment;
+        this.transformProvider = new RcsbStructuralTransformProvider(alignment);
+        this.alignmentReference = alignmentReference;
+        this.colorConfig = colorConfig;
     }
 
-    get(entryId: string): string|undefined {
-        for (const res of this.alignment.results ?? []) {
-            if ('url' in res.structures[0] && res.structures[0].url && res.structures[0].name === entryId) {
-                return res.structures[0].url;
+    get(pdb: {entryId: string; instanceId: string;}): LoadMolstarInterface<AlignmentTrajectoryParamsType, LoadMolstarReturnType> {
+        if (!this.alignment.results)
+            throw new Error('Alignments results not found');
+        const { alignmentIndex, pairIndex, entryId } = this.alignmentReference.getAlignmentEntry(`${pdb.entryId}${TagDelimiter.instance}${pdb.instanceId}`);
+        const alignmentId = `${pdb.entryId}${TagDelimiter.instance}${pdb.instanceId}`;
+        const res = this.alignment.results[alignmentIndex];
+        const structure = res.structures[pairIndex] as StructureEntry & StructureURL;
+        const transform = this.transformProvider.get(alignmentIndex, pairIndex);
+        const reprProvider = !transform?.length || transform.length === 1 ? alignmentTrajectory(
+            alignmentId,
+            this.colorConfig.closeResidues.get(alignmentId),
+            this.colorConfig.colors.get(alignmentId)
+        ) : flexibleTrajectory(
+            alignmentId,
+            this.colorConfig.closeResidues.get(alignmentId),
+            this.colorConfig.colors.get(alignmentId)
+        );
+        const loadMethod = 'url' in structure && structure.url ? LoadMethod.loadStructureFromUrl : LoadMethod.loadPdbId;
+        const url: string|undefined = 'url' in structure && structure.url ? structure.url : undefined;
+        return {
+            loadMethod,
+            loadParams: {
+                url,
+                entryId,
+                format: url ? 'mmcif' : undefined,
+                isBinary: url ? false : undefined,
+                id: alignmentId,
+                reprProvider: reprProvider,
+                params: {
+                    modelIndex: 0,
+                    pdb,
+                    transform: transform,
+                    targetAlignment: undefined
+                }
             }
-            if ('url' in res.structures[1] && res.structures[1].url && res.structures[1].name === entryId) {
-                return res.structures[1].url;
-            }
-        }
-        return undefined;
+        };
     }
-
 }
 
-async function alignmentTransform(alignment: StructureAlignmentResponse): Promise<AlignmentResponse> {
+async function alignmentTransform(alignment: StructureAlignmentResponse, alignmentRef: AlignmentReference): Promise<AlignmentResponse> {
     if (!alignment.results)
         return {};
-    const alignmentRef = await mergeAlignments(alignment.results);
     const out: AlignmentResponse = alignmentRef.buildAlignments();
-    const seqs = await getSequences(alignment.results);
+    const seqs = await alignmentRef.getSequences();
     out.target_alignment?.forEach(ta=>{
         const seq = seqs.find(s=>s.rcsbId === ta?.target_id)?.sequence;
         if (seq && ta)
@@ -129,88 +171,11 @@ async function alignmentTransform(alignment: StructureAlignmentResponse): Promis
     return out;
 }
 
-async function mergeAlignments(results: Alignment[]): Promise<AlignmentReference> {
-    const result = results[0];
-    if (!result)
-        throw new Error('Results not available');
-    const seqs = await getSequences([result]);
-    const alignmentRef = new AlignmentReference(getInstanceId(result, 0), seqs[0].sequence.length);
-    results.forEach(result=>{
-        if (result.sequence_alignment)
-            alignmentRef.addAlignment(getInstanceId(result), transformToGapedDomain(result.sequence_alignment[0].regions), transformToGapedDomain(result.sequence_alignment[1].regions));
-        else if (result.structure_alignment && result.structure_alignment[0].regions && result.structure_alignment[1].regions)
-            alignmentRef.addAlignment(getInstanceId(result), transformToGapedDomain(result.structure_alignment[0].regions.flat()), transformToGapedDomain(result.structure_alignment[1].regions.flat()));
-    });
-    return alignmentRef;
-}
-
-function getInstanceId(result: Alignment, index: 0|1 = 1): string {
-    const res = result.structures[index];
-    if ('entry_id' in res && res.entry_id && res.selection && 'asym_id' in res.selection)
-        return `${res.entry_id}.${res.selection.asym_id}`;
-    else if ('name' in res && res.name && res.selection && 'asym_id' in res.selection)
-        return `${res.name}.${res.selection.asym_id}`;
-    throw new Error('Missing entry_id and name from result');
-}
-
-function getEntryId(result: Alignment, index: 0|1 = 1): string {
-    const res = result.structures[index];
-    if ('entry_id' in res && res.entry_id && res.selection && 'asym_id' in res.selection)
-        return res.entry_id;
-    else if ('name' in res && res.name && res.selection && 'asym_id' in res.selection)
-        return res.name;
-    throw new Error('Missing entry_id and name from result');
-}
-
-function transformToGapedDomain(regions: AlignmentRegion[]): (number|undefined)[] {
-    const out: (number|undefined)[] = [];
-    let prevRegionEnd = 0;
-    regions.forEach(region=>{
-        const beg = region.beg_index + 1;
-        const end = region.beg_index + region.length;
-        if (beg > (prevRegionEnd + 1)) {
-            const nGaps = beg - (prevRegionEnd + 1);
-            out.push(...Array(nGaps).fill(undefined));
-        }
-        prevRegionEnd = end;
-        const seqBeg = region.beg_seq_id;
-        const seqEnd = region.beg_seq_id + region.length - 1;
-        for (let i = seqBeg; i <= seqEnd; i++) {
-            out.push(i);
-        }
-    });
-    return out;
-}
-
-async function getSequences(results: Alignment[]): Promise<InstanceSequenceInterface[]> {
-    const out: InstanceSequenceInterface[] = [];
-    const missingIds: string[] = [];
-    const res = results[0];
-    if (res.sequence_alignment?.[0].sequence) {
-        out.push({
-            rcsbId: getInstanceId(res, 0),
-            sequence: res.sequence_alignment[0].sequence
-        });
-    } else {
-        missingIds.push(getInstanceId(res, 0));
-    }
-    results.forEach(res=>{
-        if (res.sequence_alignment?.[1].sequence) {
-            out.push({
-                rcsbId: getInstanceId(res, 1),
-                sequence: res.sequence_alignment[1].sequence
-            });
-        } else {
-            missingIds.push(getInstanceId(res));
-        }
-    });
-    return out.concat(await RcsbRequestContextManager.getInstanceSequences(missingIds));
-}
-
-export function alignmentCloseResidues(results: Alignment[]): Map<string, Set<number>> {
+export function alignmentCloseResidues(results: AlignmentMapType[]): Map<string, Set<number>> {
     const out: Map<string, Set<number>> = new Map<string, Set<number>>();
-    results.forEach(res=>{
-        const instanceId = getInstanceId(res);
+    results.forEach(alignment=>{
+        const res = alignment.alignment;
+        const instanceId = alignment.alignmentId;
         if (!out.has(instanceId))
             out.set(instanceId, new Set<number>());
         res.structure_alignment.map(sa => sa.regions?.[1]).flat().forEach(reg=>{
@@ -220,7 +185,7 @@ export function alignmentCloseResidues(results: Alignment[]): Map<string, Set<nu
                 out.get(instanceId)?.add(reg.beg_seq_id + n);
             }
         });
-        const refId = getInstanceId(res, 0);
+        const refId = results[0].alignmentId;
         if (!out.has(refId))
             out.set(refId, new Set<number>());
         res.structure_alignment.map(sa => sa.regions?.[0]).flat().forEach(reg=>{
@@ -234,13 +199,11 @@ export function alignmentCloseResidues(results: Alignment[]): Map<string, Set<nu
     return out;
 }
 
-export function entryColors(results: Alignment[]): Map<string, number> {
+export function entryColors(results: AlignmentMapType[]): Map<string, number> {
     const out: Map<string, number> = new Map<string, number>();
-    const instanceId = getInstanceId(results[0], 0);
-    out.set(instanceId, ColorLists['set-1'][0]);
     results.forEach((res, n)=>{
-        const instanceId = getInstanceId(res);
-        out.set(instanceId, ColorLists['set-1'][n + 1]);
+        const instanceId = res.alignmentId;
+        out.set(instanceId, ColorLists['set-1'][n]);
     });
     return out;
 }
