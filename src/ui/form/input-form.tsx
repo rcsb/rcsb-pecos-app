@@ -55,7 +55,7 @@ const numInpClass = classNames('inp', 'inp-num');
 type StructureImpl = StructureEntryImpl | StructureFileUploadImpl | StructureWebLinkImpl;
 const structureOptions: { [key: string]: () => StructureImpl } = {
     'Entry ID': () => new StructureEntryImpl(),
-    'Web Link': () => new StructureWebLinkImpl(),
+    'File URL': () => new StructureWebLinkImpl(),
     'File Upload': () => new StructureFileUploadImpl()
 };
 
