@@ -1,6 +1,6 @@
 {
   "name": "@rcsb/rcsb-pecos-app",
-  "version": "2.0.0-rcsb-saguaro.8",
+  "version": "2.0.0-rcsb-saguaro.12",
   "description": "RCSB 3D Structure Alignment Application",
   "license": "MIT",
   "homepage": "https://github.com/rcsb/rcsb-pecos-app#readme",
@@ -25,8 +25,8 @@
   "dependencies": {
     "@rcsb/rcsb-api-tools": "^4.1.1",
     "@rcsb/rcsb-molstar": "^2.5.3",
-    "@rcsb/rcsb-saguaro-3d": "^2.4.0-data-provider.17",
-    "@rcsb/rcsb-saguaro-app": "^5.0.0-data-provider.14",
+    "@rcsb/rcsb-saguaro-3d": "^3.0.0-data-provider.26",
+    "@rcsb/rcsb-saguaro-app": "^5.0.0-data-provider.20",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
     "classnames": "^2.3.1",

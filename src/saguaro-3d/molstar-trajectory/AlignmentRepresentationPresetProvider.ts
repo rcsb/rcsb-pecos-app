@@ -34,6 +34,7 @@ import {
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
 import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
 import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
+import { closeResidueColoring } from './Coloring';
 
 
 type RepresentationParamsType = {
@@ -46,7 +47,7 @@ type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentation
 type ComponentMapType = Record<string, ComponentType>;
 type RepresentationMapType = Record<string, RepresentationType>;
 
-export function representationPresetProvider(residueColoring: CustomElementProperty<any>) {
+export function representationPresetProvider(alignmentId: string, closeResidues?: Set<number>, color?: number) {
     return StructureRepresentationPresetProvider({
         id: 'alignment-to-reference',
         display: {
@@ -55,7 +56,7 @@ export function representationPresetProvider(residueColoring: CustomElementPrope
         isApplicable: (structureRef: PluginStateObject.Molecule.Structure, plugin: PluginContext): boolean => true,
         params: (structureRef: PluginStateObject.Molecule.Structure | undefined, plugin: PluginContext) => ({
             pdb: PD.Value<{ entryId: string; entityId: string; } | { entryId: string; instanceId: string; } | undefined>(undefined),
-            transform: PD.Value<RigidTransformType[] | undefined>(undefined),
+            transform: PD.Value<RigidTransformType[] | undefined>(undefined)
         }),
         apply: async (structureRef: StateObjectRef<PluginStateObject.Molecule.Structure>, params: RepresentationParamsType, plugin: PluginContext) => {
             const structureCell = StateObjectRef.resolveAndCheck(plugin.state.data, structureRef);
@@ -113,8 +114,13 @@ export function representationPresetProvider(residueColoring: CustomElementPrope
                         ignoreLight: false,
                         quality: 'auto'
                     });
+                    const residueColoring: CustomElementProperty<any> = closeResidueColoring(alignmentId, closeResidues, color);
+                    if (residueColoring?.colorThemeProvider && !plugin.representation.structure.themes.colorThemeRegistry.has(residueColoring.colorThemeProvider))
+                        plugin.representation.structure.themes.colorThemeRegistry.remove(residueColoring.colorThemeProvider);
+                    if (residueColoring?.colorThemeProvider)
+                        plugin.representation.structure.themes.colorThemeRegistry.add(residueColoring.colorThemeProvider);
                     representationMap['aligned'] = builder.buildRepresentation(update, comp, {
-                        color: residueColoring.propertyProvider.descriptor.name as ColorTheme.BuiltIn,
+                        color: residueColoring?.propertyProvider.descriptor.name as ColorTheme.BuiltIn ?? undefined,
                         type: 'cartoon'
                     });
 

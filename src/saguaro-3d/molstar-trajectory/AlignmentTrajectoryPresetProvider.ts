@@ -16,16 +16,16 @@ import {
     RigidTransformType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
 import { representationPresetProvider } from './AlignmentRepresentationPresetProvider';
-import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
 
 
 export type AlignmentTrajectoryParamsType = {
     pdb?: {entryId: string;entityId: string;}|{entryId: string;instanceId: string;};
     transform?: RigidTransformType[];
     modelIndex?: number;
+    targetAlignment: undefined;
 }
 
-export function getTrajectoryPresetProvider(residueColoring: CustomElementProperty<any>) {
+export function getTrajectoryPresetProvider(alignmentId: string, closeResidues?: Set<number>, color?: number) {
     return TrajectoryHierarchyPresetProvider({
         id: 'alignment-to-reference',
         display: {
@@ -35,7 +35,8 @@ export function getTrajectoryPresetProvider(residueColoring: CustomElementProper
         params: (trajectory: PluginStateObject.Molecule.Trajectory | undefined, plugin: PluginContext): ParamDefinition.For<AlignmentTrajectoryParamsType> => ({
             pdb: PD.Value<{entryId: string;entityId: string;}|{entryId: string;instanceId: string;}|undefined>(undefined),
             modelIndex: PD.Value<number|undefined>(undefined),
-            transform: PD.Value<RigidTransformType[]|undefined>(undefined)
+            transform: PD.Value<RigidTransformType[]|undefined>(undefined),
+            targetAlignment: PD.Value<undefined>(undefined)
         }),
         apply: async (trajectory: StateObjectRef<PluginStateObject.Molecule.Trajectory>, params: AlignmentTrajectoryParamsType, plugin: PluginContext) => {
             if (!params.pdb)
@@ -78,7 +79,7 @@ export function getTrajectoryPresetProvider(residueColoring: CustomElementProper
             const structureProperties = await builder.insertStructureProperties(structure);
             const representation = await plugin.builders.structure.representation.applyPreset(
                 structureProperties,
-                representationPresetProvider(residueColoring),
+                representationPresetProvider(alignmentId, closeResidues, color),
                 {
                     pdb: params.pdb,
                     transform: params.transform
