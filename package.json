@@ -25,7 +25,7 @@
   "dependencies": {
     "@rcsb/rcsb-api-tools": "^4.1.1",
     "@rcsb/rcsb-molstar": "^2.5.3",
-    "@rcsb/rcsb-saguaro-3d": "^3.0.0-data-provider.25",
+    "@rcsb/rcsb-saguaro-3d": "^3.0.0-data-provider.26",
     "@rcsb/rcsb-saguaro-app": "^5.0.0-data-provider.20",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
