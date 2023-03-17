@@ -103,6 +103,8 @@ export class ApplicationContext {
         if (response.results) {
             this.state.events.selection.next(this.selection(response.results));
             this.state.events.status.next('ready');
+        } else {
+            this.error('Results MUST be provided');
         }
         updateWindowURL();
     }
