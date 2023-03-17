@@ -8,7 +8,7 @@ import {
     StructureWebLink
 } from '../auto/alignment/alignment-request';
 import { Structure } from './request';
-import { StructureAlignmentResponse } from '../auto/alignment/alignment-response';
+import { StructureAlignmentResponse, Alignment } from '../auto/alignment/alignment-response';
 
 // STRUCTURE
 
@@ -188,4 +188,10 @@ export function buildError(uuid: string, msg: string): StructureAlignmentRespons
             message: msg
         }
     };
+}
+
+export type TransformationType = 'flexible' | 'rigid';
+
+export function getTransformationType(results: Alignment): TransformationType {
+    return results.structure_alignment.length > 1 ? 'flexible' : 'rigid';
 }

@@ -26,7 +26,8 @@ import {
 } from '@rcsb/rcsb-saguaro';
 import {
     isEntry,
-    mergeIntervals
+    mergeIntervals,
+    getTransformationType
 } from '../utils/helper';
 import { getCombinedInstanceId, createInstanceLabel } from '../utils/identifier';
 import { DataProvider } from '../provider/data-provider';
@@ -133,7 +134,7 @@ class PairwiseAlignmentManager implements AlignmentManagerI {
     }
 
     private parseStructureTargets() {
-        const type = this.results[0].structure_alignment.length > 1 ? 'flexible' : 'rigid';
+        const type = getTransformationType(this.results[0]);
         for (let i = 0; i < this.results.length; i++) {
             const member: StructureAlignmentRepresentation = {
                 structure: this.results[i].structures[1],

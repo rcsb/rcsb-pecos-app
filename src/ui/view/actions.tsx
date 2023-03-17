@@ -8,6 +8,7 @@ import { ApplicationContext, SelectionOptions, DownloadOptions } from '../../con
 import { CopySvg, Icon, SolidArrowDownSvg, WarningSvg, DownloadSvg } from '../icons';
 import { encodingUrlParam, responseUrlParam } from '../../utils/constants';
 import { exportSequenceAlignment, exportTransformations } from '../../utils/download';
+import { getTransformationType } from '../../utils/helper';
 
 const style: React.CSSProperties = { width: '150px' };
 
@@ -32,10 +33,10 @@ export function SelectCoordsComponent(props: { ctx: ApplicationContext }) {
     };
 
     const options = (ctx: ApplicationContext): Map<string, string> => {
-        const method = ctx.state.data.request.state.query.context.method.name;
-        if (method === 'fatcat-flexible' || method === 'ce-cp')
-            return flexOptions;
-        else return rigidOptions;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const results = ctx.state.data.response!.state!.results![0];
+        const type = getTransformationType(results);
+        return type === 'rigid' ? rigidOptions : flexOptions;
     };
 
     const menuList = () => {
