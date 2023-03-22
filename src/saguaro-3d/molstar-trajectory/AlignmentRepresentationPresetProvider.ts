@@ -115,7 +115,7 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
                         quality: 'auto'
                     });
                     const residueColoring: CustomElementProperty<any> = closeResidueColoring(alignmentId, closeResidues, color);
-                    if (residueColoring?.colorThemeProvider && !plugin.representation.structure.themes.colorThemeRegistry.has(residueColoring.colorThemeProvider))
+                    if (residueColoring?.colorThemeProvider && plugin.representation.structure.themes.colorThemeRegistry.has(residueColoring.colorThemeProvider))
                         plugin.representation.structure.themes.colorThemeRegistry.remove(residueColoring.colorThemeProvider);
                     if (residueColoring?.colorThemeProvider)
                         plugin.representation.structure.themes.colorThemeRegistry.add(residueColoring.colorThemeProvider);
