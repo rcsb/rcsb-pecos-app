@@ -17,7 +17,7 @@ export function closeResidueColoring(alignmentId: string, closeResidues?: Set<nu
             return { value: map };
         },
         coloring: {
-            getColor(e) { return Color.lighten(Color(e[0]), e[1] ? 0 : 1.75); },
+            getColor(e) { return e[1] ? Color(e[0]) : Color.desaturate(Color.lighten(Color(e[0]), 1.75), 1); },
             defaultColor: Color(0x777777)
         }
     });
