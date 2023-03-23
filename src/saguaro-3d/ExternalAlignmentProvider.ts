@@ -173,7 +173,7 @@ async function alignmentTransform(alignment: StructureAlignmentResponse, alignme
 
 export function alignmentCloseResidues(results: AlignmentMapType[]): Map<string, Set<number>> {
     const out: Map<string, Set<number>> = new Map<string, Set<number>>();
-    results.forEach(alignment=>{
+    results.slice(1).forEach(alignment=>{
         const res = alignment.alignment;
         const instanceId = alignment.alignmentId;
         if (!out.has(instanceId))
