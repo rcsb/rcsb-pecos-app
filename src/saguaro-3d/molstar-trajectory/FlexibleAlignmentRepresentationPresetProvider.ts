@@ -21,8 +21,7 @@ import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
 import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure';
 import { StructureRepresentationBuilder } from 'molstar/lib/mol-plugin-state/builder/structure/representation';
 import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
-import {closeResidueColoring} from "./Coloring";
-
+import { closeResidueColoring } from './Coloring';
 
 type ComponentType = Awaited<ReturnType<InstanceType<typeof StructureBuilder>['tryCreateComponentFromExpression']>>;
 type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentationBuilder>['buildRepresentation']>;

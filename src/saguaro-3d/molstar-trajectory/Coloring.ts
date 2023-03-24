@@ -4,7 +4,7 @@ import { Color } from 'molstar/lib/mol-util/color';
 
 export function closeResidueColoring(alignmentId: string, closeResidues?: Set<number>, color?: number) {
     return CustomElementProperty.create<[number, boolean]>({
-        label: 'Close Residue Color',
+        label: `Close Residue Color ${alignmentId}`,
         name: `close-residue-color-${alignmentId}`,
         getData(model: Model) {
             const map = new Map<ElementIndex, [number, boolean]>();
@@ -17,7 +17,7 @@ export function closeResidueColoring(alignmentId: string, closeResidues?: Set<nu
             return { value: map };
         },
         coloring: {
-            getColor(e) { return e[1] ? Color(e[0]) : Color.desaturate(Color.lighten(Color(e[0]), 1.75), 1); },
+            getColor(e) { return e[1] ? Color(e[0]) : Color.desaturate(Color.lighten(Color(e[0]), 1.7), 1.2); },
             defaultColor: Color(0x777777)
         }
     });
