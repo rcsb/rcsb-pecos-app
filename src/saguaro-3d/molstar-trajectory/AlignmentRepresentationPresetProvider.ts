@@ -22,7 +22,6 @@ import { createSelectionExpressions } from '@rcsb/rcsb-molstar/build/src/viewer/
 import { ParamDefinition as PD } from 'molstar/lib/mol-util/param-definition';
 
 import { TagDelimiter } from '@rcsb/rcsb-saguaro-app';
-import { TargetAlignment } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
 import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
 
 import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure';
@@ -179,7 +178,6 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
 
             await update.commit({ revertOnError: false });
 
-            let anyLigComp;
             for (const expression of createSelectionExpressions(entryId)) {
                 if (expression.tag === 'polymer')
                     continue;
@@ -210,7 +208,6 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
                 }
 
                 await update.commit({ revertOnError: false });
-                if (comp && expression.tag !== 'water') anyLigComp = comp;
             }
 
             // await updateFocusRepr(plugin, structure, residueColoring.propertyProvider.label, params.theme?.focus?.params);
@@ -222,13 +219,6 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
         }
     });
 }
-
-type StructureAlignmentParamsType = {
-    entryId: string;
-    labelAsymId: string;
-    operatorName: string;
-    targetAlignment: TargetAlignment;
-};
 
 async function matrixAlign(plugin: PluginContext, structureRef: StateObjectRef<PluginStateObject.Molecule.Structure>, matrix: TransformMatrixType): Promise<void> {
     const trans = {

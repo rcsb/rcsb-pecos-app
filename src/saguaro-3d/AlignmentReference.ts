@@ -7,7 +7,7 @@ import { RcsbRequestContextManager, TagDelimiter } from '@rcsb/rcsb-saguaro-app'
 import {
     InstanceSequenceInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
-import {Alignment, AlignmentRegion} from '../auto/alignment/alignment-response';
+import { Alignment, AlignmentRegion } from '../auto/alignment/alignment-response';
 
 type AlignmentRefType = (number|undefined)[];
 type AlignmentMemberType = {

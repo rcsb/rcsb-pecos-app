@@ -10,7 +10,7 @@ export function closeResidueColoring(alignmentId: string, closeResidues?: Set<nu
             const map = new Map<ElementIndex, [number, boolean]>();
             for (let i = 0; i < model.atomicHierarchy.atoms._rowCount; i++) {
                 const residueIndex = model.atomicHierarchy.residueAtomSegments.index[i];
-                const residueId = model.atomicHierarchy.residues.label_seq_id.value(residueIndex)
+                const residueId = model.atomicHierarchy.residues.label_seq_id.value(residueIndex);
                 if (closeResidues && color)
                     map.set(i as ElementIndex, [color, closeResidues.has(residueId) ?? false]);
             }
