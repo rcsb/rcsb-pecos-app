@@ -7,7 +7,7 @@ import { QueryRequest } from './utils/request';
 import { StructureAlignmentProvider } from './provider/alignment-provider';
 import { DataProvider } from './provider/data-provider';
 import { SearchProvider } from './provider/search-provider';
-import { Alignment, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
+import { StructureAlignmentMetadata, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
 import { isEntry, buildError, getTransformationType } from './utils/helper';
 import { AlignmentManager } from './manager/alignment-maganger';
@@ -86,10 +86,8 @@ export class ApplicationContext {
      *
      * @returns default selection option
      */
-    private selection(results: Alignment[]): SelectionOptions {
-        if (results.length > 1)
-            throw Error('Not ready for multiple alignments');
-        const type = getTransformationType(results[0]);
+    private selection(meta: StructureAlignmentMetadata): SelectionOptions {
+        const type = getTransformationType(meta);
         return type === 'rigid' ? 'polymer' : 'residues';
     }
 
@@ -101,7 +99,7 @@ export class ApplicationContext {
     private ready(response: StructureAlignmentResponse) {
         this.state.data.response.push(response);
         if (response.results) {
-            this.state.events.selection.next(this.selection(response.results));
+            this.state.events.selection.next(this.selection(response.meta!));
             this.state.events.status.next('ready');
         } else {
             this.error('Results MUST be provided');

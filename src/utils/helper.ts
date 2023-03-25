@@ -8,7 +8,7 @@ import {
     StructureWebLink
 } from '../auto/alignment/alignment-request';
 import { Structure } from './request';
-import { StructureAlignmentResponse, Alignment } from '../auto/alignment/alignment-response';
+import { StructureAlignmentResponse, StructureAlignmentMetadata } from '../auto/alignment/alignment-response';
 
 // STRUCTURE
 
@@ -192,6 +192,8 @@ export function buildError(uuid: string, msg: string): StructureAlignmentRespons
 
 export type TransformationType = 'flexible' | 'rigid';
 
-export function getTransformationType(results: Alignment): TransformationType {
-    return results.structure_alignment.length > 1 ? 'flexible' : 'rigid';
+export function getTransformationType(meta: StructureAlignmentMetadata): TransformationType {
+    return (meta.alignment_method === 'fatcat-flexible' || meta.alignment_method === 'ce-cp')
+        ? 'flexible'
+        : 'rigid';
 }

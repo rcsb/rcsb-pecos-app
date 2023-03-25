@@ -34,8 +34,8 @@ export function SelectCoordsComponent(props: { ctx: ApplicationContext }) {
 
     const options = (ctx: ApplicationContext): Map<string, string> => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const results = ctx.state.data.response!.state!.results![0];
-        const type = getTransformationType(results);
+        const meta = ctx.state.data.response!.state!.meta!;
+        const type = getTransformationType(meta);
         return type === 'rigid' ? rigidOptions : flexOptions;
     };
 
