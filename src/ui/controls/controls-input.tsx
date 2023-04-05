@@ -18,6 +18,7 @@ type AutosuggestControlProps = {
 
 export function AutosuggestControl(props: AutosuggestControlProps) {
 
+    const [selection, setSelection] = useState<string>();
     const [suggestions, setSuggestions] = useState<Array<string>>([]);
 
     const onRenderAction = (value: string): JSX.Element => <div>{value}</div>;
@@ -36,8 +37,13 @@ export function AutosuggestControl(props: AutosuggestControlProps) {
 
     function onFetchAction(request: SuggestionsFetchRequestedParams): void {
         props.suggestHandler(request.value).then((values) => {
-            if (values.length > 0) {
+            if (values.length > 1) {
+                setSelection(undefined);
                 setSuggestions(values);
+            } else if (values.length === 1 && values[0] !== selection) {
+                props.onChange(values[0]);
+                setSelection(values[0]);
+                setSuggestions([]);
             } else { // clear suggestions
                 setSuggestions([]);
             }
