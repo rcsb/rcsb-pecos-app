@@ -16,8 +16,6 @@ import {
 
 import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder';
 import uniqid from 'uniqid';
-import { PLDDTConfidenceColorThemeProvider } from 'molstar/lib/extensions/model-archive/quality-assessment/color/plddt';
-import { ColorTheme } from 'molstar/lib/mol-theme/color';
 import { createSelectionExpressions } from '@rcsb/rcsb-molstar/build/src/viewer/helpers/selection';
 import { ParamDefinition as PD } from 'molstar/lib/mol-util/param-definition';
 
@@ -31,10 +29,10 @@ import {
     RigidTransformType,
     TransformMatrixType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
 import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
-import { closeResidueColoring } from './Coloring';
-
+import { CLOSE_RESIDUE_COLOR } from './Coloring';
+import { ColorConfig } from '../ExternalAlignmentProvider';
+import updateFocusRepr = StructureRepresentationPresetProvider.updateFocusRepr;
 
 type RepresentationParamsType = {
     pdb?: { entryId: string; entityId: string; } | { entryId: string; instanceId: string; };
@@ -46,7 +44,7 @@ type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentation
 type ComponentMapType = Record<string, ComponentType>;
 type RepresentationMapType = Record<string, RepresentationType>;
 
-export function representationPresetProvider(alignmentId: string, closeResidues?: Set<number>, color?: number) {
+export function representationPresetProvider(alignmentId: string, colorConfig: ColorConfig) {
     return StructureRepresentationPresetProvider({
         id: 'alignment-to-reference',
         display: {
@@ -62,7 +60,9 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
             if (!structureCell)
                 return {};
 
-            const structure = structureCell.obj!.data;
+            const structure = structureCell.obj?.data;
+            if (!structure)
+                return {};
 
             const entryId = params.pdb?.entryId;
             if (!entryId)
@@ -113,13 +113,11 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
                         ignoreLight: false,
                         quality: 'auto'
                     });
-                    const residueColoring: CustomElementProperty<any> = closeResidueColoring(alignmentId, closeResidues, color);
-                    if (residueColoring?.colorThemeProvider && plugin.representation.structure.themes.colorThemeRegistry.has(residueColoring.colorThemeProvider))
-                        plugin.representation.structure.themes.colorThemeRegistry.remove(residueColoring.colorThemeProvider);
-                    if (residueColoring?.colorThemeProvider)
-                        plugin.representation.structure.themes.colorThemeRegistry.add(residueColoring.colorThemeProvider);
+                    if (alignedAsymId && alignedOperatorName)
+                        colorConfig.setUniqueChain(structure.model.id, alignedAsymId, alignedOperatorName);
+
                     representationMap['aligned'] = builder.buildRepresentation(update, comp, {
-                        color: residueColoring?.propertyProvider.descriptor.name as ColorTheme.BuiltIn ?? undefined,
+                        color: CLOSE_RESIDUE_COLOR,
                         type: 'cartoon'
                     });
 
@@ -127,6 +125,7 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
                     break;
                 }
             }
+
             const expressions = [];
             const asymObserved: { [key: string]: boolean } = {};
             for (const unit of structure.units) {
@@ -165,7 +164,7 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
                 quality: 'auto'
             });
             representationMap['polymer'] = builder.buildRepresentation(update, comp, {
-                color: PLDDTConfidenceColorThemeProvider.isApplicable({ structure }) ? PLDDTConfidenceColorThemeProvider.name as ColorTheme.BuiltIn : 'chain-id',
+                color: CLOSE_RESIDUE_COLOR,
                 type: 'cartoon'
             }, {
                 initialState: {
@@ -196,7 +195,8 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
                     quality: 'auto'
                 });
                 representationMap[expression.tag] = builder.buildRepresentation(update, comp, {
-                    type: expression.type
+                    type: expression.type,
+                    color: CLOSE_RESIDUE_COLOR
                 }, {
                     initialState: {
                         isHidden: true
@@ -210,7 +210,7 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
                 await update.commit({ revertOnError: false });
             }
 
-            // await updateFocusRepr(plugin, structure, residueColoring.propertyProvider.label, params.theme?.focus?.params);
+            await updateFocusRepr(plugin, structure, CLOSE_RESIDUE_COLOR, {});
 
             return {
                 components: componentMap,

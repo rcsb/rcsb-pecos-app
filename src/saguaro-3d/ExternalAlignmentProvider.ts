@@ -106,13 +106,44 @@ class RcsbStructuralTransformProvider {
 
 }
 
+export class ColorConfig {
+
+    private readonly colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;};
+    private readonly idMap: Map<string, string> = new Map<string, string>();
+    private readonly uniqueChainMap: Map<string, {asymId: string; operatorName: string;}> = new Map<string, {asymId: string; operatorName: string;}>();
+    constructor(colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;}) {
+        this.colorConfig = colorConfig;
+    }
+
+    public getCloseResidues(modelId: string): Set<number> {
+        return this.colorConfig.closeResidues.get(this.idMap.get(modelId) ?? 'none') ?? new Set<number>();
+    }
+
+    public getModelColor(modelId: string): number {
+        return this.colorConfig.colors.get(this.idMap.get(modelId) ?? 'none') ?? 0x777777;
+    }
+
+    public setAlignmentIdToModel(modelId: string, alignmentId: string): void {
+        this.idMap.set(modelId, alignmentId);
+    }
+
+    public setUniqueChain(modelId: string, asymId: string, operatorName: string): void {
+        this.uniqueChainMap.set(modelId, { asymId, operatorName });
+    }
+
+    public getUniqueChain(modelId: string): {asymId: string; operatorName: string;} | undefined {
+        return this.uniqueChainMap.get(modelId);
+    }
+
+}
+
 export class RcsbLoadParamsProvider implements LoadParamsProviderInterface<{entryId: string; instanceId: string;}, LoadMolstarInterface<AlignmentTrajectoryParamsType, LoadMolstarReturnType>> {
 
     private readonly alignment: StructureAlignmentResponse;
     private readonly transformProvider: RcsbStructuralTransformProvider;
     private readonly alignmentReference: AlignmentReference;
-    private readonly colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;};
-    constructor(alignment: StructureAlignmentResponse, alignmentReference: AlignmentReference, colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;}) {
+    private readonly colorConfig: ColorConfig;
+    constructor(alignment: StructureAlignmentResponse, alignmentReference: AlignmentReference, colorConfig: ColorConfig) {
         this.alignment = alignment;
         this.transformProvider = new RcsbStructuralTransformProvider(alignment);
         this.alignmentReference = alignmentReference;
@@ -129,12 +160,10 @@ export class RcsbLoadParamsProvider implements LoadParamsProviderInterface<{entr
         const transform = this.transformProvider.get(alignmentIndex, pairIndex);
         const reprProvider = !transform?.length || transform.length === 1 ? alignmentTrajectory(
             alignmentId,
-            this.colorConfig.closeResidues.get(alignmentId),
-            this.colorConfig.colors.get(alignmentId)
+            this.colorConfig
         ) : flexibleTrajectory(
             alignmentId,
-            this.colorConfig.closeResidues.get(alignmentId),
-            this.colorConfig.colors.get(alignmentId)
+            this.colorConfig
         );
         const loadMethod = 'url' in structure && structure.url ? LoadMethod.loadStructureFromUrl : LoadMethod.loadPdbId;
         const url: string|undefined = 'url' in structure && structure.url ? structure.url : undefined;

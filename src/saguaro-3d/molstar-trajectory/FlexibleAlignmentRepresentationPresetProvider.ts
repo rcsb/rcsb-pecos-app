@@ -15,20 +15,20 @@ import {
 } from 'molstar/lib/mol-model/structure';
 import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder';
 import uniqid from 'uniqid';
-import { ColorTheme } from 'molstar/lib/mol-theme/color';
 import { TagDelimiter } from '@rcsb/rcsb-saguaro-app';
 import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
 import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure';
 import { StructureRepresentationBuilder } from 'molstar/lib/mol-plugin-state/builder/structure/representation';
-import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
-import { closeResidueColoring } from './Coloring';
+import { CLOSE_RESIDUE_COLOR } from './Coloring';
+import { ColorConfig } from '../ExternalAlignmentProvider';
+import updateFocusRepr = StructureRepresentationPresetProvider.updateFocusRepr;
 
 type ComponentType = Awaited<ReturnType<InstanceType<typeof StructureBuilder>['tryCreateComponentFromExpression']>>;
 type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentationBuilder>['buildRepresentation']>;
 type ComponentMapType = Record<string, ComponentType>;
 type RepresentationMapType = Record<string, RepresentationType>;
 
-export function representationPresetProvider(alignmentId: string, closeResidues?: Set<number>, color?: number) {
+export function representationPresetProvider(alignmentId: string, colorConfig: ColorConfig) {
     return StructureRepresentationPresetProvider({
         id: 'alignment-to-reference',
         display: {
@@ -44,7 +44,9 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
             const componentMap: ComponentMapType = {};
             const representationMap: RepresentationMapType = {};
 
-            const structure = structureCell.obj!.data;
+            const structure = structureCell.obj?.data;
+            if (!structure)
+                return {};
             const l = StructureElement.Location.create(structure);
             const unit = structure.units[0];
             StructureElement.Location.set(l, structure, unit, unit.elements[0]);
@@ -77,16 +79,17 @@ export function representationPresetProvider(alignmentId: string, closeResidues?
                 ignoreLight: false,
                 quality: 'auto'
             });
-            const residueColoring: CustomElementProperty<any> = closeResidueColoring(alignmentId, closeResidues, color);
-            if (residueColoring?.colorThemeProvider && plugin.representation.structure.themes.colorThemeRegistry.has(residueColoring.colorThemeProvider))
-                plugin.representation.structure.themes.colorThemeRegistry.remove(residueColoring.colorThemeProvider);
-            if (residueColoring?.colorThemeProvider)
-                plugin.representation.structure.themes.colorThemeRegistry.add(residueColoring.colorThemeProvider);
+
+            if (alignedAsymId && alignedOperatorName)
+                colorConfig.setUniqueChain(structure.model.id, alignedAsymId, alignedOperatorName);
+
             representationMap['aligned'] = builder.buildRepresentation(update, comp, {
-                color: residueColoring?.propertyProvider.descriptor.name as ColorTheme.BuiltIn ?? undefined,
+                color: CLOSE_RESIDUE_COLOR,
                 type: 'cartoon'
             });
             await update.commit({ revertOnError: false });
+
+            await updateFocusRepr(plugin, structure, CLOSE_RESIDUE_COLOR, {});
 
             return {
                 components: componentMap,

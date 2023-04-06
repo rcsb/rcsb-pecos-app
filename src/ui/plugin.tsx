@@ -9,7 +9,7 @@ import {
     RcsbModuleDataProviderInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvModule/RcsbFvModuleInterface';
 import {
-    alignmentCloseResidues, entryColors, RcsbLoadParamsProvider
+    alignmentCloseResidues, ColorConfig, entryColors, RcsbLoadParamsProvider
 } from '../saguaro-3d/ExternalAlignmentProvider';
 import { GroupReference, SequenceReference } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { ColorLists, convertHexToRgb } from '../utils/color';
@@ -20,6 +20,8 @@ import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
 import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFv3D/RcsbFv3DAlignmentProvider';
 import { RcsbStructuralAlignmentProvider } from '../saguaro-3d/ExternalAlignmentProvider';
 import { AlignmentReference } from '../saguaro-3d/AlignmentReference';
+import { Subscription } from 'rxjs';
+import { closeResidueColorThemeProvider } from '../saguaro-3d/molstar-trajectory/Coloring';
 
 let panel3D: RcsbFv3DAlignmentProvider;
 export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
@@ -46,6 +48,10 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                         }
                     };
                     panel3D?.unmount();
+                    const colorConfig = new ColorConfig({
+                        closeResidues: alignmentCloseResidues(alignmentReference.getMapAlignments() ?? []),
+                        colors: entryColors(alignmentReference.getMapAlignments() ?? [])
+                    });
                     let index = 0;
                     panel3D = new RcsbFv3DAlignmentProvider({
                         elementId: '1d-3d-div',
@@ -54,10 +60,8 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                             loadParamsProvider: new RcsbLoadParamsProvider(
                                 structAlignResponse,
                                 alignmentReference,
-                                {
-                                    closeResidues: alignmentCloseResidues(alignmentReference.getMapAlignments() ?? []),
-                                    colors: entryColors(alignmentReference.getMapAlignments() ?? [])
-                                }),
+                                colorConfig
+                            ),
                             additionalContent: (props) => <></>
                         },
                         additionalConfig: {
@@ -80,14 +84,25 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                     });
                     panel3D.render().then(()=>{
                         panel3D.pluginCall(plugin=>{
-                            (panel3D as any).downloadSubscription = props.ctx.state.events.download.subscribe((e) => exportHierarchy(plugin, { format: 'cif' }));
+                            (panel3D as unknown as {downloadSubscription: Subscription}).downloadSubscription = props.ctx.state.events.download.subscribe((e) => exportHierarchy(plugin, { format: 'cif' }));
+                            // TODO Very ugly but it does the job
+                            plugin.layout.events.updated.subscribe(()=>{
+                                const tooltip = (document.getElementsByClassName('msp-highlight-toast-wrapper').item(0) as HTMLElement);
+                                if (plugin.layout.state.isExpanded)
+                                    tooltip.style.visibility = 'visible';
+                                else
+                                    tooltip.style.visibility = 'hidden';
+                            });
+                            const residueColoring = closeResidueColorThemeProvider(colorConfig);
+                            if (residueColoring && !plugin.representation.structure.themes.colorThemeRegistry.has(residueColoring))
+                                plugin.representation.structure.themes.colorThemeRegistry.add(residueColoring);
                         });
                     });
                 });
             }
         } else {
             setTimeout(()=>panel3D?.unmount());
-            (panel3D as any)?.downloadSubscription?.unsubscribe();
+            (panel3D as unknown as {downloadSubscription: Subscription})?.downloadSubscription?.unsubscribe();
         }
     });
 

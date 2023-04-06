@@ -15,8 +15,9 @@ import { RigidTransformType } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/St
 import { FlexibleAlignmentBuiltIn } from './FlexibleAlignmentBuiltIn';
 import { representationPresetProvider } from './FlexibleAlignmentRepresentationPresetProvider';
 import { AlignmentTrajectoryParamsType } from './AlignmentTrajectoryPresetProvider';
+import { ColorConfig } from '../ExternalAlignmentProvider';
 
-export function getTrajectoryPresetProvider(alignmentId: string, closeResidues?: Set<number>, color?: number) {
+export function getTrajectoryPresetProvider(alignmentId: string, colorConfig: ColorConfig) {
     return TrajectoryHierarchyPresetProvider({
         id: 'flexible-alignment-to-reference',
         display: {
@@ -66,6 +67,8 @@ export function getTrajectoryPresetProvider(alignmentId: string, closeResidues?:
                         plugin.managers.structure.hierarchy.current.structures[plugin.managers.structure.hierarchy.current.structures.length - 1]
                     ]);
             } while (!entityCheck);
+            if (structure.data?.model.id)
+                colorConfig.setAlignmentIdToModel(structure.data?.model.id, alignmentId);
             if (params.transform) {
                 plugin.managers.structure.hierarchy.remove([
                     plugin.managers.structure.hierarchy.current.structures[plugin.managers.structure.hierarchy.current.structures.length - 1]
@@ -80,7 +83,7 @@ export function getTrajectoryPresetProvider(alignmentId: string, closeResidues?:
             const structureProperties = await builder.insertStructureProperties(structure);
             const representation = await plugin.builders.structure.representation.applyPreset(
                 structure,
-                representationPresetProvider(alignmentId, closeResidues, color)
+                representationPresetProvider(alignmentId, colorConfig)
             );
             // TODO what is the purpose of this return?
             return {

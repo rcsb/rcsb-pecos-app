@@ -1,24 +1,64 @@
-import { CustomElementProperty } from 'molstar/lib/mol-model-props/common/custom-element-property';
-import { ElementIndex, Model } from 'molstar/lib/mol-model/structure';
+import {
+    Bond,
+    StructureElement,
+    StructureProperties as SP,
+    StructureProperties
+} from 'molstar/lib/mol-model/structure';
 import { Color } from 'molstar/lib/mol-util/color';
+import { ColorConfig } from '../ExternalAlignmentProvider';
+import { ThemeDataContext } from 'molstar/lib/mol-theme/theme';
+import { ParamDefinition } from 'molstar/lib/mol-util/param-definition';
+import { ColorTheme } from 'molstar/lib/mol-theme/color';
+import { Location } from 'molstar/lib/mol-model/location';
 
-export function closeResidueColoring(alignmentId: string, closeResidues?: Set<number>, color?: number) {
-    return CustomElementProperty.create<[number, boolean]>({
-        label: `Close Residue Color ${alignmentId}`,
-        name: `close-residue-color-${alignmentId}`,
-        getData(model: Model) {
-            const map = new Map<ElementIndex, [number, boolean]>();
-            for (let i = 0; i < model.atomicHierarchy.atoms._rowCount; i++) {
-                const residueIndex = model.atomicHierarchy.residueAtomSegments.index[i];
-                const residueId = model.atomicHierarchy.residues.label_seq_id.value(residueIndex);
-                if (closeResidues && color)
-                    map.set(i as ElementIndex, [color, closeResidues.has(residueId) ?? false]);
+export const CLOSE_RESIDUE_COLOR = 'close-residue-color' as ColorTheme.BuiltIn;
+export function closeResidueColorThemeProvider(colorConfig: ColorConfig): ColorTheme.Provider<{}, typeof CLOSE_RESIDUE_COLOR> {
+    function closeResidueColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Values<{}>): ColorTheme<{}> {
+
+        const L = StructureElement.Location.create();
+        const locationColor = (location: StructureElement.Location) =>{
+            if (!ctx.structure)
+                return Color(0x777777);
+
+            const modelId = ctx.structure.model.id;
+            const closeResidues = colorConfig.getCloseResidues(modelId);
+            const color = colorConfig.getModelColor(modelId);
+            const uniqueChain = colorConfig.getUniqueChain(modelId);
+
+            const asymId = StructureProperties.chain.label_asym_id(location);
+            const seqId = StructureProperties.residue.label_seq_id(location);
+            const operatorName = SP.unit.operator_name(location);
+
+            if (uniqueChain?.asymId === asymId && uniqueChain.operatorName === operatorName && closeResidues.has(seqId))
+                return Color(color);
+            return Color.desaturate(Color.lighten(Color(color), 1.7), 1.2);
+
+        };
+        const color = (location: Location) => {
+            if (StructureElement.Location.is(location)) {
+                return locationColor(location);
+            } else if (Bond.isLocation(location)) {
+                L.structure = location.aStructure;
+                L.unit = location.aUnit;
+                L.element = location.aUnit.elements[location.aIndex];
+                return locationColor(L);
             }
-            return { value: map };
-        },
-        coloring: {
-            getColor(e) { return e[1] ? Color(e[0]) : Color.desaturate(Color.lighten(Color(e[0]), 1.7), 1.2); },
-            defaultColor: Color(0x777777)
-        }
-    });
+            return Color(0x777777);
+        };
+        return {
+            factory: closeResidueColorTheme,
+            granularity: 'group',
+            color,
+            props
+        };
+    }
+    return {
+        name: CLOSE_RESIDUE_COLOR,
+        label: 'Close Residue Color',
+        category: ColorTheme.Category.Misc,
+        factory: closeResidueColorTheme,
+        getParams: () => ({}),
+        defaultValues: ParamDefinition.getDefaultValues({}),
+        isApplicable: (ctx: ThemeDataContext) => true,
+    };
 }

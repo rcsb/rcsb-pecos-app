@@ -16,6 +16,7 @@ import {
     RigidTransformType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
 import { representationPresetProvider } from './AlignmentRepresentationPresetProvider';
+import { ColorConfig } from '../ExternalAlignmentProvider';
 
 
 export type AlignmentTrajectoryParamsType = {
@@ -25,7 +26,7 @@ export type AlignmentTrajectoryParamsType = {
     targetAlignment: undefined;
 }
 
-export function getTrajectoryPresetProvider(alignmentId: string, closeResidues?: Set<number>, color?: number) {
+export function getTrajectoryPresetProvider(alignmentId: string, colorConfig: ColorConfig) {
     return TrajectoryHierarchyPresetProvider({
         id: 'alignment-to-reference',
         display: {
@@ -75,11 +76,12 @@ export function getTrajectoryPresetProvider(alignmentId: string, closeResidues?:
                         plugin.managers.structure.hierarchy.current.structures[plugin.managers.structure.hierarchy.current.structures.length - 1]
                     ]);
             } while (!entityCheck);
-
+            if (structure.data?.model.id)
+                colorConfig.setAlignmentIdToModel(structure.data?.model.id, alignmentId);
             const structureProperties = await builder.insertStructureProperties(structure);
             const representation = await plugin.builders.structure.representation.applyPreset(
                 structureProperties,
-                representationPresetProvider(alignmentId, closeResidues, color),
+                representationPresetProvider(alignmentId, colorConfig),
                 {
                     pdb: params.pdb,
                     transform: params.transform
