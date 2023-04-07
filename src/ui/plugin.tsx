@@ -80,6 +80,12 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                             externalUiComponents: {
                                 replace: []
                             }
+                        },
+                        molstarProps: {
+                            showStructureSourceControls: false,
+                            showStrucmotifSubmitControls: false,
+                            showSuperpositionControls: false,
+                            layoutControlsDisplay: 'outside'
                         }
                     });
                     panel3D.render().then(()=>{
