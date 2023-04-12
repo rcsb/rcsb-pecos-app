@@ -84,8 +84,7 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                         molstarProps: {
                             showStructureSourceControls: false,
                             showStrucmotifSubmitControls: false,
-                            showSuperpositionControls: false,
-                            layoutControlsDisplay: 'outside'
+                            showSuperpositionControls: false
                         }
                     });
                     panel3D.render().then(()=>{
