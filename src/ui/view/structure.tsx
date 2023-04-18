@@ -1,14 +1,10 @@
 import { Subscription } from 'rxjs';
-import React, { useEffect, createRef } from 'react';
+import React, { useEffect } from 'react';
 import {
     Viewer
 } from '@rcsb/rcsb-molstar/build/src/viewer';
-import {
-    LoadPdbIdParams,
-    LoadFromUrlParams,
-    LoadStructureParams
-} from '../../manager/alignment-maganger';
-import { ApplicationContext, DownloadOptions, SelectionOptions } from '../../context';
+
+import { ApplicationContext } from '../../context';
 import { AlignmentReference } from '../../saguaro-3d/AlignmentReference';
 import {
     RcsbModuleDataProviderInterface
@@ -28,8 +24,6 @@ import { CloseResidueColorThemeProvider } from '../../saguaro-3d/molstar-traject
 
 let panel3D: RcsbFv3DAlignmentProvider;
 export function StructureViewComponent(props: { ctx: ApplicationContext }) {
-
-    let viewer: Viewer;
 
     useEffect(()=>{
         if (props.ctx.state.events.status.getValue() === 'ready' && props.ctx.state.data.response.state?.results) {
