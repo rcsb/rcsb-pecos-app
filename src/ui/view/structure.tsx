@@ -1,8 +1,5 @@
 import { Subscription } from 'rxjs';
 import React, { useEffect } from 'react';
-import {
-    Viewer
-} from '@rcsb/rcsb-molstar/build/src/viewer';
 
 import { ApplicationContext } from '../../context';
 import { AlignmentReference } from '../../saguaro-3d/AlignmentReference';
