@@ -135,7 +135,7 @@ export class AlignmentReference {
     private addRef(id: string, alignment: AlignmentRefType, target: AlignmentRefType): void {
         const map: AlignmentRefType = Array(this.alignmentRefMap.length).fill(undefined);
         alignment.forEach((v, n)=>{
-            if (typeof v === 'undefined')
+            if (v === undefined)
                 return;
             const index = this.alignmentRefMap.findIndex(e=>e === v);
             if (index >= 0)
@@ -196,7 +196,7 @@ export class AlignmentReference {
         const result = results[0];
         if (!result)
             throw new Error('Results not available');
-        this.getMapAlignments().forEach((alignment, n)=>{
+        this.getMapAlignments().forEach((alignment)=>{
             const result = alignment.alignment;
             const alignmentId = alignment.alignmentId;
             if (result.sequence_alignment)
@@ -238,7 +238,7 @@ function buildAlignments(refId: string, alignmentRefMap: AlignmentRefType, align
     alignmentMembers.forEach(am=>{
         out.target_alignment?.push({
             target_id: am.id,
-            aligned_regions: buildRegions(am.map.map((v, n)=> typeof v === 'number' ? am.target[v] : undefined))
+            aligned_regions: buildRegions(am.map.map((v)=> typeof v === 'number' ? am.target[v] : undefined))
         });
     });
     return out;

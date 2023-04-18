@@ -21,7 +21,7 @@ export const FlexibleAlignmentBuiltIn = PluginStateTransform.BuiltIn({
     from: PSO.Molecule.Model,
     to: PSO.Molecule.Structure,
     params: {
-        pdb: PD.Value<{entryId: string;entityId: string;}|{entryId: string;instanceId: string;}|undefined>(undefined),
+        pdb: PD.Value<{entryId: string;instanceId: string;}>(Object.create(null)),
         transform: PD.Value<RigidTransformType[]|undefined>(undefined)
     }
 })({
@@ -29,25 +29,22 @@ export const FlexibleAlignmentBuiltIn = PluginStateTransform.BuiltIn({
         return Task.create('Build Flexible Chain', async (ctx)=>{
             const base = await RootStructureDefinition.create(plugin, ctx, a.data);
             const structure = base.data;
-            const entityId = params.pdb && 'entityId' in params.pdb ? params.pdb?.entityId : undefined;
-            const instanceId = params.pdb && 'instanceId' in params.pdb ? params.pdb?.instanceId : undefined;
+            const instanceId = params.pdb.instanceId;
             const l = StructureElement.Location.create(structure);
-            let alignedEntityId;
             let alignedAsymId;
             let alignedOperatorName;
             let alignedType;
 
             for (const unit of structure.units) {
                 StructureElement.Location.set(l, structure, unit, unit.elements[0]);
-                if (SP.chain.label_entity_id(l) === entityId || SP.chain.label_asym_id(l) === instanceId) {
-                    alignedEntityId = SP.chain.label_entity_id(l);
+                if (SP.chain.label_asym_id(l) === instanceId) {
                     alignedAsymId = SP.chain.label_asym_id(l);
                     alignedOperatorName = SP.unit.operator_name(l);
                     alignedType = SP.entity.type(l);
                     const alignedOperators: string[] = SP.unit.pdbx_struct_oper_list_ids(l);
                     if (alignedOperators.length === 0) alignedOperators.push('0');
                     if (alignedType !== 'polymer')
-                        throw new Error('');
+                        throw new Error(`Aligned chain type ${alignedType}is not polymer`);
 
                     const builder = Structure.Builder({ label: structure.label });
                     builder.beginChainGroup();
@@ -79,7 +76,7 @@ export const FlexibleAlignmentBuiltIn = PluginStateTransform.BuiltIn({
                     return new PSO.Molecule.Structure(blockStructure, { label: structure.label });
                 }
             }
-            throw new Error('');
+            throw new Error(`No chain ${instanceId} was found`);
         });
     },
     dispose({ b }) {

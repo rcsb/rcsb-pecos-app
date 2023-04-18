@@ -2,7 +2,6 @@ import {
     AlignmentResponse,
 } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
 import {
-    AlignmentCollectConfig,
     AlignmentCollectorInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/AlignmentCollector/AlignmentCollectorInterface';
 import { TagDelimiter } from '@rcsb/rcsb-saguaro-app';
@@ -26,11 +25,9 @@ import {
     LoadMolstarReturnType
 } from '@rcsb/rcsb-saguaro-3d/lib//RcsbFvStructure/StructureViewers/MolstarViewer/MolstarActionManager';
 import {
-    AlignmentTrajectoryParamsType
+    AlignmentTrajectoryParamsType, AlignmentTrajectoryPresetProvider
 } from './molstar-trajectory/AlignmentTrajectoryPresetProvider';
 import { ColorLists } from '../utils/color';
-import { getTrajectoryPresetProvider as alignmentTrajectory } from './molstar-trajectory/AlignmentTrajectoryPresetProvider';
-import { getTrajectoryPresetProvider as flexibleTrajectory } from './molstar-trajectory/FlexibleAlignmentTrajectoryPresetProvider';
 
 export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterface {
 
@@ -42,38 +39,22 @@ export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterf
         this.alignmentReference = alignmentReference;
     }
 
-    async collect(requestConfig: AlignmentCollectConfig, filter?: Array<string>): Promise<AlignmentResponse> {
-        return new Promise((resolve)=>{
-            this.data().then((d)=>resolve(d));
-        });
+    async collect(): Promise<AlignmentResponse> {
+        return await this.data();
     }
     async getTargets(): Promise<string[]> {
-        return new Promise((resolve)=>{
-            this.data().then((d)=>resolve(d.target_alignment?.map(ta=>ta?.target_id ?? 'NA') ?? []));
-        });
+        return (await this.data()).target_alignment?.map(ta=>ta?.target_id ?? 'NA') ?? [];
     }
     async getAlignmentLength(): Promise<number> {
-        return new Promise((resolve)=>{
-            this.data().then(d=>{
-                const ends = d.target_alignment?.map(ta=>ta?.aligned_regions?.[ta?.aligned_regions?.length - 1]?.query_end);
-                resolve(Math.max(...(ends as number[])));
-            });
-        });
+        return Math.max(...(await this.data()).target_alignment?.map(ta=>ta?.aligned_regions?.[ta?.aligned_regions?.length - 1]?.query_end ?? -1) ?? []);
     }
     async getAlignment(): Promise<AlignmentResponse> {
-        return new Promise((resolve)=>{
-            this.data().then(d=>resolve(d));
-        });
+        return await this.data();
     }
     private async data(): Promise<AlignmentResponse> {
-        if (this.alignmentResponse)
-            return this.alignmentResponse;
-        return new Promise((resolve)=>{
-            alignmentTransform(this.alignment, this.alignmentReference).then(ar=>{
-                this.alignmentResponse = ar;
-                resolve(ar);
-            });
-        });
+        if (!this.alignmentResponse)
+            this.alignmentResponse = await alignmentTransform(this.alignment, this.alignmentReference);
+        return this.alignmentResponse;
     }
 
 }
@@ -158,13 +139,7 @@ export class RcsbLoadParamsProvider implements LoadParamsProviderInterface<{entr
         const res = this.alignment.results[alignmentIndex];
         const structure = res.structures[pairIndex] as StructureEntry & StructureURL;
         const transform = this.transformProvider.get(alignmentIndex, pairIndex);
-        const reprProvider = !transform?.length || transform.length === 1 ? alignmentTrajectory(
-            alignmentId,
-            this.colorConfig
-        ) : flexibleTrajectory(
-            alignmentId,
-            this.colorConfig
-        );
+        const reprProvider = AlignmentTrajectoryPresetProvider;
         const loadMethod = 'url' in structure && structure.url ? LoadMethod.loadStructureFromUrl : LoadMethod.loadPdbId;
         const url: string|undefined = 'url' in structure && structure.url ? structure.url : undefined;
         return {
@@ -177,9 +152,11 @@ export class RcsbLoadParamsProvider implements LoadParamsProviderInterface<{entr
                 id: alignmentId,
                 reprProvider: reprProvider,
                 params: {
-                    modelIndex: 0,
                     pdb,
+                    alignmentId,
+                    modelIndex: 0,
                     transform: transform,
+                    colorConfig: this.colorConfig,
                     targetAlignment: undefined
                 }
             }

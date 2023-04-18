@@ -25,6 +25,7 @@
   "dependencies": {
     "@rcsb/rcsb-api-tools": "^4.1.1",
     "@rcsb/rcsb-molstar": "^2.5.3",
+    "@rcsb/rcsb-saguaro": "^2.5.9",
     "@rcsb/rcsb-saguaro-3d": "^3.0.0-data-provider.29",
     "@rcsb/rcsb-saguaro-app": "^5.0.0-data-provider.20",
     "@types/react": "18.0.28",
@@ -59,7 +60,6 @@
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "argparse": "^2.0.1",
-    "concurrently": "^6.4.0",
     "cpx2": "^4.0.0",
     "crypto-browserify": "^3.12.0",
     "css-loader": "^6.7.3",
@@ -69,7 +69,6 @@
     "file-loader": "^6.2.0",
     "graphql": "^15.8.0",
     "html-webpack-plugin": "^5.5.0",
-    "http-server": "^14.0.0",
     "json-schema-to-typescript": "^10.1.5",
     "mini-css-extract-plugin": "^2.4.5",
     "path-browserify": "^1.0.1",
@@ -79,7 +78,6 @@
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.2",
     "typescript": "^4.5.2",
-    "uniqid": "^5.4.0",
     "webpack": "^5.64.4",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.11.1"

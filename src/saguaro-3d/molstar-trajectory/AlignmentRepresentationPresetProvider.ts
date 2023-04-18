@@ -15,7 +15,6 @@ import {
 } from 'molstar/lib/mol-model/structure';
 
 import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder';
-import uniqid from 'uniqid';
 import { createSelectionExpressions } from '@rcsb/rcsb-molstar/build/src/viewer/helpers/selection';
 import { ParamDefinition as PD } from 'molstar/lib/mol-util/param-definition';
 
@@ -26,16 +25,14 @@ import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure
 import { StructureRepresentationBuilder } from 'molstar/lib/mol-plugin-state/builder/structure/representation';
 import { StateTransform } from 'molstar/lib/mol-state/transform';
 import {
-    RigidTransformType,
-    TransformMatrixType
+    RigidTransformType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
 import { CLOSE_RESIDUE_COLOR } from './Coloring';
-import { ColorConfig } from '../ExternalAlignmentProvider';
 import updateFocusRepr = StructureRepresentationPresetProvider.updateFocusRepr;
+import { StructureRepresentationRegistry } from 'molstar/lib/mol-repr/structure/registry';
 
 type RepresentationParamsType = {
-    pdb?: { entryId: string; entityId: string; } | { entryId: string; instanceId: string; };
+    pdb: { entryId: string; instanceId: string; };
     transform: RigidTransformType[]|undefined;
 }
 
@@ -44,195 +41,140 @@ type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentation
 type ComponentMapType = Record<string, ComponentType>;
 type RepresentationMapType = Record<string, RepresentationType>;
 
-export function representationPresetProvider(alignmentId: string, colorConfig: ColorConfig) {
-    return StructureRepresentationPresetProvider({
-        id: 'alignment-to-reference',
-        display: {
-            name: 'Alignment to Reference'
-        },
-        isApplicable: (structureRef: PluginStateObject.Molecule.Structure, plugin: PluginContext): boolean => true,
-        params: (structureRef: PluginStateObject.Molecule.Structure | undefined, plugin: PluginContext) => ({
-            pdb: PD.Value<{ entryId: string; entityId: string; } | { entryId: string; instanceId: string; } | undefined>(undefined),
-            transform: PD.Value<RigidTransformType[] | undefined>(undefined)
-        }),
-        apply: async (structureRef: StateObjectRef<PluginStateObject.Molecule.Structure>, params: RepresentationParamsType, plugin: PluginContext) => {
-            const structureCell = StateObjectRef.resolveAndCheck(plugin.state.data, structureRef);
-            if (!structureCell)
-                return {};
+export const AlignmentRepresentationProvider = StructureRepresentationPresetProvider({
+    id: 'alignment-to-reference',
+    display: {
+        name: 'Alignment to Reference'
+    },
+    isApplicable: (): boolean => true,
+    params: () => ({
+        pdb: PD.Value<{ entryId: string; instanceId: string; }>(Object.create(null)),
+        transform: PD.Value<RigidTransformType[] | undefined>(undefined)
+    }),
+    apply: async (structureRef: StateObjectRef<PluginStateObject.Molecule.Structure>, params: RepresentationParamsType, plugin: PluginContext) => {
+        const structureCell = StateObjectRef.resolveAndCheck(plugin.state.data, structureRef);
+        if (!structureCell)
+            return {};
 
-            const structure = structureCell.obj?.data;
-            if (!structure)
-                return {};
+        const structure = structureCell.obj?.data;
+        if (!structure)
+            return {};
 
-            const entryId = params.pdb?.entryId;
-            if (!entryId)
-                return {};
-            const entityId = params.pdb && 'entityId' in params.pdb ? params.pdb?.entityId : undefined;
-            const instanceId = params.pdb && 'instanceId' in params.pdb ? params.pdb?.instanceId : undefined;
-            const l = StructureElement.Location.create(structure);
-            let alignedEntityId;
-            let alignedAsymId;
-            let alignedOperatorName;
-            let alignedType;
+        const entryId = params.pdb?.entryId;
+        if (!entryId)
+            return {};
 
-            const componentMap: ComponentMapType = {};
-            const representationMap: RepresentationMapType = {};
+        const instanceId = params.pdb && 'instanceId' in params.pdb ? params.pdb?.instanceId : undefined;
+        const l = StructureElement.Location.create(structure);
 
-            for (const unit of structure.units) {
-                StructureElement.Location.set(l, structure, unit, unit.elements[0]);
-                if (SP.chain.label_entity_id(l) === entityId || SP.chain.label_asym_id(l) === instanceId) {
-                    alignedEntityId = SP.chain.label_entity_id(l);
-                    alignedAsymId = SP.chain.label_asym_id(l);
-                    alignedOperatorName = SP.unit.operator_name(l);
-                    alignedType = SP.entity.type(l);
-                    const alignedOperators: string[] = SP.unit.pdbx_struct_oper_list_ids(l);
-                    if (alignedOperators.length === 0) alignedOperators.push('0');
-                    if (alignedType !== 'polymer')
-                        return {};
-                    if (params.transform?.[0].transform) {
-                        await matrixAlign(plugin, structureRef, params.transform?.[0].transform);
-                    }
-                    const comp = await plugin.builders.structure.tryCreateComponentFromExpression(
-                        structureCell,
-                        MS.struct.generator.atomGroups({
-                            'chain-test': MS.core.logic.and([
-                                MS.core.rel.eq([MS.ammp('label_asym_id'), alignedAsymId]),
-                                MS.core.rel.eq([MS.acp('operatorName'), alignedOperatorName])
-                            ])
-                        }),
-                        uniqid(`${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.instance}${alignedAsymId}${TagDelimiter.entity}${alignedOperators.join(',')}`),
-                        {
-                            label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.instance}${alignedAsymId}${TagDelimiter.assembly}${alignedOperators.join(',')}${TagDelimiter.assembly}${alignedType}`
-                        }
-                    );
-                    componentMap['aligned'] = comp;
+        const componentMap: ComponentMapType = {};
+        const representationMap: RepresentationMapType = {};
+        // find the aligned chain
+        structure.units.find(unit => {
+            StructureElement.Location.set(l, structure, unit, unit.elements[0]);
+            return SP.chain.label_asym_id(l) === instanceId;
+        });
+        const alignedEntityId = SP.chain.label_entity_id(l);
+        const alignedAsymId = SP.chain.label_asym_id(l);
+        const alignedOperatorName = SP.unit.operator_name(l);
+        const alignedType = SP.entity.type(l);
+        const alignedOperators: string[] = SP.unit.pdbx_struct_oper_list_ids(l);
+        if (alignedOperators.length === 0) alignedOperators.push('0');
+        if (alignedType !== 'polymer')
+            return {};
+        if (alignedAsymId && alignedOperatorName)
+            structure.inheritedPropertyData.colorConfig.setUniqueChain(structure.model.id, alignedAsymId, alignedOperatorName);
 
-                    // TODO This needs to be called after tryCreateComponentFromExpression
-                    const { update, builder } = reprBuilder(plugin, {
-                        ignoreHydrogens: true,
-                        ignoreLight: false,
-                        quality: 'auto'
-                    });
-                    if (alignedAsymId && alignedOperatorName)
-                        colorConfig.setUniqueChain(structure.model.id, alignedAsymId, alignedOperatorName);
-
-                    representationMap['aligned'] = builder.buildRepresentation(update, comp, {
-                        color: CLOSE_RESIDUE_COLOR,
-                        type: 'cartoon'
-                    });
-
-                    await update.commit({ revertOnError: false });
-                    break;
-                }
+        const alignedChainComp = await plugin.builders.structure.tryCreateComponentFromExpression(
+            structureCell,
+            MS.struct.generator.atomGroups({
+                'chain-test': MS.core.logic.and([
+                    MS.core.rel.eq([MS.ammp('label_asym_id'), alignedAsymId]),
+                    MS.core.rel.eq([MS.acp('operatorName'), alignedOperatorName])
+                ])
+            }),
+            `${structureCell.transform.ref}-aligned`,
+            {
+                label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.instance}${alignedAsymId}${TagDelimiter.assembly}${alignedOperators.join(',')}${TagDelimiter.assembly}${alignedType}`
             }
+        );
+        componentMap['aligned'] = alignedChainComp;
+        representationMap['aligned'] = await buildRepr(plugin, alignedChainComp, 'cartoon');
 
-            const expressions = [];
-            const asymObserved: { [key: string]: boolean } = {};
-            for (const unit of structure.units) {
-                StructureElement.Location.set(l, structure, unit, unit.elements[0]);
-                const asymId = SP.chain.label_asym_id(l);
-                const operatorName = SP.unit.operator_name(l);
-                if (asymId === alignedAsymId && operatorName === alignedOperatorName)
-                    continue;
-                if (asymObserved[`${asymId}${TagDelimiter.assembly}${operatorName}`])
-                    continue;
-                asymObserved[`${asymId}${TagDelimiter.assembly}${operatorName}`] = true;
-                const type = SP.entity.type(l);
-                if (type === 'polymer') {
-                    expressions.push(MS.core.logic.and([
-                        MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]),
-                        MS.core.rel.eq([MS.acp('operatorName'), operatorName])
-                    ]));
-                }
+        const expressions = [];
+        const asymObserved: { [key: string]: boolean } = {};
+        // find non-aligned polymer chains
+        for (const unit of structure.units) {
+            StructureElement.Location.set(l, structure, unit, unit.elements[0]);
+            const asymId = SP.chain.label_asym_id(l);
+            const operatorName = SP.unit.operator_name(l);
+            if (asymId === alignedAsymId && operatorName === alignedOperatorName)
+                continue;
+            if (asymObserved[`${asymId}${TagDelimiter.assembly}${operatorName}`])
+                continue;
+            asymObserved[`${asymId}${TagDelimiter.assembly}${operatorName}`] = true;
+            const type = SP.entity.type(l);
+            if (type === 'polymer') {
+                expressions.push(MS.core.logic.and([
+                    MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]),
+                    MS.core.rel.eq([MS.acp('operatorName'), operatorName])
+                ]));
             }
-            const compId = `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.assembly}${alignedType}`;
+        }
+        const compId = `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.assembly}${alignedType}`;
+        const comp = await plugin.builders.structure.tryCreateComponentFromExpression(
+            structureCell,
+            MS.struct.generator.atomGroups({
+                'chain-test': MS.core.logic.or(expressions)
+            }),
+            `${structureCell.transform.ref}-polymer`,
+            {
+                label: compId
+            }
+        );
+        componentMap['polymer'] = comp;
+        representationMap['polymer'] = await buildRepr(plugin, comp, 'cartoon', { isHidden: true });
+
+        for (const expression of createSelectionExpressions(entryId)) {
+            if (expression.tag === 'polymer')
+                continue;
             const comp = await plugin.builders.structure.tryCreateComponentFromExpression(
                 structureCell,
-                MS.struct.generator.atomGroups({
-                    'chain-test': MS.core.logic.or(expressions)
-                }),
-                uniqid(compId),
+                expression.expression,
+                `${structureCell.transform.ref}-${expression.tag}`,
                 {
-                    label: compId
-                }
-            );
-            componentMap['polymer'] = comp;
-
-            const { update, builder } = reprBuilder(plugin, {
-                ignoreHydrogens: true,
-                ignoreLight: false,
-                quality: 'auto'
-            });
-            representationMap['polymer'] = builder.buildRepresentation(update, comp, {
-                color: CLOSE_RESIDUE_COLOR,
-                type: 'cartoon'
-            }, {
-                initialState: {
-                    isHidden: true
-                }
-            });
-            if (comp?.cell?.state) {
-                StateTransform.assignState(comp?.cell?.state, { isHidden: true });
-            }
-
-            await update.commit({ revertOnError: false });
-
-            for (const expression of createSelectionExpressions(entryId)) {
-                if (expression.tag === 'polymer')
-                    continue;
-                const comp = await plugin.builders.structure.tryCreateComponentFromExpression(
-                    structureCell,
-                    expression.expression,
-                    uniqid(`${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.assembly}${expression.tag}`),
-                    {
-                        label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.assembly}${expression.tag}`
-                    });
-                componentMap[expression.tag] = comp;
-                // TODO This needs to be called after tryCreateComponentFromExpression
-                const { update, builder } = reprBuilder(plugin, {
-                    ignoreHydrogens: true,
-                    ignoreLight: false,
-                    quality: 'auto'
+                    label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.assembly}${expression.tag}`
                 });
-                representationMap[expression.tag] = builder.buildRepresentation(update, comp, {
-                    type: expression.type,
-                    color: CLOSE_RESIDUE_COLOR
-                }, {
-                    initialState: {
-                        isHidden: true
-                    }
-                });
+            componentMap[expression.tag] = comp;
+            representationMap[expression.tag] = await buildRepr(plugin, comp, expression.type, { isHidden: true });
 
-                if (comp?.cell?.state) {
-                    StateTransform.assignState(comp?.cell?.state, { isHidden: true });
-                }
-
-                await update.commit({ revertOnError: false });
-            }
-
-            await updateFocusRepr(plugin, structure, CLOSE_RESIDUE_COLOR, {});
-
-            return {
-                components: componentMap,
-                representations: representationMap
-            };
         }
+
+        await updateFocusRepr(plugin, structure, CLOSE_RESIDUE_COLOR, {});
+
+        return {
+            components: componentMap,
+            representations: representationMap
+        };
+    }
+});
+
+export async function buildRepr(plugin: PluginContext, comp: ComponentType, type: StructureRepresentationRegistry.BuiltIn, initialState?: { isHidden: boolean; }) {
+    const { update, builder } = reprBuilder(plugin, {
+        ignoreHydrogens: true,
+        ignoreLight: false,
+        quality: 'auto'
     });
+    const repr = builder.buildRepresentation(update, comp, {
+        color: CLOSE_RESIDUE_COLOR,
+        type
+    }, {
+        initialState
+    });
+    if (comp?.cell?.state) {
+        StateTransform.assignState(comp?.cell?.state, { isHidden: initialState?.isHidden });
+    }
+    await update.commit({ revertOnError: false });
+    return repr;
 }
 
-async function matrixAlign(plugin: PluginContext, structureRef: StateObjectRef<PluginStateObject.Molecule.Structure>, matrix: TransformMatrixType): Promise<void> {
-    const trans = {
-        transform: {
-            name: 'matrix' as const,
-            params: { data: matrix, transpose: false }
-        }
-    };
-    const b = plugin.state.data.build().to(structureRef).insert(
-        TransformStructureConformation,
-        trans as any,
-        { tags: 'pairwise-matrix-alignment' }
-    );
-    const task = plugin.state.data.updateTree(b);
-    await plugin.runTask(task);
-
-}
