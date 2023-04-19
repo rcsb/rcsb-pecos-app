@@ -4,7 +4,7 @@ import {
 import {
     AlignmentCollectorInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/AlignmentCollector/AlignmentCollectorInterface';
-import { TagDelimiter } from '@rcsb/rcsb-saguaro-app';
+import { TagDelimiter } from '@rcsb/rcsb-api-tools/build/RcsbUtils/TagDelimiter';
 
 
 import { AlignmentMapType, AlignmentReference } from './AlignmentReference';

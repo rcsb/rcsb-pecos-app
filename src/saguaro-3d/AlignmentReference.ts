@@ -3,7 +3,8 @@ import {
     AlignedRegion,
     AlignmentResponse,
 } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
-import { RcsbRequestContextManager, TagDelimiter } from '@rcsb/rcsb-saguaro-app';
+import { RcsbRequestContextManager } from '@rcsb/rcsb-saguaro-app';
+import { TagDelimiter } from '@rcsb/rcsb-api-tools/build/RcsbUtils/TagDelimiter';
 import {
     InstanceSequenceInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';

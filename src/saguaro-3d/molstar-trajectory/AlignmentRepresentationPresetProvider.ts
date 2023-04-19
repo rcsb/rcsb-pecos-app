@@ -18,7 +18,7 @@ import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder'
 import { createSelectionExpressions } from '@rcsb/rcsb-molstar/build/src/viewer/helpers/selection';
 import { ParamDefinition as PD } from 'molstar/lib/mol-util/param-definition';
 
-import { TagDelimiter } from '@rcsb/rcsb-saguaro-app';
+import { TagDelimiter } from '@rcsb/rcsb-api-tools/build/RcsbUtils/TagDelimiter';
 import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
 
 import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure';
