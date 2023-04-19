@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useEffect, useState } from 'react';
-import { Subscription } from 'rxjs';
 import { Alignment } from '../../auto/alignment/alignment-response';
 import { ApplicationContext } from '../../context';
 import { ColorLists, convertHexToRgb } from '../../utils/color';

@@ -64,7 +64,7 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
         if (!entryId)
             return {};
 
-        const instanceId = params.pdb && 'instanceId' in params.pdb ? params.pdb?.instanceId : undefined;
+        const instanceId = params.pdb.instanceId;
         const l = StructureElement.Location.create(structure);
 
         const componentMap: ComponentMapType = {};

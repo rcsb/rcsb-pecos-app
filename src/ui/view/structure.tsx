@@ -65,9 +65,9 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                             trackConfigModifier: {
                                 alignment: ()=>{
                                     const color = convertHexToRgb(ColorLists['set-1'][index++], 0.8);
-                                    return new Promise((resolve)=>resolve({
+                                    return Promise.resolve({
                                         titleFlagColor: color
-                                    }));
+                                    });
                                 }
                             },
                             externalUiComponents: {
