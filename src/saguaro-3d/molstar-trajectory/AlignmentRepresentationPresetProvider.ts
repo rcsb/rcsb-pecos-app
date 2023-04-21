@@ -27,7 +27,7 @@ import { StateTransform } from 'molstar/lib/mol-state/transform';
 import {
     RigidTransformType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { CLOSE_RESIDUE_COLOR } from './Coloring';
+import { EQUIVALENT_RESIDUES_COLOR } from './Coloring';
 import updateFocusRepr = StructureRepresentationPresetProvider.updateFocusRepr;
 import { StructureRepresentationRegistry } from 'molstar/lib/mol-repr/structure/registry';
 
@@ -150,7 +150,7 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
 
         }
 
-        await updateFocusRepr(plugin, structure, CLOSE_RESIDUE_COLOR, {});
+        await updateFocusRepr(plugin, structure, EQUIVALENT_RESIDUES_COLOR, {});
 
         return {
             components: componentMap,
@@ -166,7 +166,7 @@ export async function buildRepr(plugin: PluginContext, comp: ComponentType, type
         quality: 'auto'
     });
     const repr = builder.buildRepresentation(update, comp, {
-        color: CLOSE_RESIDUE_COLOR,
+        color: EQUIVALENT_RESIDUES_COLOR,
         type
     }, {
         initialState

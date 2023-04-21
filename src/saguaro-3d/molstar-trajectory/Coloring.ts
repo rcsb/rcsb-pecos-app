@@ -10,7 +10,7 @@ import { ParamDefinition } from 'molstar/lib/mol-util/param-definition';
 import { ColorTheme } from 'molstar/lib/mol-theme/color';
 import { Location } from 'molstar/lib/mol-model/location';
 
-export const CLOSE_RESIDUE_COLOR = 'close-residue-color' as ColorTheme.BuiltIn;
+export const EQUIVALENT_RESIDUES_COLOR = 'close-residue-color' as ColorTheme.BuiltIn;
 function closeResidueColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Values<{}>): ColorTheme<{}> {
 
     const L = StructureElement.Location.create();
@@ -51,9 +51,9 @@ function closeResidueColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Va
         props
     };
 }
-export const CloseResidueColorThemeProvider = {
-    name: CLOSE_RESIDUE_COLOR,
-    label: 'Close Residue Color',
+export const EquivalentResiduesColorThemeProvider = {
+    name: EQUIVALENT_RESIDUES_COLOR,
+    label: 'Equivalent Residues',
     category: ColorTheme.Category.Misc,
     factory: closeResidueColorTheme,
     getParams: () => ({}),

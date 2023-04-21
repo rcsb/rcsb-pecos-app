@@ -16,7 +16,7 @@ import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFv3D/Rc
 import { AlignmentTrackFactory } from '../../saguaro-3d/AlignmentTrackFactory';
 import { ColorLists, convertHexToRgb } from '../../utils/color';
 import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
-import { CloseResidueColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/Coloring';
+import { EquivalentResiduesColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/Coloring';
 
 
 let panel3D: RcsbFv3DAlignmentProvider;
@@ -91,8 +91,8 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                                 else
                                     tooltip.style.visibility = 'hidden';
                             });
-                            if (!plugin.representation.structure.themes.colorThemeRegistry.has(CloseResidueColorThemeProvider))
-                                plugin.representation.structure.themes.colorThemeRegistry.add(CloseResidueColorThemeProvider);
+                            if (!plugin.representation.structure.themes.colorThemeRegistry.has(EquivalentResiduesColorThemeProvider))
+                                plugin.representation.structure.themes.colorThemeRegistry.add(EquivalentResiduesColorThemeProvider);
                         });
                     });
                 });
