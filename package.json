@@ -1,6 +1,6 @@
 {
   "name": "@rcsb/rcsb-pecos-app",
-  "version": "2.0.0-rcsb-saguaro.26",
+  "version": "2.0.0",
   "description": "RCSB 3D Structure Alignment Application",
   "license": "MIT",
   "homepage": "https://github.com/rcsb/rcsb-pecos-app#readme",
@@ -99,6 +99,6 @@
     "version": "npm run clean && npm run build",
     "postversion": "git push && git push --tags",
     "dev-server": "webpack-dev-server --config webpack.server.dev.config.js",
-    "publish-app": "npm publish --tag rcsb-saguaro"
+    "publish-app": "npm publish"
   }
 }
