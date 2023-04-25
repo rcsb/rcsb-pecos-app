@@ -6,7 +6,6 @@ import Select, { Option } from 'rc-select';
 import Upload, { UploadProps } from 'rc-upload';
 import Autosuggest, { ChangeEvent, SuggestionsFetchRequestedParams } from 'react-autosuggest';
 import { Icon, UploadSvg, PaperClipSvg } from '../icons';
-import { isValidEntryId } from '../../utils/identifier';
 
 type AutosuggestControlProps = {
     value: string,
@@ -19,6 +18,7 @@ type AutosuggestControlProps = {
 
 export function AutosuggestControl(props: AutosuggestControlProps) {
 
+    const [selection, setSelection] = useState<string>();
     const [suggestions, setSuggestions] = useState<Array<string>>([]);
 
     const onRenderAction = (value: string): JSX.Element => <div>{value}</div>;
@@ -31,15 +31,19 @@ export function AutosuggestControl(props: AutosuggestControlProps) {
     function onChangeAction(_: React.FormEvent<HTMLElement>, change: ChangeEvent): void {
         const v = change.newValue?.trim().toUpperCase() || '';
         if (props.value !== v) {
-            if (isValidEntryId(v)) setSuggestions([]);
             props.onChange(v);
         }
     }
 
     function onFetchAction(request: SuggestionsFetchRequestedParams): void {
         props.suggestHandler(request.value).then((values) => {
-            if (values.length > 0 && !isValidEntryId(request.value)) {
+            if (values.length > 1) {
+                setSelection(undefined);
                 setSuggestions(values);
+            } else if (values.length === 1 && values[0] !== selection) {
+                props.onChange(values[0]);
+                setSelection(values[0]);
+                setSuggestions([]);
             } else { // clear suggestions
                 setSuggestions([]);
             }

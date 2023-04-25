@@ -96,7 +96,3 @@ export function SelectableControl(props: SelectionProps) {
         {showOptions && <div className='dropdown-content'>{renderOptions(props.options)}</div>}
     </span>;
 }
-
-// export function DownloadActionControl(props: SelectableControlProps) {
-
-// }

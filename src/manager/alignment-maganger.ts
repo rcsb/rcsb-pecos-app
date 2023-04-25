@@ -26,7 +26,9 @@ import {
 } from '@rcsb/rcsb-saguaro';
 import {
     isEntry,
-    mergeIntervals
+    mergeIntervals,
+    getTransformationType,
+    TransformationType
 } from '../utils/helper';
 import { getCombinedInstanceId, createInstanceLabel } from '../utils/identifier';
 import { DataProvider } from '../provider/data-provider';
@@ -99,11 +101,13 @@ export class AlignmentManager implements AlignmentManagerI {
 }
 
 class PairwiseAlignmentManager implements AlignmentManagerI {
+    private type: TransformationType = 'rigid';
     private results: Alignment[] = [];
     private structure: StructureAlignmentRepresentation[] = [];
     private sequence: SequenceAlignmentRepresentation[][] = [];
 
     async init(data: DataProvider, response?: StructureAlignmentResponse) {
+        this.type = getTransformationType(response!.meta!);
         this.results = response!.results!;
         this.parseStructureReference();
         this.parseStructureTargets();
@@ -133,13 +137,13 @@ class PairwiseAlignmentManager implements AlignmentManagerI {
     }
 
     private parseStructureTargets() {
-        const type = this.results[0].structure_alignment.length > 1 ? 'flexible' : 'rigid';
+
         for (let i = 0; i < this.results.length; i++) {
             const member: StructureAlignmentRepresentation = {
                 structure: this.results[i].structures[1],
                 alignment: []
             };
-            if (type === 'rigid') {
+            if (this.type === 'rigid') {
                 member.matrix = Mat4.fromArray(Mat4(), this.results[i].structure_alignment[0].transformations[1], 0);
                 member.alignment = this.results[i].structure_alignment[0].regions![1];
             } else {

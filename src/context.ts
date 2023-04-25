@@ -7,9 +7,9 @@ import { QueryRequest } from './utils/request';
 import { StructureAlignmentProvider } from './provider/alignment-provider';
 import { DataProvider } from './provider/data-provider';
 import { SearchProvider } from './provider/search-provider';
-import { StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
+import { StructureAlignmentMetadata, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
-import { isEntry, buildError } from './utils/helper';
+import { isEntry, buildError, getTransformationType } from './utils/helper';
 import { AlignmentManager } from './manager/alignment-maganger';
 import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
@@ -86,10 +86,9 @@ export class ApplicationContext {
      *
      * @returns default selection option
      */
-    private selection(): SelectionOptions {
-        const method = this.state.data.request.state.query.context.method.name;
-        if (method === 'fatcat-flexible' || method === 'ce-cp') return 'residues';
-        else return 'polymer';
+    private selection(meta: StructureAlignmentMetadata): SelectionOptions {
+        const type = getTransformationType(meta);
+        return type === 'rigid' ? 'polymer' : 'residues';
     }
 
     private loading() {
@@ -99,8 +98,12 @@ export class ApplicationContext {
 
     private ready(response: StructureAlignmentResponse) {
         this.state.data.response.push(response);
-        this.state.events.selection.next(this.selection());
-        this.state.events.status.next('ready');
+        if (response.results) {
+            this.state.events.selection.next(this.selection(response.meta!));
+            this.state.events.status.next('ready');
+        } else {
+            this.error('Results MUST be provided');
+        }
         updateWindowURL();
     }
 
