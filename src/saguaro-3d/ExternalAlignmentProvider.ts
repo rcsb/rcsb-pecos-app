@@ -147,8 +147,8 @@ export class RcsbLoadParamsProvider implements LoadParamsProviderInterface<{entr
             loadParams: {
                 url,
                 entryId,
-                format: url ? 'mmcif' : undefined,
-                isBinary: url ? false : undefined,
+                format: structure.format,
+                isBinary: structure.is_binary,
                 id: alignmentId,
                 reprProvider: reprProvider,
                 params: {

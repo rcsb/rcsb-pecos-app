@@ -1,5 +1,3 @@
-@import '@rcsb/rcsb-molstar/build/dist/viewer/rcsb-molstar.css';
-
 #app-container {
   padding-top: 2em;
 }
@@ -459,7 +457,7 @@
   position: absolute;
   left: -9999px;
   top: -9999px;
-  z-index: 3070;
+  z-index: 10;
   display: block;
 }
 
@@ -892,4 +890,8 @@
 
 .msp-highlight-toast-wrapper{
   visibility: hidden;
+}
+
+.msp-layout-expanded {
+  z-index: 3000;
 }
