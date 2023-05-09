@@ -81,7 +81,7 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
         const alignedOperators: string[] = SP.unit.pdbx_struct_oper_list_ids(l);
         if (alignedOperators.length === 0) alignedOperators.push('0');
         if (alignedType !== 'polymer')
-            return {};
+            throw new Error(`Aligned chain wrong type ${alignedType}`);
         if (alignedAsymId && alignedOperatorName)
             structure.inheritedPropertyData.colorConfig.setUniqueChain(structure.model.id, alignedAsymId, alignedOperatorName);
 
