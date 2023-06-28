@@ -19,6 +19,7 @@ import { ModelSymmetry } from 'molstar/lib/mol-model-formats/structure/property/
 import { TrajectoryHierarchyPresetProvider } from 'molstar/lib/mol-plugin-state/builder/structure/hierarchy-preset';
 import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
 import { FlexibleAlignmentBuiltIn } from './FlexibleAlignmentBuiltIn';
+import { ModelExport } from 'molstar/lib/extensions/model-export/export';
 
 export type AlignmentTrajectoryParamsType = {
     pdb: {entryId: string;instanceId: string;};
@@ -75,6 +76,9 @@ export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvid
             structure.data.inheritedPropertyData.colorConfig = params.colorConfig;
         if (structure.data?.model.id)
             structure.data.inheritedPropertyData.colorConfig.setAlignmentIdToModel(structure.data?.model.id.toString(), params.alignmentId);
+
+        // Set a file name for user uploaded structures
+        ModelExport.setStructureName(structure.data, params.pdb.entryId);
 
         const structureProperties = await builder.insertStructureProperties(structure);
         const representation = await plugin.builders.structure.representation.applyPreset(
