@@ -77,10 +77,12 @@ export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvid
         if (structure.data?.model.id)
             structure.data.inheritedPropertyData.colorConfig.setAlignmentIdToModel(structure.data?.model.id.toString(), params.alignmentId);
 
-        // Set a file name for user uploaded structures
-        ModelExport.setStructureName(structure.data, params.pdb.entryId);
-
         const structureProperties = await builder.insertStructureProperties(structure);
+        if (!structureProperties.data) return {};
+
+        // Set a file name for user uploaded structures
+        ModelExport.setStructureName(structureProperties.data, params.alignmentId);
+
         const representation = await plugin.builders.structure.representation.applyPreset(
             structureProperties,
             AlignmentRepresentationProvider,
