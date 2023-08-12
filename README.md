@@ -23,13 +23,10 @@ To get syntax highlighting for graphql files, add the following to Visual Code's
 
     npm run watch-app
 
-#### Run:
-
-Uses `http-server` module for serving the files to browser on port 3000. Run the following command: 
-
-    npm run serve
-
-and navigate to `build/`
+### Testing
+- `npm install`
+- `npm run dev-server`
+- Go to `http://localhost:9000/`
 
 ## Publish
 
