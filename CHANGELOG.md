@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.5] - 2023-06-28
 ### Dependency update
+- rcsb-saguaro-3d v3.0.18
 - rcsb-molstar v2.7.1
 - molstar v3.37.1
 
