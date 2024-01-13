@@ -53,6 +53,18 @@ export class ApplicationContext {
             const uuid = params.get(uuidUrlParam)!;
             const response = await this._alignment.results(uuid);
             this.processResponse(response);
+        } else if (params.has(responseUrlParam)) {
+            // response data can be passed as URL parameter
+            const needsDecoding = params.get(encodingUrlParam) && params.get(encodingUrlParam) === 'true';
+            const responseData = params.get(responseUrlParam)!;
+            const response = (needsDecoding) ? decodeBase64ToJson(responseData) : JSON.parse(responseData);
+            this.processResponse(response);
+            if (params.has(requestUrlParam)) {
+                const requestData = params.get(requestUrlParam)!;
+                const request = (needsDecoding) ? decodeBase64ToJson(requestData) : JSON.parse(requestData);
+                const query = new QueryRequest(request);
+                this.state.data.request.push(query);
+            }
         } else if (params.has(requestUrlParam)) {
             // request data can be passed as URL parameter
             const data = params.get(requestUrlParam)!;
@@ -60,12 +72,6 @@ export class ApplicationContext {
             const request = new QueryRequest(json);
             this.state.data.request.push(request);
             await this.align(request);
-        } else if (params.has(responseUrlParam)) {
-            // response data can be passed as URL parameter
-            const needsDecoding = params.get(encodingUrlParam) && params.get(encodingUrlParam) === 'true';
-            const data = params.get(responseUrlParam)!;
-            const response = (needsDecoding) ? decodeBase64ToJson(data) : JSON.parse(data);
-            this.processResponse(response);
         }
     }
 
@@ -99,8 +105,8 @@ export class ApplicationContext {
     private ready(response: StructureAlignmentResponse) {
         this.state.data.response.push(response);
         if (response.results) {
-            this.state.events.selection.next(this.selection(response.meta!));
             this.state.events.status.next('ready');
+            this.state.events.selection.next(this.selection(response.meta!));
         } else {
             this.error('Results MUST be provided');
         }

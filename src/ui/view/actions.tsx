@@ -5,7 +5,7 @@ import Menu, { Divider, Item as MenuItem } from 'rc-menu';
 import { encodeJsonToBase64 } from '../../utils/encoding';
 import { ApplicationContext, DownloadOptions } from '../../context';
 import { CopySvg, Icon, SolidArrowDownSvg, WarningSvg, DownloadSvg } from '../icons';
-import { encodingUrlParam, responseUrlParam } from '../../utils/constants';
+import { encodingUrlParam, requestUrlParam, responseUrlParam } from '../../utils/constants';
 import { exportSequenceAlignment, exportTransformations } from '../../utils/download';
 import { MenuInfo, MenuClickEventHandler } from 'rc-menu/es/interface';
 
@@ -95,10 +95,12 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
 
     function createLink() {
         const baseURL = window.location.href.split('?')[0];
+        const b64Request = encodeJsonToBase64(props.ctx.state.data.request.state);
+        const requestParam = `${requestUrlParam}=${encodeURIComponent(b64Request)}`;
+        const b64Response = encodeJsonToBase64(props.ctx.state.data.response.state);
+        const responseParam = `${responseUrlParam}=${encodeURIComponent(b64Response)}`;
         const encodeParam = `${encodingUrlParam}=true`;
-        const b64 = encodeJsonToBase64(props.ctx.state.data.response.state);
-        const bodyParam = `${responseUrlParam}=${encodeURIComponent(b64)}`;
-        return baseURL + '?' + bodyParam + '&' + encodeParam;
+        return baseURL + '?' + requestParam + '&' + responseParam + '&' + encodeParam;
     }
 
     async function fallbackCopyToClipboard(text: string) {

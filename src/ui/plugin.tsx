@@ -15,7 +15,6 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
     const [state, setState] = useState<Status>(props.ctx.state.events.status.getValue());
     useObservable<Status>(props.ctx.state.events.status, setState);
 
-
     return (
         <>
             <div className='app-body'>
