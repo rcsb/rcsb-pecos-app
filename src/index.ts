@@ -62,6 +62,10 @@ export class Application {
     align(request: QueryRequest): void {
         this._context.align(request);
     }
+
+    getRequest(): QueryRequest | null {
+        return this._context.getRequest();
+    }
 }
 
 export async function createApp(elementOrId: string | HTMLElement, configs: RecursivePartial<AppConfigs> = {}): Promise<Application> {

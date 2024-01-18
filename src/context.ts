@@ -114,7 +114,6 @@ export class ApplicationContext {
     }
 
     private error(message: string) {
-
         const response = buildError('', message);
         this.state.data.response.push(response);
         this.state.events.status.next('error');
@@ -155,6 +154,12 @@ export class ApplicationContext {
             this.state.data.response.push(response);
             this.state.events.status.next('error');
         }
+    }
+
+    public getRequest(): QueryRequest | null {
+        if (this.state.events.status.getValue() === 'ready')
+            return this.state.data.request.state;
+        else return null;
     }
 
     public async align(request: QueryRequest) {

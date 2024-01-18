@@ -1,7 +1,8 @@
 import { createApp } from './index';
 
-document.addEventListener('DOMContentLoaded', function (event) {
-    createApp('app-container').then(()=>{
-        console.log('Render done');
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+document.addEventListener('DOMContentLoaded', function (_event) {
+    createApp('app-container').then(() => {
+        console.log('Application is created');
     });
 });
