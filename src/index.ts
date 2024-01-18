@@ -63,7 +63,7 @@ export class Application {
         this._context.align(request);
     }
 
-    getRequest(): QueryRequest | null {
+    request(): QueryRequest | null {
         return this._context.getRequest();
     }
 }

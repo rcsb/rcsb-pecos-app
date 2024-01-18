@@ -156,7 +156,7 @@ export class ApplicationContext {
         }
     }
 
-    public getRequest(): QueryRequest | null {
+    public request(): QueryRequest | null {
         if (this.state.events.status.getValue() === 'ready')
             return this.state.data.request.state;
         else return null;
