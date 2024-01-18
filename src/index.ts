@@ -64,7 +64,7 @@ export class Application {
     }
 
     request(): QueryRequest | null {
-        return this._context.getRequest();
+        return this._context.request();
     }
 }
 
