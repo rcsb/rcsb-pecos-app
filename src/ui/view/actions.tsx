@@ -4,7 +4,7 @@ import Menu, { Divider, Item as MenuItem } from 'rc-menu';
 
 import { encodeJsonToBase64 } from '../../utils/encoding';
 import { ApplicationContext, DownloadOptions } from '../../context';
-import { CopySvg, Icon, SolidArrowDownSvg, WarningSvg, DownloadSvg } from '../icons';
+import { CopySvg, Icon, SolidArrowDownSvg, DownloadSvg } from '../icons';
 import { encodingUrlParam, requestUrlParam, responseUrlParam } from '../../utils/constants';
 import { exportSequenceAlignment, exportTransformations } from '../../utils/download';
 import { MenuInfo, MenuClickEventHandler } from 'rc-menu/es/interface';
@@ -87,7 +87,8 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         for (const alignment of results!) {
             for (const s of alignment.structures) {
-                if ('url' in s) return false;
+                if (('format' in s) && !('url' in s))
+                    return false;
             }
         }
         return true;
@@ -149,7 +150,6 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
                     onClick={() => copyLinkToClipboard()}>
                     <Icon svg={CopySvg} className='copy-icon' />
                         Copy Link
-                    <Icon svg={WarningSvg} className='warning-icon'/>
                 </button>
                 }
             </span>

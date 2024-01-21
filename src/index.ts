@@ -31,6 +31,12 @@ const DefaultAppConfigs = {
             pollingIntervalMs: 1000,
             // Maximum time (in milliseconds) the application waits to get results from the server
             timeoutMs: 300 * 1000
+        },
+        fileUpload: {
+            base: 'https://user-upload.rcsb.org/v1/',
+            upload: 'putMultipart',
+            download: 'download',
+            httpHeaders: {}
         }
     }
 };

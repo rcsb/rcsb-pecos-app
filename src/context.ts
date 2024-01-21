@@ -3,16 +3,17 @@ import { BehaviorSubject } from 'rxjs';
 import { AppConfigs } from './index';
 import { RequestState } from './state/request';
 import { ResponseState } from './state/response';
-import { QueryRequest } from './utils/request';
+import { QueryRequest, StructureFileUploadImpl, StructureWebLinkImpl } from './utils/request';
 import { StructureAlignmentProvider } from './provider/alignment-provider';
 import { DataProvider } from './provider/data-provider';
 import { SearchProvider } from './provider/search-provider';
 import { StructureAlignmentMetadata, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
 import { isEntry, buildError, getTransformationType } from './utils/helper';
-import { AlignmentManager } from './manager/alignment-maganger';
+import { AlignmentManager } from './manager/alignment-manager';
 import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
+import { FileUploadManager } from './manager/file-upload-manager';
 
 export type Status = 'init' | 'loading' | 'ready' | 'error';
 export type DownloadOptions = 'structure' | 'sequence' | 'transform' | 'all' | undefined;
@@ -24,6 +25,7 @@ export class ApplicationContext {
     private readonly _search: SearchProvider;
     private readonly _manager: AlignmentManager;
     private readonly _alignment: StructureAlignmentProvider;
+    private readonly _files: FileUploadManager;
 
     readonly state = {
         events: {
@@ -43,6 +45,7 @@ export class ApplicationContext {
         this._search = new SearchProvider(configs.service.search, this.error.bind(this));
         this._alignment = new StructureAlignmentProvider(configs.service.alignment);
         this._manager = new AlignmentManager();
+        this._files = new FileUploadManager(configs.service.fileUpload);
     }
 
     async init() {
@@ -164,13 +167,40 @@ export class ApplicationContext {
 
     public async align(request: QueryRequest) {
         this.loading();
-        try {
-            const uuid = await this._alignment.submit(request);
-            updateWindowURL('?uuid=' + uuid);
-            const response = await this._alignment.results(uuid);
-            this.processResponse(response);
-        } catch (e) {
-            this.error((e as Error).message);
+        this.uploadAtomicCoordinateFiles(request)
+            .then(() => {
+                return this._alignment.submit(request);
+            })
+            .then((uuid) => {
+                updateWindowURL('?uuid=' + uuid);
+                return this._alignment.results(uuid);
+            })
+            .then((response) => {
+                this.processResponse(response);
+            })
+            .catch((e) => this.error(e.message));
+    }
+
+    public async uploadAtomicCoordinateFiles(request: QueryRequest) {
+        if (request.files && request.files.length > 0) {
+            for (let j = 0; j < request.query.context.structures.length; j++) {
+                const structure = request.query.context.structures[j];
+                if (structure instanceof StructureFileUploadImpl) {
+                    const file = request.files.shift()!;
+                    const format = structure.format;
+                    await this._files.upload(file, format)
+                        .then((response) => {
+                            const uploaded = new StructureWebLinkImpl();
+                            uploaded.url = response.url;
+                            uploaded.name = file.name;
+                            uploaded.format = response.format;
+                            uploaded.selection = structure.selection;
+                            request.query.context.structures[j] = uploaded;
+                        })
+                        .catch((e) => this.error(e.message));
+                }
+            }
+            this.state.data.request.push(request);
         }
     }
 }
