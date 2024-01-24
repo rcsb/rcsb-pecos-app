@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import clonedeep from 'lodash.clonedeep';
+
 import { BehaviorSubject } from 'rxjs';
 import { AppConfigs } from './index';
 import { RequestState } from './state/request';
@@ -88,6 +90,10 @@ export class ApplicationContext {
 
     manager() {
         return this._manager;
+    }
+
+    files() {
+        return this._files;
     }
 
     /**
@@ -183,10 +189,11 @@ export class ApplicationContext {
 
     public async uploadAtomicCoordinateFiles(request: QueryRequest) {
         if (request.files && request.files.length > 0) {
+            const clone = clonedeep(request);
             for (let j = 0; j < request.query.context.structures.length; j++) {
                 const structure = request.query.context.structures[j];
                 if (structure instanceof StructureFileUploadImpl) {
-                    const file = request.files.shift()!;
+                    const file = clone.files.shift()!;
                     const format = structure.format;
                     await this._files.upload(file, format)
                         .then((response) => {
@@ -195,12 +202,12 @@ export class ApplicationContext {
                             uploaded.name = file.name;
                             uploaded.format = response.format;
                             uploaded.selection = structure.selection;
-                            request.query.context.structures[j] = uploaded;
+                            clone.query.context.structures[j] = uploaded;
                         })
                         .catch((e) => this.error(e.message));
                 }
             }
-            this.state.data.request.push(request);
+            this.state.data.request.push(clone);
         }
     }
 }

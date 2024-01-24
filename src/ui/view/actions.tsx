@@ -125,10 +125,26 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
         }
     }
 
+    function willExpire() {
+        const results = props.ctx.state.data.response.state?.results;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        for (const alignment of results!) {
+            for (const s of alignment.structures) {
+                if (('url' in s) && props.ctx.files().isServiceUrl(s.url))
+                    return true;
+            }
+        }
+        return false;
+    }
+
     function copyLinkToClipboard() {
+
         const text = createLink();
         copyLinkToClipboardAsync(text)
             .then(() => {
+                if (willExpire()) {
+                    alert('⚠️ Attention: This link contains URLs to structures hosted by the RCSB PDB file upload service. These URLs will expire after a certain period and structures will not be available for visualization. If the link has expired, consider generating a new one');
+                }
                 setCopied(true);
                 setTimeout(() => setCopied(false), 800);
             })

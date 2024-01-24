@@ -28,9 +28,12 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
                     {state === 'error' && <ErrorMessage ctx={props.ctx}/>}
                     {state === 'ready' && <>
                         <AlignmentScoresComponent ctx={props.ctx}/>
-                        <div className='box-row inp-space inp-space-horizontal' style={{ justifyContent: 'flex-end' }}>
-                            <DownloadAssetsComponent ctx={props.ctx}/>
-                            <CopyResultsComponent ctx={props.ctx}/>
+                        <div className='box-row' style={{ justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: 'larger' }}>Sequence Alignment in 3D</span>
+                            <div className='inp-space inp-space-horizontal'>
+                                <DownloadAssetsComponent ctx={props.ctx}/>
+                                <CopyResultsComponent ctx={props.ctx}/>
+                            </div>
                         </div>
                     </>}
                 </div>
