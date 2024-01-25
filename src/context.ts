@@ -6,15 +6,16 @@ import { AppConfigs } from './index';
 import { RequestState } from './state/request';
 import { ResponseState } from './state/response';
 import { QueryRequest, StructureFileUploadImpl, StructureWebLinkImpl } from './utils/request';
-import { StructureAlignmentProvider } from './service/alignment-service';
-import { DataProvider } from './service/data-service';
-import { SearchProvider } from './service/search-service';
 import { StructureAlignmentMetadata, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
 import { isEntry, buildError, getTransformationType } from './utils/helper';
 import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
-import { FileUploadProvider } from './service/file-upload-service';
+
+import { DataService } from './service/data-service';
+import { SearchService } from './service/search-service';
+import { FileUploadService } from './service/file-upload-service';
+import { StructureAlignmentService } from './service/alignment-service';
 
 export type Status = 'init' | 'loading' | 'ready' | 'error';
 export type DownloadOptions = 'structure' | 'sequence' | 'transform' | 'all' | undefined;
@@ -22,10 +23,10 @@ export type SelectionOptions = 'residues' | 'polymer' | 'structure' | undefined;
 
 export class ApplicationContext {
 
-    private readonly _gql: DataProvider;
-    private readonly _search: SearchProvider;
-    private readonly _alignment: StructureAlignmentProvider;
-    private readonly _files: FileUploadProvider;
+    private readonly _gql: DataService;
+    private readonly _search: SearchService;
+    private readonly _alignment: StructureAlignmentService;
+    private readonly _files: FileUploadService;
 
     readonly state = {
         events: {
@@ -41,10 +42,10 @@ export class ApplicationContext {
     } as const;
 
     constructor(public configs: AppConfigs) {
-        this._gql = new DataProvider(configs.service.data, this.error.bind(this));
-        this._search = new SearchProvider(configs.service.search, this.error.bind(this));
-        this._alignment = new StructureAlignmentProvider(configs.service.alignment);
-        this._files = new FileUploadProvider(configs.service.fileUpload);
+        this._gql = new DataService(configs.service.data, this.error.bind(this));
+        this._search = new SearchService(configs.service.search, this.error.bind(this));
+        this._alignment = new StructureAlignmentService(configs.service.alignment);
+        this._files = new FileUploadService(configs.service.fileUpload);
     }
 
     async init() {

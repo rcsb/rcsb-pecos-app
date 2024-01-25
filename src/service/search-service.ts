@@ -4,7 +4,7 @@ import { SuggesterResponse } from '../auto/search/suggest-response';
 import { trimTrailingChars } from '../utils/helper';
 
 type SearchProviderConfigs = AppConfigs['service']['search'];
-export class SearchProvider {
+export class SearchService {
     private readonly _config: SearchProviderConfigs;
     private readonly _errFn: (msg: string) => void;
     constructor(config: SearchProviderConfigs, onError: (msg: string) => void) {

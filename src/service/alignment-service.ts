@@ -6,7 +6,7 @@ import { buildError, isEntry, trimTrailingChars } from '../utils/helper';
 import { QueryOptionsImpl, QueryRequest } from '../utils/request';
 
 type AlignmentProviderConfigs = AppConfigs['service']['alignment'];
-export class StructureAlignmentProvider {
+export class StructureAlignmentService {
 
     private readonly _config;
     // Delay (in milliseconds) between the last retry and next API call to get the results

@@ -9,7 +9,7 @@ type FileUploadResponse = {
     format: StructureFileFormat
 }
 
-export class FileUploadProvider {
+export class FileUploadService {
 
     private readonly _config;
 

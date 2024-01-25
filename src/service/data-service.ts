@@ -15,7 +15,7 @@ export type InstanceData = {
 };
 
 type DataProviderConfigs = AppConfigs['service']['data'];
-export class DataProvider {
+export class DataService {
     private readonly _config: DataProviderConfigs;
     private readonly _errFn: (msg: string) => void;
     constructor(config: DataProviderConfigs, onError: (msg: string) => void) {
