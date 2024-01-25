@@ -2,7 +2,7 @@ import { Subscription } from 'rxjs';
 import React, { useEffect } from 'react';
 
 import { ApplicationContext } from '../../context';
-import { AlignmentReference } from '../../saguaro-3d/AlignmentReference';
+import { AlignmentReference } from '../../saguaro-3d/alignment-reference';
 import {
     RcsbModuleDataProviderInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvModule/RcsbFvModuleInterface';
@@ -10,13 +10,13 @@ import {
     alignmentCloseResidues,
     ColorConfig, entryColors, RcsbLoadParamsProvider,
     RcsbStructuralAlignmentProvider
-} from '../../saguaro-3d/ExternalAlignmentProvider';
+} from '../../saguaro-3d/external-alignment-provider';
 import { SequenceReference } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFv3D/RcsbFv3DAlignmentProvider';
-import { AlignmentTrackFactory } from '../../saguaro-3d/AlignmentTrackFactory';
+import { AlignmentTrackFactory } from '../../saguaro-3d/alignment-track-factory';
 import { ColorLists, convertHexToRgb } from '../../utils/color';
 import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
-import { EquivalentResiduesColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/Coloring';
+import { EquivalentResiduesColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
 
 
 let panel3D: RcsbFv3DAlignmentProvider;

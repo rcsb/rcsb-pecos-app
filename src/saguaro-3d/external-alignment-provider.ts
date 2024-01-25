@@ -7,7 +7,7 @@ import {
 import { TagDelimiter } from '@rcsb/rcsb-api-tools/build/RcsbUtils/TagDelimiter';
 
 
-import { AlignmentMapType, AlignmentReference } from './AlignmentReference';
+import { AlignmentMapType, AlignmentReference } from './alignment-reference';
 import {
     LoadParamsProviderInterface,
     RigidTransformType,
@@ -26,7 +26,7 @@ import {
 } from '@rcsb/rcsb-saguaro-3d/lib//RcsbFvStructure/StructureViewers/MolstarViewer/MolstarActionManager';
 import {
     AlignmentTrajectoryParamsType, AlignmentTrajectoryPresetProvider
-} from './molstar-trajectory/AlignmentTrajectoryPresetProvider';
+} from './molstar-trajectory/alignment-trajectory-preset-provider';
 import { ColorLists } from '../utils/color';
 
 export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterface {

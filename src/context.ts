@@ -6,16 +6,15 @@ import { AppConfigs } from './index';
 import { RequestState } from './state/request';
 import { ResponseState } from './state/response';
 import { QueryRequest, StructureFileUploadImpl, StructureWebLinkImpl } from './utils/request';
-import { StructureAlignmentProvider } from './provider/alignment-provider';
-import { DataProvider } from './provider/data-provider';
-import { SearchProvider } from './provider/search-provider';
+import { StructureAlignmentProvider } from './service/alignment-service';
+import { DataProvider } from './service/data-service';
+import { SearchProvider } from './service/search-service';
 import { StructureAlignmentMetadata, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
 import { isEntry, buildError, getTransformationType } from './utils/helper';
-import { AlignmentManager } from './manager/alignment-manager';
 import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
-import { FileUploadManager } from './manager/file-upload-manager';
+import { FileUploadProvider } from './service/file-upload-service';
 
 export type Status = 'init' | 'loading' | 'ready' | 'error';
 export type DownloadOptions = 'structure' | 'sequence' | 'transform' | 'all' | undefined;
@@ -25,9 +24,8 @@ export class ApplicationContext {
 
     private readonly _gql: DataProvider;
     private readonly _search: SearchProvider;
-    private readonly _manager: AlignmentManager;
     private readonly _alignment: StructureAlignmentProvider;
-    private readonly _files: FileUploadManager;
+    private readonly _files: FileUploadProvider;
 
     readonly state = {
         events: {
@@ -46,8 +44,7 @@ export class ApplicationContext {
         this._gql = new DataProvider(configs.service.data, this.error.bind(this));
         this._search = new SearchProvider(configs.service.search, this.error.bind(this));
         this._alignment = new StructureAlignmentProvider(configs.service.alignment);
-        this._manager = new AlignmentManager();
-        this._files = new FileUploadManager(configs.service.fileUpload);
+        this._files = new FileUploadProvider(configs.service.fileUpload);
     }
 
     async init() {
@@ -86,10 +83,6 @@ export class ApplicationContext {
 
     search() {
         return this._search;
-    }
-
-    manager() {
-        return this._manager;
     }
 
     files() {
@@ -157,7 +150,6 @@ export class ApplicationContext {
     private async processResponse(response: StructureAlignmentResponse) {
         if (response.info.status === 'COMPLETE') {
             await this.addPolymerSequences(response);
-            await this._manager.init(this._gql, response);
             this.ready(response);
         } else if (response.info.status === 'ERROR') {
             this.state.data.response.push(response);
@@ -193,7 +185,7 @@ export class ApplicationContext {
             for (let j = 0; j < request.query.context.structures.length; j++) {
                 const structure = request.query.context.structures[j];
                 if (structure instanceof StructureFileUploadImpl) {
-                    const file = clone.files.shift()!;
+                    const file = clone.files[j]!;
                     const format = structure.format;
                     await this._files.upload(file, format)
                         .then((response) => {
@@ -207,6 +199,7 @@ export class ApplicationContext {
                         .catch((e) => this.error(e.message));
                 }
             }
+            clone.files = [];
             this.state.data.request.push(clone);
         }
     }

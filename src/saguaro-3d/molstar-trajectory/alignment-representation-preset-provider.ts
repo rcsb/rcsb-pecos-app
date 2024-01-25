@@ -27,7 +27,7 @@ import { StateTransform } from 'molstar/lib/mol-state/transform';
 import {
     RigidTransformType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { EQUIVALENT_RESIDUES_COLOR } from './Coloring';
+import { EQUIVALENT_RESIDUES_COLOR } from './alignment-color-theme';
 import updateFocusRepr = StructureRepresentationPresetProvider.updateFocusRepr;
 import { StructureRepresentationRegistry } from 'molstar/lib/mol-repr/structure/registry';
 

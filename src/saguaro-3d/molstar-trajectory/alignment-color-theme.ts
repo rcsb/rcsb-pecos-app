@@ -51,6 +51,7 @@ function closeResidueColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Va
         props
     };
 }
+
 export const EquivalentResiduesColorThemeProvider = {
     name: EQUIVALENT_RESIDUES_COLOR,
     label: 'Equivalent Residues',

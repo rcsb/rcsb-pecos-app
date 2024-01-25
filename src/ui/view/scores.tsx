@@ -11,7 +11,6 @@ function round(value: number | undefined) {
 
 function scores(alignment: Alignment) {
 
-
     const entryId = 'entry_id' in alignment.structures[1] ? alignment.structures[1]['entry_id'] : ('name' in alignment.structures[1] ? alignment.structures[1]['name'] : 'NA');
     const chainId = alignment.structures[1].selection && 'asym_id' in alignment.structures[1].selection ? alignment.structures[1].selection['asym_id'] : 'NA';
     const rmsd = alignment.summary?.scores?.find(s => s.type === 'RMSD')?.value;
@@ -22,8 +21,8 @@ function scores(alignment: Alignment) {
     const length = alignment.summary?.n_aln_residue_pairs;
     const coverage = alignment.summary?.aln_coverage?.[1];
     const refCoverage = alignment.summary?.aln_coverage?.[0];
-    const seqLength = alignment.sequence_alignment![1].sequence?.length;
-    const modeledLength = alignment.summary!.n_modeled_residues![1];
+    const seqLength = alignment.sequence_alignment?.[1].sequence?.length;
+    const modeledLength = alignment.summary?.n_modeled_residues?.[1];
 
     return { entryId, chainId, rmsd, tmscore, simscore, identity, similarity, length, coverage, refCoverage, seqLength, modeledLength };
 }
@@ -64,8 +63,8 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
         const entryId = 'entry_id' in alignment.structures[0] ? alignment.structures[0]['entry_id'] : ('name' in alignment.structures[0] ? alignment.structures[0]['name'] : 'NA');
         const chainId = alignment.structures[0].selection && 'asym_id' in alignment.structures[0].selection ? alignment.structures[0].selection['asym_id'] : 'NA';
         const color = convertHexToRgb(ColorLists['set-1'][0], 0.8);
-        const seqLength = alignment.sequence_alignment![0].sequence?.length;
-        const modeledLength = alignment.summary!.n_modeled_residues![0];
+        const seqLength = alignment.sequence_alignment?.[0].sequence?.length;
+        const modeledLength = alignment.summary?.n_modeled_residues?.[0];
         return (<tr>
             <td style={{ backgroundColor: color }}></td>
             <td>{entryId}</td>

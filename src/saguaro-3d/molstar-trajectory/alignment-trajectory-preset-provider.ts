@@ -13,12 +13,12 @@ import { Model } from 'molstar/lib/mol-model/structure';
 import {
     RigidTransformType, TransformMatrixType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { AlignmentRepresentationProvider } from './AlignmentRepresentationPresetProvider';
-import { ColorConfig } from '../ExternalAlignmentProvider';
+import { AlignmentRepresentationProvider } from './alignment-representation-preset-provider';
+import { ColorConfig } from '../external-alignment-provider';
 import { ModelSymmetry } from 'molstar/lib/mol-model-formats/structure/property/symmetry';
 import { TrajectoryHierarchyPresetProvider } from 'molstar/lib/mol-plugin-state/builder/structure/hierarchy-preset';
 import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
-import { FlexibleAlignmentBuiltIn } from './FlexibleAlignmentBuiltIn';
+import { FlexibleAlignmentBuiltIn } from './flexible-alignment-built-in';
 import { ModelExport } from 'molstar/lib/extensions/model-export/export';
 
 export type AlignmentTrajectoryParamsType = {

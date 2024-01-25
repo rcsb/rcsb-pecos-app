@@ -14,7 +14,6 @@ import { PluginContext } from 'molstar/lib/mol-plugin/context';
 import { Task } from 'molstar/lib/mol-task';
 import { RootStructureDefinition } from 'molstar/lib/mol-plugin-state/helpers/root-structure';
 
-
 export const FlexibleAlignmentBuiltIn = PluginStateTransform.BuiltIn({
     name: 'Multiple Aligned Regions',
     display: 'Flexible Alignment',
