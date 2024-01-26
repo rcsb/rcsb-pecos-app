@@ -143,7 +143,7 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
         copyLinkToClipboardAsync(text)
             .then(() => {
                 if (willExpire()) {
-                    alert('⚠️ Attention: This link contains URLs to structures hosted by the RCSB PDB file upload service. These URLs will expire after a certain period and structures will not be available for visualization. If the link has expired, consider generating a new one');
+                    alert('⚠️ This link contains URLs to structure files hosted by the RCSB PDB file upload service. These URLs will expire after a certain period, after which the structures will not be available for visualization. If the link has expired, consider generating a new one');
                 }
                 setCopied(true);
                 setTimeout(() => setCopied(false), 800);
