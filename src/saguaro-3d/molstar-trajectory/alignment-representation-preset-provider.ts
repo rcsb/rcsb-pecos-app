@@ -33,13 +33,11 @@ import { StructureRepresentationRegistry } from 'molstar/lib/mol-repr/structure/
 
 type RepresentationParamsType = {
     pdb: { entryId: string; instanceId: string; };
-    transform: RigidTransformType[]|undefined;
+    transform: RigidTransformType[] | undefined;
 }
 
 type ComponentType = Awaited<ReturnType<InstanceType<typeof StructureBuilder>['tryCreateComponentFromExpression']>>;
 type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentationBuilder>['buildRepresentation']>;
-type ComponentMapType = Record<string, ComponentType>;
-type RepresentationMapType = Record<string, RepresentationType>;
 
 export const AlignmentRepresentationProvider = StructureRepresentationPresetProvider({
     id: 'alignment-to-reference',
@@ -52,23 +50,22 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
         transform: PD.Value<RigidTransformType[] | undefined>(undefined)
     }),
     apply: async (structureRef: StateObjectRef<PluginStateObject.Molecule.Structure>, params: RepresentationParamsType, plugin: PluginContext) => {
+
         const structureCell = StateObjectRef.resolveAndCheck(plugin.state.data, structureRef);
-        if (!structureCell)
-            return {};
+        if (!structureCell) return {};
 
         const structure = structureCell.obj?.data;
-        if (!structure)
-            return {};
+        if (!structure) return {};
 
         const entryId = params.pdb?.entryId;
-        if (!entryId)
-            return {};
+        if (!entryId) return {};
 
         const instanceId = params.pdb.instanceId;
         const l = StructureElement.Location.create(structure);
 
-        const componentMap: ComponentMapType = {};
-        const representationMap: RepresentationMapType = {};
+        const components: Record<string, ComponentType> = {};
+        const representations: Record<string, RepresentationType> = {};
+
         // find the aligned chain
         structure.units.find(unit => {
             StructureElement.Location.set(l, structure, unit, unit.elements[0]);
@@ -76,12 +73,14 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
         });
         const alignedEntityId = SP.chain.label_entity_id(l);
         const alignedAsymId = SP.chain.label_asym_id(l);
-        const alignedOperatorName = SP.unit.operator_name(l);
-        const alignedType = SP.entity.type(l);
+
         const alignedOperators: string[] = SP.unit.pdbx_struct_oper_list_ids(l);
         if (alignedOperators.length === 0) alignedOperators.push('0');
-        if (alignedType !== 'polymer')
-            throw new Error(`Aligned chain wrong type ${alignedType}`);
+
+        if (SP.entity.type(l) !== 'polymer')
+            throw new Error('Aligned chain must by of type polimer');
+
+        const alignedOperatorName = SP.unit.operator_name(l);
         if (alignedAsymId && alignedOperatorName)
             structure.inheritedPropertyData.colorConfig.setUniqueChain(structure.model.id, alignedAsymId, alignedOperatorName);
 
@@ -95,15 +94,15 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
             }),
             `${structureCell.transform.ref}-aligned`,
             {
-                label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.instance}${alignedAsymId}${TagDelimiter.assembly}${alignedOperators.join(',')}${TagDelimiter.assembly}${alignedType}`
+                label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.instance}${alignedAsymId}-${alignedOperators.join(',')}-polymer`
             }
         );
-        componentMap['aligned'] = alignedChainComp;
-        representationMap['aligned'] = await buildRepr(plugin, alignedChainComp, 'cartoon');
+        components['aligned'] = alignedChainComp;
+        representations['aligned'] = await buildRepr(plugin, alignedChainComp, 'cartoon');
 
+        // find non-aligned polymer chains
         const expressions = [];
         const asymObserved: { [key: string]: boolean } = {};
-        // find non-aligned polymer chains
         for (const unit of structure.units) {
             StructureElement.Location.set(l, structure, unit, unit.elements[0]);
             const asymId = SP.chain.label_asym_id(l);
@@ -121,7 +120,7 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
                 ]));
             }
         }
-        const compId = `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.assembly}${alignedType}`;
+        const compId = `${entryId}${TagDelimiter.entity}${alignedEntityId}-polymer`;
         const comp = await plugin.builders.structure.tryCreateComponentFromExpression(
             structureCell,
             MS.struct.generator.atomGroups({
@@ -132,8 +131,8 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
                 label: compId
             }
         );
-        componentMap['polymer'] = comp;
-        representationMap['polymer'] = await buildRepr(plugin, comp, 'cartoon', { isHidden: true });
+        components['polymer'] = comp;
+        representations['polymer'] = await buildRepr(plugin, comp, 'cartoon', { isHidden: true });
 
         for (const expression of createSelectionExpressions(entryId)) {
             if (expression.tag === 'polymer')
@@ -145,16 +144,16 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
                 {
                     label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.assembly}${expression.tag}`
                 });
-            componentMap[expression.tag] = comp;
-            representationMap[expression.tag] = await buildRepr(plugin, comp, expression.type, { isHidden: true });
+            components[expression.tag] = comp;
+            representations[expression.tag] = await buildRepr(plugin, comp, expression.type, { isHidden: true });
 
         }
 
         await updateFocusRepr(plugin, structure, EQUIVALENT_RESIDUES_COLOR, {});
 
         return {
-            components: componentMap,
-            representations: representationMap
+            components: components,
+            representations: representations
         };
     }
 });
