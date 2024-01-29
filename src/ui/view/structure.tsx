@@ -91,6 +91,7 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                                 else
                                     tooltip.style.visibility = 'hidden';
                             });
+                            (plugin.customState as { colorConfig: ColorConfig }).colorConfig = colorConfig
                             if (!plugin.representation.structure.themes.colorThemeRegistry.has(EquivalentResiduesColorThemeProvider))
                                 plugin.representation.structure.themes.colorThemeRegistry.add(EquivalentResiduesColorThemeProvider);
                         });

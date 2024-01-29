@@ -164,9 +164,13 @@ export async function buildRepr(plugin: PluginContext, comp: ComponentType, type
         ignoreLight: false,
         quality: 'auto'
     });
+    // const s = comp?.data;
     const repr = builder.buildRepresentation(update, comp, {
         color: EQUIVALENT_RESIDUES_COLOR,
-        type
+        type,
+        // typeParams: {
+        //     alpha: s?.inheritedPropertyData.colorConfig.idMap.get(s.model.id) === undefined ? 0.2 : 1
+        // }
     }, {
         initialState
     });

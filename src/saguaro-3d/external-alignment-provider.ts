@@ -90,7 +90,7 @@ class RcsbStructuralTransformProvider {
 export class ColorConfig {
 
     private readonly colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;};
-    private readonly idMap: Map<string, string> = new Map<string, string>();
+    readonly idMap: Map<string, string> = new Map<string, string>();
     private readonly uniqueChainMap: Map<string, {asymId: string; operatorName: string;}> = new Map<string, {asymId: string; operatorName: string;}>();
     constructor(colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;}) {
         this.colorConfig = colorConfig;
