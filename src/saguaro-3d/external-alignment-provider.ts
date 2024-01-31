@@ -28,6 +28,11 @@ import {
     AlignmentTrajectoryParamsType, AlignmentTrajectoryPresetProvider
 } from './molstar-trajectory/alignment-trajectory-preset-provider';
 import { ColorLists } from '../utils/color';
+import { DefaultQueryRuntimeTable, QuerySymbolRuntime } from 'molstar/lib/mol-script/runtime/query/compiler';
+import { CustomPropSymbol } from 'molstar/lib/mol-script/language/symbol';
+import { Type } from 'molstar/lib/mol-script/language/type';
+import { StructureProperties } from 'molstar/lib/mol-model/structure/structure/properties';
+import { CustomPropertyDescriptor } from 'molstar/lib/mol-model/custom-property';
 
 export class RcsbStructuralAlignmentProvider implements AlignmentCollectorInterface {
 
@@ -213,4 +218,30 @@ export function entryColors(results: AlignmentMapType[]): Map<string, number> {
     });
     return out;
 }
+
+export const ColorConfigDescriptor = CustomPropertyDescriptor({
+    name: 'alignment.color-config',
+    symbols: {
+        closeResidue: QuerySymbolRuntime.Dynamic(CustomPropSymbol('rcsb', 'alignment.color-config.close-residue', Type.Bool),
+            ctx => {
+                const { structure } = ctx.element;
+                const colorConfig = structure.inheritedPropertyData.colorConfig as ColorConfig | undefined;
+                if (!colorConfig) return false;
+
+                const closeResidues = colorConfig.getCloseResidues(structure.model.id);
+                if (!closeResidues) return false;
+
+                const uniqueChain = colorConfig.getUniqueChain(structure.model.id);
+                if (!uniqueChain) return false;
+
+                const asymId = StructureProperties.chain.label_asym_id(ctx.element);
+                const seqId = StructureProperties.residue.label_seq_id(ctx.element);
+                const operatorName = StructureProperties.unit.operator_name(ctx.element);
+                return uniqueChain.asymId === asymId && uniqueChain.operatorName === operatorName && closeResidues.has(seqId);
+            }
+        )
+    }
+});
+
+DefaultQueryRuntimeTable.addCustomProp(ColorConfigDescriptor);
 

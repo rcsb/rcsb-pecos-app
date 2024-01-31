@@ -14,7 +14,7 @@ import {
     RigidTransformType, TransformMatrixType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
 import { AlignmentRepresentationProvider } from './alignment-representation-preset-provider';
-import { ColorConfig } from '../external-alignment-provider';
+import { ColorConfig, ColorConfigDescriptor } from '../external-alignment-provider';
 import { ModelSymmetry } from 'molstar/lib/mol-model-formats/structure/property/symmetry';
 import { TrajectoryHierarchyPresetProvider } from 'molstar/lib/mol-plugin-state/builder/structure/hierarchy-preset';
 import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
@@ -22,7 +22,6 @@ import { FlexibleAlignmentBuiltIn } from './flexible-alignment-built-in';
 import { ModelExport } from 'molstar/lib/extensions/model-export/export';
 import { StructureSelectionQuery } from 'molstar/lib/mol-plugin-state/helpers/structure-selection-query';
 import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder';
-import { SetUtils } from 'molstar/lib/mol-util/set';
 
 export type AlignmentTrajectoryParamsType = {
     pdb: {entryId: string;instanceId: string;};
@@ -95,33 +94,16 @@ export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvid
             }
         );
 
-        const closeResidues = SetUtils.toArray(params.colorConfig.getCloseResidues(structure.data.model.id));
-        const uniqueChain = params.colorConfig.getUniqueChain(structure.data.model.id);
         await plugin.managers.structure.component.applyTheme({
             action: {
                 name: 'transparency',
                 params: { value: 0.8 }
             },
             representations: ['cartoon'],
-            selection: StructureSelectionQuery('foo', MS.struct.combinator.merge([
-                MS.struct.modifier.union([
-                    MS.struct.generator.atomGroups({
-                        'chain-test': MS.core.logic.and([
-                            MS.core.rel.eq([uniqueChain?.asymId, MS.ammp('label_asym_id')]),
-                            MS.core.rel.eq([uniqueChain?.operatorName, MS.acp('operatorName')]),
-                        ]),
-                        'residue-test': MS.core.logic.not([MS.core.set.has([MS.set(...closeResidues), MS.ammp('label_seq_id')])])
-
-                    })
-                ]),
-                // MS.struct.modifier.union([
-                //     MS.struct.generator.atomGroups({
-                //         'chain-test': MS.core.logic.and([
-                //             MS.core.logic.not([MS.core.rel.eq([uniqueChain?.asymId, MS.ammp('label_asym_id')])]),
-                //             MS.core.logic.not([MS.core.rel.eq([uniqueChain?.operatorName, MS.acp('operatorName')])]),
-                //         ])
-                //     })
-                // ]),
+            selection: StructureSelectionQuery('foo', MS.struct.modifier.union([
+                MS.struct.generator.atomGroups({
+                    'residue-test': MS.core.logic.not([ColorConfigDescriptor.symbols.closeResidue.symbol()]),
+                })
             ])),
         });
 
