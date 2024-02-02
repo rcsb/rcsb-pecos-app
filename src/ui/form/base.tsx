@@ -10,7 +10,7 @@ import {
 } from '../controls/controls-input';
 
 import { StructureFileFormat } from '../../auto/alignment/alignment-request';
-import { createInstanceLabel, isValidEntryId } from '../../utils/identifier';
+import { createInstanceLabel, isValidEntryId, isValidUniprotId } from '../../utils/identifier';
 
 type BaseProps = {
     value?: string | number,
@@ -65,6 +65,7 @@ export function AsymSelectorComponent(props: BaseProps & {
     if (options.length > 0) {
         return <SelectorControl
             value={String(props.value)}
+            placeholder='Chain ID'
             options={options}
             isDisabled={props.isDisabled}
             onChange={props.onChange}
@@ -110,6 +111,7 @@ export function FormatInputComponent(props: BaseProps) {
     ];
     return <SelectorControl
         value={String(props.value)}
+        placeholder='Format'
         options={options}
         onChange={props.onChange}
         className='inp-format'

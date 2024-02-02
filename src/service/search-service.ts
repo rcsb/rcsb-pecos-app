@@ -48,4 +48,26 @@ export class SearchService {
         };
         return this.returnSuggestions(query, attribute);
     }
+
+    async suggestUniprotID(input: string): Promise<string[]> {
+        const attribute = 'rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession';
+        const filter = [
+            {
+                'name': 'reference_sequence_identifiers',
+                'values': [
+                    'UniProt'
+                ]
+            }
+        ];
+        const query: SuggestQuery = {
+            type: 'term',
+            suggest: {
+                text: input,
+                completion: [{ attribute: attribute, filter: filter }],
+                size: 10
+            },
+            results_content_type: ['experimental', 'computational']
+        };
+        return this.returnSuggestions(query, attribute);
+    }
 }

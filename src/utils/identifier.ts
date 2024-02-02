@@ -6,6 +6,7 @@ import {
 
 const rePdbId = /^[1-9][A-Z0-9][A-Z0-9][A-Z0-9]$/i;
 const reModelId = /^[A-Z0-9]+_[A-Z0-9]{6,}$/i;
+const reUniprotId = /^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$/i;
 
 export function isValidEntryId(value: string) {
     return isValidPdbId(value) || isValidModelId(value);
@@ -17,6 +18,10 @@ function isValidPdbId(pdbId: string) {
 
 function isValidModelId(modelId: string) {
     return reModelId.test(modelId);
+}
+
+export function isValidUniprotId(modelId: string) {
+    return reUniprotId.test(modelId);
 }
 
 /**

@@ -156,6 +156,7 @@ export function UploadedFile(props: UploadedFileProps) {
 
 type SelectorControlProps = {
     value: string,
+    placeholder: string,
     options: string[] | string[][],
     isDisabled?: boolean,
     onChange: (value: string) => void,
@@ -167,7 +168,7 @@ export function SelectorControl(props: SelectorControlProps) {
     return (
         <div className={props.className} style={props.style}>
             <Select
-                placeholder='Chain ID'
+                placeholder={props.placeholder}
                 value={props.value}
                 disabled={props.isDisabled}
                 onChange={(e) => props.onChange(e)}>

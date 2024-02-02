@@ -49,12 +49,14 @@ import {
 import { SelectorControl } from '../controls/controls-input';
 import { Icon, LineArrowDownSvg, HelpCircleSvg } from '../icons';
 import { ApplicationContext } from '../../context';
+import { isValidUniprotId } from '../../utils/identifier';
 
 const numInpClass = classNames('inp', 'inp-num');
 
 type StructureImpl = StructureEntryImpl | StructureFileUploadImpl | StructureWebLinkImpl;
 const structureOptions: { [key: string]: () => StructureImpl } = {
     'Entry ID': () => new StructureEntryImpl(),
+    'UniProt ID': () => new StructureEntryImpl(),
     'File URL': () => new StructureWebLinkImpl(),
     'File Upload': () => new StructureFileUploadImpl()
 };
@@ -584,6 +586,7 @@ function MethodComponent(props: {ctx: RequestState}) {
     return <>
         <div className={horizontal}>
             <SelectorControl
+                placeholder='Method Name'
                 value={method.name}
                 options={options}
                 isDisabled={false}
@@ -759,6 +762,33 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
                 label='Entry ID'
                 suggestFn={ctx.search().suggestEntriesByID.bind(ctx.search())}
                 onChange={(v) => updateEntryId(v)}
+            />
+            {renderSelection(index, 'selection')}
+        </>;
+    };
+
+    const renderStructureUniprotId = (index: number) => {
+
+        let uniprotId;
+        const struct = structure(handler.state, index) as StructureEntry;
+
+        const updateUniprotID = (v: string) => {
+            if (isValidUniprotId(v)) uniprotId = v;
+            else uniprotId = undefined;
+        };
+
+        return <>
+            <EntryInputComponent
+                value={uniprotId}
+                label='UniProt ID'
+                suggestFn={ctx.search().suggestUniprotID.bind(ctx.search())}
+                onChange={(v) => updateUniprotID(v)}
+            />
+            <EntryInputComponent
+                value={struct.entry_id}
+                label='Entry ID'
+                suggestFn={ctx.search().suggestUniprotID.bind(ctx.search())}
+                onChange={(v) => updateUniprotID(v)}
             />
             {renderSelection(index, 'selection')}
         </>;
