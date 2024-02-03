@@ -92,7 +92,7 @@ class RcsbStructuralTransformProvider {
 
 }
 
-export class ColorConfig {
+export class AlignmentColoringConfig {
 
     private readonly colorConfig: {closeResidues: Map<string, Set<number>>; colors: Map<string, number>;};
     readonly idMap: Map<string, string> = new Map<string, string>();
@@ -128,12 +128,11 @@ export class RcsbLoadParamsProvider implements LoadParamsProviderInterface<{entr
     private readonly alignment: StructureAlignmentResponse;
     private readonly transformProvider: RcsbStructuralTransformProvider;
     private readonly alignmentReference: AlignmentReference;
-    private readonly colorConfig: ColorConfig;
-    constructor(alignment: StructureAlignmentResponse, alignmentReference: AlignmentReference, colorConfig: ColorConfig) {
+
+    constructor(alignment: StructureAlignmentResponse, alignmentReference: AlignmentReference) {
         this.alignment = alignment;
         this.transformProvider = new RcsbStructuralTransformProvider(alignment);
         this.alignmentReference = alignmentReference;
-        this.colorConfig = colorConfig;
     }
 
     get(pdb: {entryId: string; instanceId: string;}): LoadMolstarInterface<AlignmentTrajectoryParamsType, LoadMolstarReturnType> {
@@ -161,7 +160,6 @@ export class RcsbLoadParamsProvider implements LoadParamsProviderInterface<{entr
                     alignmentId,
                     modelIndex: 0,
                     transform: transform,
-                    colorConfig: this.colorConfig,
                     targetAlignment: undefined
                 }
             }
@@ -225,7 +223,7 @@ export const ColorConfigDescriptor = CustomPropertyDescriptor({
         closeResidue: QuerySymbolRuntime.Dynamic(CustomPropSymbol('rcsb', 'alignment.color-config.close-residue', Type.Bool),
             ctx => {
                 const { structure } = ctx.element;
-                const colorConfig = structure.inheritedPropertyData.colorConfig as ColorConfig | undefined;
+                const colorConfig = structure.inheritedPropertyData.colorConfig as AlignmentColoringConfig | undefined;
                 if (!colorConfig) return false;
 
                 const closeResidues = colorConfig.getCloseResidues(structure.model.id);
@@ -244,4 +242,3 @@ export const ColorConfigDescriptor = CustomPropertyDescriptor({
 });
 
 DefaultQueryRuntimeTable.addCustomProp(ColorConfigDescriptor);
-

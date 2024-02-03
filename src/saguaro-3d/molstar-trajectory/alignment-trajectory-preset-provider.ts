@@ -14,7 +14,7 @@ import {
     RigidTransformType, TransformMatrixType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
 import { AlignmentRepresentationProvider } from './alignment-representation-preset-provider';
-import { ColorConfig, ColorConfigDescriptor } from '../external-alignment-provider';
+import { AlignmentColoringConfig, ColorConfigDescriptor } from '../external-alignment-provider';
 import { ModelSymmetry } from 'molstar/lib/mol-model-formats/structure/property/symmetry';
 import { TrajectoryHierarchyPresetProvider } from 'molstar/lib/mol-plugin-state/builder/structure/hierarchy-preset';
 import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
@@ -29,7 +29,6 @@ export type AlignmentTrajectoryParamsType = {
     modelIndex: number;
     targetAlignment: undefined;
     alignmentId: string;
-    colorConfig: ColorConfig;
 }
 
 export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvider({
@@ -43,8 +42,7 @@ export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvid
         modelIndex: PD.Value<number>(0),
         transform: PD.Value<RigidTransformType[]>([]),
         targetAlignment: PD.Value<undefined>(undefined),
-        alignmentId: PD.Value<string>(''),
-        colorConfig: PD.Value<ColorConfig>(Object.create(null))
+        alignmentId: PD.Value<string>('')
     }),
     apply: async (trajectory: StateObjectRef<PluginStateObject.Molecule.Trajectory>, params: AlignmentTrajectoryParamsType, plugin: PluginContext) => {
 
@@ -74,8 +72,13 @@ export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvid
 
         if (!structure.data)
             return {};
-        if (!structure.data?.inheritedPropertyData.colorConfig)
-            structure.data.inheritedPropertyData.colorConfig = params.colorConfig;
+
+        if (!structure.data?.inheritedPropertyData.colorConfig) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            structure.data.inheritedPropertyData.colorConfig = ((plugin.customState as any).colorConfig as AlignmentColoringConfig);
+            console.log(structure.data.inheritedPropertyData.colorConfig);
+        }
+
         if (structure.data?.model.id)
             structure.data.inheritedPropertyData.colorConfig.setAlignmentIdToModel(structure.data?.model.id.toString(), params.alignmentId);
 

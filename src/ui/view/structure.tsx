@@ -8,7 +8,7 @@ import {
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvModule/RcsbFvModuleInterface';
 import {
     alignmentCloseResidues,
-    ColorConfig, entryColors, RcsbLoadParamsProvider,
+    AlignmentColoringConfig, entryColors, RcsbLoadParamsProvider,
     RcsbStructuralAlignmentProvider
 } from '../../saguaro-3d/external-alignment-provider';
 import { SequenceReference } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
@@ -18,19 +18,17 @@ import { ColorLists, convertHexToRgb } from '../../utils/color';
 import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
 import { EquivalentResiduesColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
 
-
 let panel3D: RcsbFv3DAlignmentProvider;
 export function StructureViewComponent(props: { ctx: ApplicationContext }) {
-
     useEffect(()=>{
         if (props.ctx.state.events.status.getValue() === 'ready' && props.ctx.state.data.response.state?.results) {
-            const structAlignResponse = props.ctx.state.data.response.state;
+            const alignmentResponse = props.ctx.state.data.response.state;
             const alignmentReference = new AlignmentReference();
-            if (structAlignResponse.results) {
-                alignmentReference.init(structAlignResponse.results).then(()=>{
+            if (alignmentResponse.results) {
+                alignmentReference.init(alignmentResponse.results).then(() => {
                     const dataProvider: RcsbModuleDataProviderInterface = {
                         alignments: {
-                            collector: new RcsbStructuralAlignmentProvider(structAlignResponse, alignmentReference),
+                            collector: new RcsbStructuralAlignmentProvider(alignmentResponse, alignmentReference),
                             context: {
                                 queryId: 'structural-alignment',
                                 to: SequenceReference.PdbInstance
@@ -41,19 +39,20 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                         }
                     };
                     panel3D?.unmount();
-                    const colorConfig = new ColorConfig({
+
+                    const colorConfig = new AlignmentColoringConfig({
                         closeResidues: alignmentCloseResidues(alignmentReference.getMapAlignments() ?? []),
                         colors: entryColors(alignmentReference.getMapAlignments() ?? [])
                     });
+
                     let index = 0;
                     panel3D = new RcsbFv3DAlignmentProvider({
                         elementId: '1d-3d-div',
                         config: {
                             dataProvider: dataProvider,
                             loadParamsProvider: new RcsbLoadParamsProvider(
-                                structAlignResponse,
-                                alignmentReference,
-                                colorConfig
+                                alignmentResponse,
+                                alignmentReference
                             ),
                             additionalContent: () => <></>
                         },
@@ -80,18 +79,19 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                             showSuperpositionControls: false
                         }
                     });
-                    panel3D.render().then(()=>{
+                    panel3D.render().then(() => {
                         panel3D.pluginCall(plugin=>{
                             (panel3D as unknown as {downloadSubscription: Subscription}).downloadSubscription = props.ctx.state.events.download.subscribe(() => exportHierarchy(plugin, { format: 'cif' }));
                             // Hides / Displays molstar tooltip on panel expansion
-                            plugin.layout.events.updated.subscribe(()=>{
+                            plugin.layout.events.updated.subscribe(() => {
                                 const tooltip = (document.getElementsByClassName('msp-highlight-toast-wrapper').item(0) as HTMLElement);
                                 if (plugin.layout.state.isExpanded)
                                     tooltip.style.visibility = 'visible';
                                 else
                                     tooltip.style.visibility = 'hidden';
                             });
-                            (plugin.customState as { colorConfig: ColorConfig }).colorConfig = colorConfig
+                            // Alignment coloring configuration will be available for Mol* visualization
+                            (plugin.customState as { colorConfig: AlignmentColoringConfig }).colorConfig = colorConfig;
                             if (!plugin.representation.structure.themes.colorThemeRegistry.has(EquivalentResiduesColorThemeProvider))
                                 plugin.representation.structure.themes.colorThemeRegistry.add(EquivalentResiduesColorThemeProvider);
                         });
