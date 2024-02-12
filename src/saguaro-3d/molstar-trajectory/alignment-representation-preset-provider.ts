@@ -1,16 +1,9 @@
-/*
-* Copyright (c) 2021 RCSB PDB and contributors, licensed under MIT, See LICENSE file for more info.
-* @author Joan Segura Mora <joan.segura@rcsb.org>
-*/
-
-import {
-    StructureRepresentationPresetProvider
-} from 'molstar/lib/mol-plugin-state/builder/structure/representation-preset';
+import { StructureRepresentationPresetProvider } from 'molstar/lib/mol-plugin-state/builder/structure/representation-preset';
 import { PluginContext } from 'molstar/lib/mol-plugin/context';
 import { PluginStateObject } from 'molstar/lib/mol-plugin-state/objects';
 import { StateObjectRef } from 'molstar/lib/mol-state';
 import {
-    StructureElement,
+    StructureElement as SE,
     StructureProperties as SP
 } from 'molstar/lib/mol-model/structure';
 
@@ -19,25 +12,28 @@ import { createSelectionExpressions } from '@rcsb/rcsb-molstar/build/src/viewer/
 import { ParamDefinition as PD } from 'molstar/lib/mol-util/param-definition';
 
 import { TagDelimiter } from '@rcsb/rcsb-api-tools/build/RcsbUtils/TagDelimiter';
-import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
-
 import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure';
 import { StructureRepresentationBuilder } from 'molstar/lib/mol-plugin-state/builder/structure/representation';
 import { StateTransform } from 'molstar/lib/mol-state/transform';
-import {
-    RigidTransformType
-} from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { EQUIVALENT_RESIDUES_COLOR } from './alignment-color-theme';
-import updateFocusRepr = StructureRepresentationPresetProvider.updateFocusRepr;
+import { RigidTransformType } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
+import { STRUCTURAL_ALIGNMENT_COLOR } from './alignment-color-theme';
+
 import { StructureRepresentationRegistry } from 'molstar/lib/mol-repr/structure/registry';
 
 type RepresentationParamsType = {
-    pdb: { entryId: string; instanceId: string; };
+    pdb: {
+        entryId: string
+        instanceId: string
+    };
     transform: RigidTransformType[] | undefined;
 }
 
 type ComponentType = Awaited<ReturnType<InstanceType<typeof StructureBuilder>['tryCreateComponentFromExpression']>>;
 type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentationBuilder>['buildRepresentation']>;
+
+import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
+import updateFocusRepr = StructureRepresentationPresetProvider.updateFocusRepr;
+import { AlignemntDataDescriptor } from './alignment-data-descriptor';
 
 export const AlignmentRepresentationProvider = StructureRepresentationPresetProvider({
     id: 'alignment-to-reference',
@@ -60,96 +56,78 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
         const entryId = params.pdb?.entryId;
         if (!entryId) return {};
 
+        let alignedEntityId;
+        let alignedOperators = [];
+
+        const l = SE.Location.create();
         const instanceId = params.pdb.instanceId;
-        const l = StructureElement.Location.create(structure);
+        const isIdentityMap = structure.inheritedPropertyData.rcsb_alignmentIsIdentityMap as Map<number, boolean>;
+
+        const expressionsAlignedChain = [];
+        const expressionsOtherPolymerChains = [];
+        for (const unit of structure.units) {
+            SE.Location.set(l, structure, unit, unit.elements[0]);
+            const type = SP.entity.type(l);
+            const asymId = SP.chain.label_asym_id(l);
+            if (asymId === instanceId && isIdentityMap?.get(unit.id)) {
+                alignedEntityId = SP.chain.label_entity_id(l);
+                alignedOperators = SP.unit.pdbx_struct_oper_list_ids(l);
+                if (alignedOperators.length === 0) alignedOperators.push('0');
+                expressionsAlignedChain.push(MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]));
+                expressionsAlignedChain.push(AlignemntDataDescriptor.symbols.isIdentityUnit.symbol());
+            } else if (type === 'polymer') {
+                expressionsOtherPolymerChains.push(MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]));
+            }
+        }
 
         const components: Record<string, ComponentType> = {};
         const representations: Record<string, RepresentationType> = {};
 
-        // find the aligned chain
-        structure.units.find(unit => {
-            StructureElement.Location.set(l, structure, unit, unit.elements[0]);
-            return SP.chain.label_asym_id(l) === instanceId;
-        });
-        const alignedEntityId = SP.chain.label_entity_id(l);
-        const alignedAsymId = SP.chain.label_asym_id(l);
-
-        const alignedOperators: string[] = SP.unit.pdbx_struct_oper_list_ids(l);
-        if (alignedOperators.length === 0) alignedOperators.push('0');
-
-        if (SP.entity.type(l) !== 'polymer')
-            throw new Error('Aligned chain must by of type polimer');
-
-        const alignedOperatorName = SP.unit.operator_name(l);
-        if (alignedAsymId && alignedOperatorName)
-            structure.inheritedPropertyData.colorConfig.setUniqueChain(structure.model.id, alignedAsymId, alignedOperatorName);
-
-        const alignedChainComp = await plugin.builders.structure.tryCreateComponentFromExpression(
+        // create a component for aligned polymer chain
+        const alignedChainComponent = await plugin.builders.structure.tryCreateComponentFromExpression(
             structureCell,
             MS.struct.generator.atomGroups({
-                'chain-test': MS.core.logic.and([
-                    MS.core.rel.eq([MS.ammp('label_asym_id'), alignedAsymId]),
-                    MS.core.rel.eq([MS.acp('operatorName'), alignedOperatorName])
-                ])
+                'chain-test': MS.core.logic.and(expressionsAlignedChain)
             }),
             `${structureCell.transform.ref}-aligned`,
             {
-                label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.instance}${alignedAsymId}-${alignedOperators.join(',')}-polymer`
+                // NOTE: this label format is needed for show/hide boxes in 1D view to work
+                label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.instance}${instanceId}-${alignedOperators.join(',')}-polymer`
             }
         );
-        components['aligned'] = alignedChainComp;
-        representations['aligned'] = await buildRepr(plugin, alignedChainComp, 'cartoon');
+        components['aligned'] = alignedChainComponent;
+        representations['aligned'] = await buildRepr(plugin, alignedChainComponent, 'cartoon');
 
-        // find non-aligned polymer chains
-        const expressions = [];
-        const asymObserved: { [key: string]: boolean } = {};
-        for (const unit of structure.units) {
-            StructureElement.Location.set(l, structure, unit, unit.elements[0]);
-            const asymId = SP.chain.label_asym_id(l);
-            const operatorName = SP.unit.operator_name(l);
-            if (asymId === alignedAsymId && operatorName === alignedOperatorName)
-                continue;
-            if (asymObserved[`${asymId}${TagDelimiter.assembly}${operatorName}`])
-                continue;
-            asymObserved[`${asymId}${TagDelimiter.assembly}${operatorName}`] = true;
-            const type = SP.entity.type(l);
-            if (type === 'polymer') {
-                expressions.push(MS.core.logic.and([
-                    MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]),
-                    MS.core.rel.eq([MS.acp('operatorName'), operatorName])
-                ]));
-            }
-        }
-        const compId = `${entryId}${TagDelimiter.entity}${alignedEntityId}-polymer`;
-        const comp = await plugin.builders.structure.tryCreateComponentFromExpression(
+        // creare component for other polymer chains
+        const polymerChainsComponent = await plugin.builders.structure.tryCreateComponentFromExpression(
             structureCell,
             MS.struct.generator.atomGroups({
-                'chain-test': MS.core.logic.or(expressions)
+                'chain-test': MS.core.logic.or(expressionsOtherPolymerChains)
             }),
             `${structureCell.transform.ref}-polymer`,
             {
-                label: compId
+                // NOTE: this label format is needed for show/hide boxes in 1D view to work
+                label: `${entryId}${TagDelimiter.entity}${alignedEntityId}-polymer`
             }
         );
-        components['polymer'] = comp;
-        representations['polymer'] = await buildRepr(plugin, comp, 'cartoon', { isHidden: true });
+        components['polymer'] = polymerChainsComponent;
+        representations['polymer'] = await buildRepr(plugin, polymerChainsComponent, 'cartoon', { isHidden: true });
 
         for (const expression of createSelectionExpressions(entryId)) {
             if (expression.tag === 'polymer')
                 continue;
-            const comp = await plugin.builders.structure.tryCreateComponentFromExpression(
+            const nonPolymersComponent = await plugin.builders.structure.tryCreateComponentFromExpression(
                 structureCell,
                 expression.expression,
                 `${structureCell.transform.ref}-${expression.tag}`,
                 {
-                    label: `${entryId}${TagDelimiter.entity}${alignedEntityId}${TagDelimiter.assembly}${expression.tag}`
+                    label: `${entryId}${TagDelimiter.entity}${alignedEntityId}-${expression.tag}`
                 });
-            components[expression.tag] = comp;
-            representations[expression.tag] = await buildRepr(plugin, comp, expression.type, { isHidden: true });
-
+            components[expression.tag] = nonPolymersComponent;
+            representations[expression.tag] = await buildRepr(plugin, nonPolymersComponent, expression.type, { isHidden: true });
         }
 
-        await updateFocusRepr(plugin, structure, EQUIVALENT_RESIDUES_COLOR, {});
+        await updateFocusRepr(plugin, structure, STRUCTURAL_ALIGNMENT_COLOR, {});
 
         return {
             components: components,
@@ -164,13 +142,9 @@ export async function buildRepr(plugin: PluginContext, comp: ComponentType, type
         ignoreLight: false,
         quality: 'auto'
     });
-    // const s = comp?.data;
     const repr = builder.buildRepresentation(update, comp, {
-        color: EQUIVALENT_RESIDUES_COLOR,
-        type,
-        // typeParams: {
-        //     alpha: s?.inheritedPropertyData.colorConfig.idMap.get(s.model.id) === undefined ? 0.2 : 1
-        // }
+        color: STRUCTURAL_ALIGNMENT_COLOR,
+        type
     }, {
         initialState
     });
