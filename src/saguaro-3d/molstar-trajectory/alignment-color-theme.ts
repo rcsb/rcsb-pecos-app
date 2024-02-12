@@ -8,7 +8,7 @@ import { ThemeDataContext } from 'molstar/lib/mol-theme/theme';
 import { ParamDefinition } from 'molstar/lib/mol-util/param-definition';
 import { ColorTheme, LocationColor } from 'molstar/lib/mol-theme/color';
 import { Location } from 'molstar/lib/mol-model/location';
-import { ColorLists, DefaultColor } from '../../utils/color';
+import { getAlignmentColorHex, DefaultColor } from '../../utils/color';
 
 export const STRUCTURAL_ALIGNMENT_COLOR = 'staructual-alignment-color' as ColorTheme.BuiltIn;
 function structuralAlignmentColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Values<{}>): ColorTheme<{}> {
@@ -16,7 +16,7 @@ function structuralAlignmentColorTheme(ctx: ThemeDataContext, props: ParamDefini
     const L = SE.Location.create();
     const locationColor = (location: SE.Location) => {
         const index = ctx.structure?.inheritedPropertyData.rcsb_alignmentModelIndex as number;
-        const color = (index < ColorLists['set-1'].length) ? ColorLists['set-1'][index] : DefaultColor;
+        const color = getAlignmentColorHex(index);
         if (SP.entity.type(location) === 'polymer') {
             return Color(color);
         } else {

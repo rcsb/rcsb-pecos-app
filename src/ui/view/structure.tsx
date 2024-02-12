@@ -13,7 +13,7 @@ import {
 import { SequenceReference } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFv3D/RcsbFv3DAlignmentProvider';
 import { AlignmentTrackFactory } from '../../saguaro-3d/alignment-track-factory';
-import { ColorLists, convertHexToRgb } from '../../utils/color';
+import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
 import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
 import { StructuralAlignmentColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
 
@@ -58,7 +58,7 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                                 },
                                 trackConfigModifier: {
                                     alignment: ()=> {
-                                        const color = convertHexToRgb(ColorLists['set-1'][index++], 0.8);
+                                        const color = getAlignmentColorRgb(index++, DefaultOpasityValue);
                                         return Promise.resolve({
                                             titleFlagColor: color
                                         });
