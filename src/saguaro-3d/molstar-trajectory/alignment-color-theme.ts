@@ -1,7 +1,6 @@
 import {
     Bond,
-    StructureElement as SE,
-    StructureProperties as SP
+    StructureElement as SE
 } from 'molstar/lib/mol-model/structure';
 import { Color } from 'molstar/lib/mol-util/color';
 import { ThemeDataContext } from 'molstar/lib/mol-theme/theme';
@@ -9,6 +8,7 @@ import { ParamDefinition } from 'molstar/lib/mol-util/param-definition';
 import { ColorTheme, LocationColor } from 'molstar/lib/mol-theme/color';
 import { Location } from 'molstar/lib/mol-model/location';
 import { getAlignmentColorHex, DefaultColor } from '../../utils/color';
+import { isCloseResidue } from './alignment-data-descriptor';
 
 export const STRUCTURAL_ALIGNMENT_COLOR = 'staructual-alignment-color' as ColorTheme.BuiltIn;
 function structuralAlignmentColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Values<{}>): ColorTheme<{}> {
@@ -17,7 +17,7 @@ function structuralAlignmentColorTheme(ctx: ThemeDataContext, props: ParamDefini
     const locationColor = (location: SE.Location) => {
         const index = ctx.structure?.inheritedPropertyData.rcsb_alignmentModelIndex as number;
         const color = getAlignmentColorHex(index);
-        if (SP.entity.type(location) === 'polymer') {
+        if (isCloseResidue(location)) {
             return Color(color);
         } else {
             // mute the main color for non-polymeric molecules

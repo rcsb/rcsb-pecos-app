@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useEffect, useState } from 'react';
 import { Alignment } from '../../auto/alignment/alignment-response';
 import { ApplicationContext } from '../../context';
