@@ -133,8 +133,8 @@ export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvid
             await plugin.managers.structure.component.applyTheme({
                 action: {
                     name: 'transparency',
-                    // same setting as for strucmotif alignment
-                    params: { value: 0.79 }
+                    // this is a minimal setting for selection to work
+                    params: { value: 0.49 }
                 },
                 representations: ['cartoon'],
                 selection: StructureSelectionQuery('close-residues', MS.struct.modifier.union([
