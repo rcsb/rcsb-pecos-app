@@ -16,7 +16,7 @@ import { StructureBuilder } from 'molstar/lib/mol-plugin-state/builder/structure
 import { StructureRepresentationBuilder } from 'molstar/lib/mol-plugin-state/builder/structure/representation';
 import { StateTransform } from 'molstar/lib/mol-state/transform';
 import { RigidTransformType } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
-import { STRUCTURAL_ALIGNMENT_COLOR } from './alignment-color-theme';
+import { STRUCTURAL_ALIGNMENT_CLOSE_RESIDUE_COLOR, STRUCTURAL_ALIGNMENT_HOMOGENOUS_COLOR } from './alignment-color-theme';
 
 import { StructureRepresentationRegistry } from 'molstar/lib/mol-repr/structure/registry';
 
@@ -34,6 +34,7 @@ type RepresentationType = ReturnType<InstanceType<typeof StructureRepresentation
 import reprBuilder = StructureRepresentationPresetProvider.reprBuilder;
 import updateFocusRepr = StructureRepresentationPresetProvider.updateFocusRepr;
 import { AlignemntDataDescriptor } from './alignment-data-descriptor';
+import { ColorTheme } from 'molstar/lib/mol-theme/color';
 
 export const AlignmentRepresentationProvider = StructureRepresentationPresetProvider({
     id: 'alignment-to-reference',
@@ -77,6 +78,7 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
                 expressionsAlignedChain.push(AlignemntDataDescriptor.symbols.isIdentityUnit.symbol());
             } else if (type === 'polymer') {
                 expressionsOtherPolymerChains.push(MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]));
+                expressionsOtherPolymerChains.push(MS.core.logic.not([AlignemntDataDescriptor.symbols.isIdentityUnit.symbol()]));
             }
         }
 
@@ -96,13 +98,13 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
             }
         );
         components['aligned'] = alignedChainComponent;
-        representations['aligned'] = await buildRepr(plugin, alignedChainComponent, 'cartoon');
+        representations['aligned'] = await buildRepr(plugin, alignedChainComponent, 'cartoon', STRUCTURAL_ALIGNMENT_HOMOGENOUS_COLOR);
 
         // creare component for other polymer chains
         const polymerChainsComponent = await plugin.builders.structure.tryCreateComponentFromExpression(
             structureCell,
             MS.struct.generator.atomGroups({
-                'chain-test': MS.core.logic.or(expressionsOtherPolymerChains)
+                'chain-test': MS.core.logic.and(expressionsOtherPolymerChains)
             }),
             `${structureCell.transform.ref}-polymer`,
             {
@@ -111,7 +113,7 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
             }
         );
         components['polymer'] = polymerChainsComponent;
-        representations['polymer'] = await buildRepr(plugin, polymerChainsComponent, 'cartoon', { isHidden: true });
+        representations['polymer'] = await buildRepr(plugin, polymerChainsComponent, 'cartoon', STRUCTURAL_ALIGNMENT_HOMOGENOUS_COLOR);
 
         for (const expression of createSelectionExpressions(entryId)) {
             if (expression.tag === 'polymer')
@@ -124,10 +126,10 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
                     label: `${entryId}${TagDelimiter.entity}${alignedEntityId}-${expression.tag}`
                 });
             components[expression.tag] = nonPolymersComponent;
-            representations[expression.tag] = await buildRepr(plugin, nonPolymersComponent, expression.type, { isHidden: true });
+            representations[expression.tag] = await buildRepr(plugin, nonPolymersComponent, expression.type, STRUCTURAL_ALIGNMENT_CLOSE_RESIDUE_COLOR, { isHidden: true });
         }
 
-        await updateFocusRepr(plugin, structure, STRUCTURAL_ALIGNMENT_COLOR, {});
+        await updateFocusRepr(plugin, structure, STRUCTURAL_ALIGNMENT_CLOSE_RESIDUE_COLOR, {});
 
         return {
             components: components,
@@ -136,14 +138,14 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
     }
 });
 
-export async function buildRepr(plugin: PluginContext, comp: ComponentType, type: StructureRepresentationRegistry.BuiltIn, initialState?: { isHidden: boolean; }) {
+export async function buildRepr(plugin: PluginContext, comp: ComponentType, type: StructureRepresentationRegistry.BuiltIn, color: ColorTheme.BuiltIn, initialState?: { isHidden: boolean; }) {
     const { update, builder } = reprBuilder(plugin, {
         ignoreHydrogens: true,
         ignoreLight: false,
         quality: 'auto'
     });
     const repr = builder.buildRepresentation(update, comp, {
-        color: STRUCTURAL_ALIGNMENT_COLOR,
+        color,
         type
     }, {
         initialState

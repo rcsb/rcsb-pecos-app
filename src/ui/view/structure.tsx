@@ -15,7 +15,7 @@ import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFv3D/Rc
 import { AlignmentTrackFactory } from '../../saguaro-3d/alignment-track-factory';
 import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
 import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
-import { StructuralAlignmentColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
+import { CloseResidueAlignmentColorThemeProvider, HomogenousAlignmentColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
 
 let panel3D: RcsbFv3DAlignmentProvider;
 export function StructureViewComponent(props: { ctx: ApplicationContext }) {
@@ -88,8 +88,10 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                                 });
                                 // Alignment data will be available for Mol* visualization
                                 (plugin.customState as { alignmentData: Map<string, CloseResidues> }).alignmentData = alignmentReference.alignmentCloseResidues();
-                                if (!plugin.representation.structure.themes.colorThemeRegistry.has(StructuralAlignmentColorThemeProvider))
-                                    plugin.representation.structure.themes.colorThemeRegistry.add(StructuralAlignmentColorThemeProvider);
+                                if (!plugin.representation.structure.themes.colorThemeRegistry.has(CloseResidueAlignmentColorThemeProvider))
+                                    plugin.representation.structure.themes.colorThemeRegistry.add(CloseResidueAlignmentColorThemeProvider);
+                                if (!plugin.representation.structure.themes.colorThemeRegistry.has(HomogenousAlignmentColorThemeProvider))
+                                    plugin.representation.structure.themes.colorThemeRegistry.add(HomogenousAlignmentColorThemeProvider);
                             });
                         });
                     });

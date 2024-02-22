@@ -10,8 +10,17 @@ import { Location } from 'molstar/lib/mol-model/location';
 import { getAlignmentColorHex, DefaultColor } from '../../utils/color';
 import { isCloseResidue } from './alignment-data-descriptor';
 
-export const STRUCTURAL_ALIGNMENT_COLOR = 'staructual-alignment-color' as ColorTheme.BuiltIn;
-function structuralAlignmentColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Values<{}>): ColorTheme<{}> {
+export const STRUCTURAL_ALIGNMENT_CLOSE_RESIDUE_COLOR = 'staructual-alignment-close-residue-color' as ColorTheme.BuiltIn;
+export const CloseResidueAlignmentColorThemeProvider = {
+    name: STRUCTURAL_ALIGNMENT_CLOSE_RESIDUE_COLOR,
+    label: 'Structural Alignment Residues',
+    category: ColorTheme.Category.Misc,
+    factory: closeResidueAlignmentColorTheme,
+    getParams: () => ({}),
+    defaultValues: ParamDefinition.getDefaultValues({}),
+    isApplicable: () => true,
+};
+function closeResidueAlignmentColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Values<{}>): ColorTheme<{}> {
 
     const L = SE.Location.create();
     const locationColor = (location: SE.Location) => {
@@ -43,19 +52,41 @@ function structuralAlignmentColorTheme(ctx: ThemeDataContext, props: ParamDefini
     }
 
     return {
-        factory: structuralAlignmentColorTheme,
-        granularity: 'group',
+        factory: closeResidueAlignmentColorTheme,
+        // needs to be evaluated for each instance
+        granularity: 'groupInstance',
         color,
         props
     };
 }
 
-export const StructuralAlignmentColorThemeProvider = {
-    name: STRUCTURAL_ALIGNMENT_COLOR,
+export const STRUCTURAL_ALIGNMENT_HOMOGENOUS_COLOR = 'staructual-alignment-homogenous-color' as ColorTheme.BuiltIn;
+export const HomogenousAlignmentColorThemeProvider = {
+    name: STRUCTURAL_ALIGNMENT_HOMOGENOUS_COLOR,
     label: 'Structural Alignment',
     category: ColorTheme.Category.Misc,
-    factory: structuralAlignmentColorTheme,
+    factory: homogenousAlignmentColorTheme,
     getParams: () => ({}),
     defaultValues: ParamDefinition.getDefaultValues({}),
     isApplicable: () => true,
 };
+function homogenousAlignmentColorTheme(ctx: ThemeDataContext, props: ParamDefinition.Values<{}>): ColorTheme<{}> {
+
+    let color: LocationColor;
+    if (ctx.structure) {
+        color = () => {
+            const index = ctx.structure?.inheritedPropertyData.rcsb_alignmentModelIndex as number;
+            const color = getAlignmentColorHex(index);
+            return Color(color);
+        };
+    } else {
+        color = () => DefaultColor;
+    }
+
+    return {
+        factory: homogenousAlignmentColorTheme,
+        granularity: 'groupInstance',
+        color,
+        props
+    };
+}

@@ -20,7 +20,7 @@ import { AlignemntDataDescriptor } from './alignment-data-descriptor';
 import { ModelSymmetry } from 'molstar/lib/mol-model-formats/structure/property/symmetry';
 import { TrajectoryHierarchyPresetProvider } from 'molstar/lib/mol-plugin-state/builder/structure/hierarchy-preset';
 import { TransformStructureConformation } from 'molstar/lib/mol-plugin-state/transforms/model';
-import { FlexibleAlignmentBuiltIn } from './flexible-alignment-built-in';
+import { FlexibleAlignmentBuiltIn } from './alignment-flexible-built-in';
 import { ModelExport } from 'molstar/lib/extensions/model-export/export';
 import { StructureSelectionQuery } from 'molstar/lib/mol-plugin-state/helpers/structure-selection-query';
 import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder';
@@ -101,7 +101,8 @@ export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvid
                 const invAliTransform = Mat4.invert(Mat4(), Mat4.fromArray(Mat4(), transformMatrix, 0));
                 const opMat = u.conformation.operator.matrix;
                 const originalTransform = Mat4.mul(Mat4(), invAliTransform, opMat);
-                isIdentityMap.set(u.id, Mat4.isIdentity(originalTransform));
+                const isIdentity = Mat4.isIdentity(originalTransform);
+                isIdentityMap.set(u.id, isIdentity);
             });
         }
 
