@@ -845,7 +845,7 @@
 }
 
 .dropdown-content {
-  position: absolute;
+  position: fixed;
   background-color: #fff;
   min-width: 120px;
   overflow: auto;
