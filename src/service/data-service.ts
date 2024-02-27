@@ -34,7 +34,8 @@ export class DataService {
         return fetch(url, {
             method: 'GET',
             headers: this._config.httpHeaders
-        }).then(response => response.json())
+        })
+            .then(response => response.json())
             .then(json => {
                 if (json.data)
                     return json.data as Query;

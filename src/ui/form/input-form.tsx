@@ -46,20 +46,22 @@ import {
     StructureFileFormat
 } from '../../auto/alignment/alignment-request';
 
-import { AutosuggestControl, SelectorControl } from '../controls/controls-input';
+import { AutosuggestControl, InputBoxControl, SelectorControl } from '../controls/controls-input';
 import { Icon, LineArrowDownSvg, HelpCircleSvg } from '../icons';
 import { ApplicationContext } from '../../context';
-import { isValidUniprotId } from '../../utils/identifier';
+import { isValidMgnifyId, isValidUniprotId } from '../../utils/identifier';
 
 const numInpClass = classNames('inp', 'inp-num');
 
 type StructureImpl = StructureEntryImpl | StructureFileUploadImpl | StructureWebLinkImpl;
-type StructureInputOption = 'Entry ID' | 'UniProt ID' | 'File URL' | 'File Upload';
+type StructureInputOption = 'Entry ID' | 'UniProt ID' | 'File URL' | 'File Upload' | 'AlphaFold DB' | 'ESMAtlas';
 const structureOptions: { [key in StructureInputOption]: () => StructureImpl } = {
     'Entry ID': () => new StructureEntryImpl(),
     'UniProt ID': () => new StructureEntryImpl(),
     'File URL': () => new StructureWebLinkImpl(),
-    'File Upload': () => new StructureFileUploadImpl()
+    'File Upload': () => new StructureFileUploadImpl(),
+    'AlphaFold DB': () => new StructureWebLinkImpl(),
+    'ESMAtlas': () => new StructureWebLinkImpl()
 };
 
 type DisplayMethod = Exclude<MethodName, QCP['name']>;
@@ -610,7 +612,6 @@ function StructureAlignmentMethod(props: {ctx: RequestState}) {
 
 function StructureSelectorByUniprotId(props: {
     ctx: ApplicationContext,
-    index: number,
     onChange: (value: string) => void
 }) {
     const [uniprotId, updateUniprotId] = useState('');
@@ -650,6 +651,65 @@ function StructureSelectorByUniprotId(props: {
             className='inp-select'
         />
     </>;
+}
+
+function AlphaFoldDbStructureSelector(props: {
+    ctx: ApplicationContext,
+    onChange: (value: string) => void
+}) {
+    const [uniprotId, updateUniprotId] = useState('');
+    useEffect(() => { getAlphaFoldStructureByUniprotId(); }, [uniprotId]);
+
+    const base = 'https://alphafold.ebi.ac.uk/api/prediction/';
+    const getAlphaFoldStructureByUniprotId = async () => {
+        if (isValidUniprotId(uniprotId)) {
+            const url = base + uniprotId;
+            const cifUrl = await fetch(url)
+                .then(response => response.json())
+                .then(json => {
+                    if (json) {
+                        const entry = json[0];
+                        return entry.cifUrl;
+                    } else throw Error('Failed to fetch data from [ ' + url + ' ]: ' + json.error);
+                });
+            props.onChange(cifUrl);
+        }
+    };
+
+    return <InputBoxControl
+        type='text'
+        value={uniprotId || ''}
+        label='UniProt ID'
+        onChange={updateUniprotId}
+        style={{ width: '70px' }}
+        className='inp'
+    />;
+}
+
+// https://api.esmatlas.com/fetchPredictedStructure/MGYP001006757307.cif
+function ESMAtlasStructureSelector(props: {
+    ctx: ApplicationContext,
+    onChange: (value: string) => void
+}) {
+    const [mgnifyId, updateMgnifyId] = useState('');
+    useEffect(() => { getESMAtlasStructureByMgnifyId(); }, [mgnifyId]);
+
+    const base = 'https://api.esmatlas.com/fetchPredictedStructure/';
+    const getESMAtlasStructureByMgnifyId = async () => {
+        if (isValidMgnifyId(mgnifyId)) {
+            const url = base + mgnifyId + '.cif';
+            props.onChange(url);
+        }
+    };
+
+    return <InputBoxControl
+        type='text'
+        value={mgnifyId || ''}
+        label='MgnifyID'
+        onChange={updateMgnifyId}
+        style={{ width: '70px' }}
+        className='inp'
+    />;
 }
 
 export function StructureAlignmentInput(props: {
@@ -858,7 +918,52 @@ export function StructureAlignmentInput(props: {
         return <>
             <StructureSelectorByUniprotId
                 ctx={props.ctx}
-                index={index}
+                onChange={(v) => updateStructureSelection(v)}
+            />
+        </>;
+    };
+
+    const renderStructureAlphaFoldDb = (index: number) => {
+
+        const updateStructureSelection = (v: string) => {
+
+            const next = handler.copy();
+            const s = (structure(next, index) as StructureWebLink);
+            s.url = v;
+            s.format = 'mmcif';
+            s.selection = {
+                asym_id: 'A'
+            };
+            handler.push(next);
+            updateStructureList(index, 'File URL');
+        };
+
+        return <>
+            <AlphaFoldDbStructureSelector
+                ctx={props.ctx}
+                onChange={(v) => updateStructureSelection(v)}
+            />
+        </>;
+    };
+
+    const renderStructureESMAtlas = (index: number) => {
+
+        const updateStructureSelection = (v: string) => {
+
+            const next = handler.copy();
+            const s = (structure(next, index) as StructureWebLink);
+            s.url = v;
+            s.format = 'mmcif';
+            s.selection = {
+                asym_id: 'A'
+            };
+            handler.push(next);
+            updateStructureList(index, 'File URL');
+        };
+
+        return <>
+            <ESMAtlasStructureSelector
+                ctx={props.ctx}
                 onChange={(v) => updateStructureSelection(v)}
             />
         </>;
@@ -923,6 +1028,10 @@ export function StructureAlignmentInput(props: {
             return renderStructureFileUpload(index);
         else if (o === 'UniProt ID')
             return renderStructureUniprotId(index);
+        else if (o === 'AlphaFold DB')
+            return renderStructureAlphaFoldDb(index);
+        else if (o === 'ESMAtlas')
+            return renderStructureESMAtlas(index);
     };
 
     const renderSelectedStructures = () => {

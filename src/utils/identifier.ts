@@ -24,6 +24,10 @@ export function isValidUniprotId(modelId: string) {
     return reUniprotId.test(modelId);
 }
 
+export function isValidMgnifyId(modelId: string) {
+    return modelId.startsWith('MGYP') && modelId.length === 16;
+}
+
 /**
  * Uses RCSB PDB convention to create a string representation of instance
  * identifier from parts: entry ID and asym ID. For example, 4HHB.A
