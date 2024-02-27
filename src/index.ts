@@ -19,6 +19,7 @@ const DefaultAppConfigs = {
         },
         search: {
             base: 'https://search.rcsb.org/rcsbsearch/v2',
+            search: 'query',
             suggest: 'suggest',
             httpHeaders: {}
         },

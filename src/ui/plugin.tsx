@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Status, ApplicationContext } from '../context';
 import { QueryRequest } from '../utils/request';
 import { useObservable } from '../utils/helper';
-import { InputUIComponent } from './form/input-form';
+import { StructureAlignmentInput } from './form/input-form';
 import { ErrorMessage } from './view/error';
 import { AlignmentScoresComponent } from './view/scores';
 import { CopyResultsComponent, DownloadAssetsComponent } from './view/actions';
@@ -19,7 +19,7 @@ export function ApplicationContextContainer(props: {ctx: ApplicationContext}) {
         <>
             <div className='app-body'>
                 <div className='box-column'>
-                    <InputUIComponent
+                    <StructureAlignmentInput
                         ctx={props.ctx}
                         isCollapsed={state === 'ready'}
                         onSubmit={(r: QueryRequest) => props.ctx.align(r)}

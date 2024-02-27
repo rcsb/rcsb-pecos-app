@@ -20,7 +20,7 @@ import { ActionButtonControl } from '../controls/controls-button';
 import { AddActionControl, DeleteActionControl, SelectableControl } from '../controls/controls-action';
 
 import { horizontal, vertical } from '../../utils/constants';
-import { applyToStructure, StructureActions, useObservable } from '../../utils/helper';
+import { isEntry, isUploadedFile, isUrl, useObservable } from '../../utils/helper';
 
 import {
     WebLinkInputComponent,
@@ -46,7 +46,7 @@ import {
     StructureFileFormat
 } from '../../auto/alignment/alignment-request';
 
-import { SelectorControl } from '../controls/controls-input';
+import { AutosuggestControl, SelectorControl } from '../controls/controls-input';
 import { Icon, LineArrowDownSvg, HelpCircleSvg } from '../icons';
 import { ApplicationContext } from '../../context';
 import { isValidUniprotId } from '../../utils/identifier';
@@ -54,7 +54,8 @@ import { isValidUniprotId } from '../../utils/identifier';
 const numInpClass = classNames('inp', 'inp-num');
 
 type StructureImpl = StructureEntryImpl | StructureFileUploadImpl | StructureWebLinkImpl;
-const structureOptions: { [key: string]: () => StructureImpl } = {
+type StructureInputOption = 'Entry ID' | 'UniProt ID' | 'File URL' | 'File Upload';
+const structureOptions: { [key in StructureInputOption]: () => StructureImpl } = {
     'Entry ID': () => new StructureEntryImpl(),
     'UniProt ID': () => new StructureEntryImpl(),
     'File URL': () => new StructureWebLinkImpl(),
@@ -545,7 +546,7 @@ function SmithWatermanParams(props: {ctx: RequestState}) {
     );
 }
 
-function ParametersComponent(props: {ctx: RequestState}) {
+function StructureAlignmentMethodParams(props: {ctx: RequestState}) {
     const method = props.ctx.state.query.context.method.name;
     switch (method) {
         case 'fatcat-rigid':
@@ -563,7 +564,7 @@ function ParametersComponent(props: {ctx: RequestState}) {
     }
 }
 
-function MethodComponent(props: {ctx: RequestState}) {
+function StructureAlignmentMethod(props: {ctx: RequestState}) {
 
     const [paramsVisible, setVisibility] = useState(false);
 
@@ -601,34 +602,90 @@ function MethodComponent(props: {ctx: RequestState}) {
             />}
         </div>
         {paramsVisible &&
-        <ParametersComponent
+        <StructureAlignmentMethodParams
             ctx={props.ctx}
         />}
     </>;
 }
 
-interface InputUIComponentProps {
-    ctx: ApplicationContext;
-    isCollapsed: boolean;
-    onSubmit: (r: QueryRequest) => void;
+function StructureSelectorByUniprotId(props: {
+    ctx: ApplicationContext,
+    index: number,
+    onChange: (value: string) => void
+}) {
+    const [uniprotId, updateUniprotId] = useState('');
+
+    const [options, setOptions] = useState<string[][]>([]);
+    useEffect(() => { getInstancesByUniprot(); }, [uniprotId]);
+
+    const getInstancesByUniprot = async () => {
+        const opts: string[][] = [];
+        if (isValidUniprotId(uniprotId)) {
+            const ids = await props.ctx.search().matchInstancesByUniProtId(uniprotId, 20);
+            if (ids.length > 0) {
+                const ranges = await props.ctx.data().referenceSequenceCoverage(ids, uniprotId);
+                for (const id of ids) {
+                    const label = id + ':' + ranges.get(id)?.map(r => r.join('-')).join(',');
+                    opts.push([id, label]);
+                }
+            }
+        }
+        setOptions(opts);
+    };
+
+    return <>
+        <AutosuggestControl
+            value={uniprotId || ''}
+            label={'UniProt ID'}
+            onChange={updateUniprotId}
+            suggestHandler={props.ctx.search().suggestUniprotID.bind(props.ctx.search())}
+            className={classNames('inp', 'inp-entry')}
+        />
+        <SelectorControl
+            value={'Select protein chain'}
+            placeholder='Chain ID'
+            options={options}
+            isDisabled={options.length === 0}
+            onChange={props.onChange}
+            className='inp-select'
+        />
+    </>;
 }
 
-export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponentProps) {
-
+export function StructureAlignmentInput(props: {
+    ctx: ApplicationContext,
+    onSubmit: (r: QueryRequest) => void,
+    isCollapsed: boolean
+}) {
     const [activeKey, updateKey] = useState(['0']);
-    useEffect(() => { if (isCollapsed) updateKey([]); }, [isCollapsed]);
+    useEffect(() => { if (props.isCollapsed) updateKey([]); }, [props.isCollapsed]);
 
-    const handler = ctx.state.data.request;
+    const handler = props.ctx.state.data.request;
     const [request, setRequest] = useState(handler.state);
     useObservable<QueryRequest>(handler.subject, setRequest);
 
-    const onPanelChange = (key: React.Key | React.Key[]) => {
-        updateKey(key as string[]);
+    // Allow to add up to 10 structures to the alignment request
+    const MAX_NUM_STRUCTURES = 10;
+    const initStructureListState = (state: QueryRequest) => {
+        const list = new Array<StructureInputOption>();
+        state.query.context.structures.map((s, i) => {
+            if (isEntry(s)) {
+                list[i] = 'Entry ID';
+            } else if (isUrl(s)) {
+                list[i] = 'File URL';
+            } else if (isUploadedFile(s)) {
+                list[i] = 'File Upload';
+            } else {
+                throw new Error('Initialization from state is not implemented. Structure: ' + s);
+            }
+        });
+        return list;
     };
+    const [structureList, setStructureList] = useState(initStructureListState(handler.state));
 
-    const updateStructure = (index: number, strucFactory: () => Structure) => {
+    const updateStructure = (index: number, s: Structure) => {
         const clone = handler.copy();
-        clone.query.context.structures[index] = strucFactory();
+        clone.query.context.structures[index] = s;
         handler.push(clone);
     };
 
@@ -640,10 +697,21 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
         handler.push(clone);
     };
 
+    const updateStructureList = (index: number, o: StructureInputOption) => {
+        const updated = [...structureList.slice(0, index), o, ...structureList.slice(index + 1)];
+        setStructureList(updated);
+    };
+
+    const deleteFromStructureList = (index: number) => {
+        const updated = [...structureList.slice(0, index), ...structureList.slice(index + 1)];
+        setStructureList(updated);
+    };
+
     const onMutation = (index: number, value?: string) => {
         if (!value) throw new Error('Undefined input option');
-        const factory = () => structureOptions[value]();
-        return updateStructure(index, factory);
+        const v = value as StructureInputOption;
+        updateStructure(index, structureOptions[v]());
+        updateStructureList(index, v);
     };
 
     const renderMutateAction = (index: number, text: string) => {
@@ -662,15 +730,18 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
             <DeleteActionControl
                 info='Click to remove this item'
                 className={classNames('upload-icon delete-icon')}
-                onClick={() => deleteStructure(index)}
+                onClick={() => {
+                    deleteStructure(index);
+                    deleteFromStructureList(index);
+                }}
             />
             {renderMutateAction(index, 'Click to change an item type')}
         </span>;
     };
 
     const renderAddControls = () => {
-        const count = handler.state.query.context.structures.length;
-        const disabled = count === 10;
+        const count = structureList.length;
+        const disabled = count === MAX_NUM_STRUCTURES;
         return <div className={horizontal}>
             {
                 disabled &&
@@ -687,7 +758,10 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
                 <div className='new-item-area'>
                     <AddActionControl
                         info='Click to add a new entry'
-                        onClick={() => updateStructure(count, () => new StructureEntryImpl())}
+                        onClick={() => {
+                            updateStructure(count, structureOptions['Entry ID']());
+                            updateStructureList(count, 'Entry ID');
+                        }}
                         className='add-new-item'
                     />
                     {renderMutateAction(count, 'Click to select a new item')}
@@ -721,7 +795,7 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
             {type === 'selection' &&
             <AsymSelectorComponent
                 entry_id={(s as StructureEntry).entry_id}
-                fetchFn={ctx.data().asymIds}
+                fetchFn={props.ctx.data().asymIds}
                 value={sele.asym_id}
                 onOptsAvailable={(v) => updateAsymId(v)}
                 onChange={(v) => updateAsymId(v)}
@@ -748,7 +822,7 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
 
     const renderStructureEntry = (index: number) => {
 
-        const struct = structure(handler.state, index) as StructureEntry;
+        const s = structure(handler.state, index) as StructureEntry;
 
         const updateEntryId = (v: string) => {
             const next = handler.copy();
@@ -758,9 +832,9 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
 
         return <>
             <EntryInputComponent
-                value={struct.entry_id}
+                value={s.entry_id}
                 label='Entry ID'
-                suggestFn={ctx.search().suggestEntriesByID.bind(ctx.search())}
+                suggestFn={props.ctx.search().suggestEntriesByID.bind(props.ctx.search())}
                 onChange={(v) => updateEntryId(v)}
             />
             {renderSelection(index, 'selection')}
@@ -769,28 +843,24 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
 
     const renderStructureUniprotId = (index: number) => {
 
-        let uniprotId;
-        const struct = structure(handler.state, index) as StructureEntry;
-
-        const updateUniprotID = (v: string) => {
-            if (isValidUniprotId(v)) uniprotId = v;
-            else uniprotId = undefined;
+        const updateStructureSelection = (v: string) => {
+            const [entry_id, asym_id] = v.split('.');
+            const next = handler.copy();
+            const s = (structure(next, index) as StructureEntry);
+            s.entry_id = entry_id;
+            s.selection = {
+                asym_id: asym_id
+            };
+            handler.push(next);
+            updateStructureList(index, 'Entry ID');
         };
 
         return <>
-            <EntryInputComponent
-                value={uniprotId}
-                label='UniProt ID'
-                suggestFn={ctx.search().suggestUniprotID.bind(ctx.search())}
-                onChange={(v) => updateUniprotID(v)}
+            <StructureSelectorByUniprotId
+                ctx={props.ctx}
+                index={index}
+                onChange={(v) => updateStructureSelection(v)}
             />
-            <EntryInputComponent
-                value={struct.entry_id}
-                label='Entry ID'
-                suggestFn={ctx.search().suggestUniprotID.bind(ctx.search())}
-                onChange={(v) => updateUniprotID(v)}
-            />
-            {renderSelection(index, 'selection')}
         </>;
     };
 
@@ -844,22 +914,26 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
         </>;
     };
 
-    const renderStructureOption = (index: number, s: Structure) => {
-        const actions: StructureActions<JSX.Element> = [
-            () => renderStructureEntry(index),
-            () => renderStructureWebLink(index),
-            () => renderStructureFileUpload(index)
-        ];
-        return applyToStructure(s, actions);
+    const renderStructureInputOption = (index: number, o: StructureInputOption) => {
+        if (o === 'Entry ID')
+            return renderStructureEntry(index);
+        else if (o === 'File URL')
+            return renderStructureWebLink(index);
+        else if (o === 'File Upload')
+            return renderStructureFileUpload(index);
+        else if (o === 'UniProt ID')
+            return renderStructureUniprotId(index);
     };
 
-    const renderStructureSelection = () => {
+    const renderSelectedStructures = () => {
         return <>
-            {handler.state.query.context.structures.map((s, i) => {
-                return <div key={i} className={horizontal}>
-                    {renderMutateControls(i)}
-                    {renderStructureOption(i, s)}
-                </div>;
+            {structureList.map((s, i) => {
+                if (s !== undefined) {
+                    return <div key={i} className={horizontal}>
+                        {renderMutateControls(i)}
+                        {renderStructureInputOption(i, s)}
+                    </div>;
+                }
             })}
             {renderAddControls()}
         </>;
@@ -870,18 +944,20 @@ export function InputUIComponent({ ctx, onSubmit, isCollapsed }: InputUIComponen
             <Collapse
                 activeKey={activeKey}
                 className='panel-input-form'
-                onChange={onPanelChange}
+                onChange={(key: React.Key | React.Key[]) => {
+                    updateKey(key as string[]);
+                }}
             >
                 <Panel header='Compare Protein Structures'>
                     <div className={vertical}>
-                        {renderStructureSelection()}
+                        {renderSelectedStructures()}
                         <br/>
-                        <MethodComponent ctx={handler} />
+                        <StructureAlignmentMethod ctx={handler} />
                         <div className={horizontal} style={{ justifyContent: 'flex-end' }}>
                             <ActionButtonControl
                                 label='Compare'
                                 isDisabled={!handler.state.isSubmittable()}
-                                onClick={() => onSubmit(request)}
+                                onClick={() => props.onSubmit(request)}
                                 className={classNames('btn-action', 'btn-submit')}
                             />
                             <ActionButtonControl

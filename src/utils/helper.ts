@@ -29,6 +29,14 @@ export function isEntry(s: Structure): s is StructureEntry {
     return 'entry_id' in s;
 }
 
+export function isUrl(s: Structure): s is StructureWebLink {
+    return 'url' in s;
+}
+
+export function isUploadedFile(s: Structure): s is StructureFileUpload {
+    return !('url' in s) && ('format' in s);
+}
+
 // COMMON
 
 export function deepEqual(a: any, b: any) {

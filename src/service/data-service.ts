@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { AppConfigs } from '..';
 import { AsymIdsQueryVariables, PolymerInstancesQueryVariables, Query } from '../auto/data/graphql';
-import { asymIdsQuery, polymerInstancesQuery } from '../auto/data/query.gql';
+import { asymIdsQuery, polymerInstancesQuery, referenceSequenceCoverageQuery } from '../auto/data/query.gql';
 import { memoizeOneArgAsync, trimTrailingChars } from '../utils/helper';
 
 export type InstanceData = {
@@ -93,5 +94,26 @@ export class DataService {
             });
         }
         return [];
+    }
+
+    async referenceSequenceCoverage(instanceIds: string[], uniprotId: string): Promise<Map<string, [][]>> {
+        const coverage = new Map();
+        const vars: PolymerInstancesQueryVariables = { ids: instanceIds };
+        const data = await this.fetch<PolymerInstancesQueryVariables>(referenceSequenceCoverageQuery, vars);
+        console.log(data);
+        if (data && data.polymer_entity_instances) {
+            data.polymer_entity_instances.map(i => {
+                const key = i?.rcsb_id;
+                coverage.set(key, []);
+                i?.polymer_entity!.rcsb_polymer_entity_align?.map(r => {
+                    if (r?.reference_database_accession === uniprotId) {
+                        r.aligned_regions?.map(o => {
+                            coverage.get(key).push([o?.ref_beg_seq_id, o?.ref_beg_seq_id! + o?.length! - 1]);
+                        });
+                    }
+                });
+            });
+        }
+        return coverage;
     }
 }

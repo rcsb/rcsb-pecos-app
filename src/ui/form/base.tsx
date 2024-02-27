@@ -10,7 +10,7 @@ import {
 } from '../controls/controls-input';
 
 import { StructureFileFormat } from '../../auto/alignment/alignment-request';
-import { createInstanceLabel, isValidEntryId, isValidUniprotId } from '../../utils/identifier';
+import { createInstanceLabel, isValidEntryId } from '../../utils/identifier';
 
 type BaseProps = {
     value?: string | number,
@@ -56,7 +56,8 @@ export function AsymSelectorComponent(props: BaseProps & {
                     const label = createInstanceLabel(asymId, authAsymId);
                     opts.push([asymId, label]);
                 }
-                props.onOptsAvailable(opts[0][0]);
+                const current = props.value || opts[0][0];
+                props.onOptsAvailable(String(current));
             }
         }
         setOptions(opts);

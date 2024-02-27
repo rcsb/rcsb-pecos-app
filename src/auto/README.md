@@ -23,6 +23,14 @@ The `package.json` also has the following script:
 
 Uses [json-schema-to-typescript](https://www.npmjs.com/package/json-schema-to-typescript) tool to generate TypeScript type definitions from JSON Schema files. A CLI utility is provided in: `scripts/generator.js`
 
+#### Types for Search API
+
+Run the following commands to generate the TypeScript type definitions for Search API JSON Schemas:
+
+    node scripts/generator --schema ../rcsb-arches/src/main/resources/schema/search/request/json-schema-rcsb_search_query.json --out src/auto/search/search-request.d.ts
+
+    node scripts/generator --schema ../rcsb-arches/src/main/resources/schema/search/response/json-schema-rcsb_search_results.json --out src/auto/search/search-response.d.ts
+
 #### Types for Suggest API
 
 Run the following commands to generate the TypeScript type definitions for Suggest API JSON Schemas:

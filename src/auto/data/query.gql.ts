@@ -42,3 +42,20 @@ query polymerInstances($ids: [String]!) {
   }
 }
 `;
+
+export const referenceSequenceCoverageQuery = /* GraphQL */ `
+query referenceSequenceCoverage($ids: [String]!) {
+  polymer_entity_instances(instance_ids: $ids) {
+    rcsb_id
+    polymer_entity {
+      rcsb_polymer_entity_align {
+        reference_database_accession
+        aligned_regions {
+          ref_beg_seq_id
+          length
+        }
+      }
+    }
+  }
+}  
+`;

@@ -165,20 +165,20 @@ type SelectorControlProps = {
 }
 
 export function SelectorControl(props: SelectorControlProps) {
+    const children = props.options.length > 0 && props.options.map((item, i) => {
+        let value, option;
+        if (Array.isArray(item)) { [value, option] = item; } else { value = option = item; }
+        return <Option key={i} value={value}>{option}</Option>;
+    });
     return (
         <div className={props.className} style={props.style}>
             <Select
                 placeholder={props.placeholder}
                 value={props.value}
                 disabled={props.isDisabled}
-                onChange={(e) => props.onChange(e)}>
-                {
-                    props.options.length > 0 && props.options.map((item, i) => {
-                        let value, option;
-                        if (Array.isArray(item)) { [value, option] = item; } else { value = option = item; }
-                        return <Option key={i} value={value}>{option}</Option>;
-                    })
-                }
+                onChange={(e) => props.onChange(e)}
+            >
+                {children}
             </Select>
         </div>
     );
