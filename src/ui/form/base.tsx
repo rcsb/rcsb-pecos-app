@@ -6,11 +6,12 @@ import {
     SelectorControl,
     FileUploadControl,
     UploadedFile,
-    AutosuggestControl
+    AutosuggestControl,
+    SelectOption
 } from '../controls/controls-input';
 
-import { StructureFileFormat } from '../../auto/alignment/alignment-request';
 import { createInstanceLabel, isValidEntryId } from '../../utils/identifier';
+import { StructureFileFormat } from '../../auto/alignment/alignment-request';
 
 type BaseProps = {
     value?: string | number,
@@ -42,11 +43,11 @@ export function AsymSelectorComponent(props: BaseProps & {
     fetchFn: (v: string) => Promise<string[][]>;
     onOptsAvailable: (value: string) => void;
 }) {
-    const [options, setOptions] = useState<string[][]>([]);
+    const [options, setOptions] = useState<SelectOption<string>[]>([]);
     useEffect(() => { getAsymOptions(); }, [props.entry_id]);
 
     const getAsymOptions = async () => {
-        const opts: string[][] = [];
+        const opts: SelectOption<string>[] = [];
         if (isValidEntryId(props.entry_id)) {
             const values = await props.fetchFn(props.entry_id);
             if (values.length > 0) {
@@ -54,9 +55,9 @@ export function AsymSelectorComponent(props: BaseProps & {
                     const asymId = val[0];
                     const authAsymId = val[1];
                     const label = createInstanceLabel(asymId, authAsymId);
-                    opts.push([asymId, label]);
+                    opts.push({ label: label, value: asymId });
                 }
-                const current = props.value || opts[0][0];
+                const current = props.value || opts[0].value;
                 props.onOptsAvailable(String(current));
             }
         }
@@ -106,9 +107,15 @@ export function ResidueInputComponent(props: BaseProps) {
 }
 
 export function FormatInputComponent(props: BaseProps) {
-    const options: Array<[StructureFileFormat, string]> = [
-        ['mmcif', 'mmCIF'],
-        ['pdb', 'PDB']
+    const options: SelectOption<StructureFileFormat>[] = [
+        {
+            label: 'mmCIF',
+            value: 'mmcif'
+        },
+        {
+            label: 'PDB',
+            value: 'pdb'
+        }
     ];
     return <SelectorControl
         value={String(props.value)}

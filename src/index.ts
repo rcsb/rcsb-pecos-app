@@ -24,7 +24,7 @@ const DefaultAppConfigs = {
             httpHeaders: {}
         },
         alignment: {
-            base: 'https://alignment.rcsb.org/api/v1',
+            base: 'https://alignment-dev.rcsb.org/api/v1',
             submit: 'structures/submit',
             results: 'structures/results',
             httpHeaders: {},

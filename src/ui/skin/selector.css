@@ -92,7 +92,8 @@
 }
 
 .rc-select-item-group {
-    color: #999;
+    font-weight: bold;
+    color: #999 !important;
 }
 
 .rc-select-item-option {
@@ -100,7 +101,7 @@
 }
 
 .rc-select-item-option-grouped {
-    padding-left: 24px;
+    padding-left: 28px !important;
 }
 
 .rc-select-item-option .rc-select-item-option-state {

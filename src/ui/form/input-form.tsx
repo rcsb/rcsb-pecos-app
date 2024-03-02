@@ -46,7 +46,7 @@ import {
     StructureFileFormat
 } from '../../auto/alignment/alignment-request';
 
-import { AutosuggestControl, InputBoxControl, SelectorControl } from '../controls/controls-input';
+import { AutosuggestControl, InputBoxControl, SelectOption, SelectorControl } from '../controls/controls-input';
 import { Icon, LineArrowDownSvg, HelpCircleSvg } from '../icons';
 import { ApplicationContext } from '../../context';
 import { isValidMgnifyId, isValidUniprotId } from '../../utils/identifier';
@@ -65,14 +65,6 @@ const structureOptions: { [key in StructureInputOption]: () => StructureImpl } =
 };
 
 type DisplayMethod = Exclude<MethodName, QCP['name']>;
-const methodOptions: { [key in DisplayMethod]: string } = {
-    'fatcat-rigid': 'jFATCAT (rigid)',
-    'fatcat-flexible': 'jFATCAT (flexible)',
-    'ce': 'jCE',
-    'ce-cp': 'jCE-CP',
-    'tm-align': 'TM-align',
-    'smith-waterman-3d': 'Smith-Waterman 3D'
-};
 
 function FatCatRigidParams(props: {ctx: RequestState}) {
     const next = props.ctx.copy();
@@ -582,10 +574,43 @@ function StructureAlignmentMethod(props: {ctx: RequestState}) {
     };
 
     const method = props.ctx.state.query.context.method;
-    const options = [];
-    for (const [key, value] of Object.entries(methodOptions)) {
-        options.push([key, value]);
-    }
+    const options: SelectOption<DisplayMethod>[] = [
+        {
+            label: 'Rigid Methods',
+            title: '',
+            options: [
+                {
+                    label: 'jFATCAT (rigid)',
+                    value: 'fatcat-rigid'
+                },
+                {
+                    label: 'jCE',
+                    value: 'ce'
+                },
+                {
+                    label: 'TM-align',
+                    value: 'tm-align'
+                },
+                {
+                    label: 'Smith-Waterman 3D',
+                    value: 'smith-waterman-3d'
+                }
+            ]
+        },
+        {
+            label: 'Flexible Methods',
+            options: [
+                {
+                    label: 'jFATCAT (flexible)',
+                    value: 'fatcat-flexible'
+                },
+                {
+                    label: 'jCE-CP',
+                    value: 'ce-cp'
+                }
+            ]
+        }
+    ];
     return <>
         <div className={horizontal}>
             <SelectorControl
@@ -616,18 +641,18 @@ function StructureSelectorByUniprotId(props: {
 }) {
     const [uniprotId, updateUniprotId] = useState('');
 
-    const [options, setOptions] = useState<string[][]>([]);
+    const [options, setOptions] = useState<SelectOption<string>[]>([]);
     useEffect(() => { getInstancesByUniprot(); }, [uniprotId]);
 
     const getInstancesByUniprot = async () => {
-        const opts: string[][] = [];
+        const opts: SelectOption<string>[] = [];
         if (isValidUniprotId(uniprotId)) {
             const ids = await props.ctx.search().matchInstancesByUniProtId(uniprotId, 20);
             if (ids.length > 0) {
                 const ranges = await props.ctx.data().referenceSequenceCoverage(ids, uniprotId);
                 for (const id of ids) {
                     const label = id + ':' + ranges.get(id)?.map(r => r.join('-')).join(',');
-                    opts.push([id, label]);
+                    opts.push({ label: label, value: id });
                 }
             }
         }
@@ -681,7 +706,7 @@ function AlphaFoldDbStructureSelector(props: {
         value={uniprotId || ''}
         label='UniProt ID'
         onChange={updateUniprotId}
-        style={{ width: '70px' }}
+        style={{ width: '90px' }}
         className='inp'
     />;
 }
@@ -705,9 +730,9 @@ function ESMAtlasStructureSelector(props: {
     return <InputBoxControl
         type='text'
         value={mgnifyId || ''}
-        label='MgnifyID'
+        label='MGnify Protein ID'
         onChange={updateMgnifyId}
-        style={{ width: '70px' }}
+        style={{ width: '180px' }}
         className='inp'
     />;
 }

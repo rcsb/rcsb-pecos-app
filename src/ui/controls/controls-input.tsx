@@ -2,7 +2,7 @@ import '../skin/selector.css';
 import '../skin/suggestions.css';
 
 import { useState, CSSProperties } from 'react';
-import Select, { Option } from 'rc-select';
+import Select from 'rc-select';
 import Upload, { UploadProps } from 'rc-upload';
 import Autosuggest, { ChangeEvent, SuggestionsFetchRequestedParams } from 'react-autosuggest';
 import { Icon, UploadSvg, PaperClipSvg } from '../icons';
@@ -154,22 +154,24 @@ export function UploadedFile(props: UploadedFileProps) {
     );
 }
 
-type SelectorControlProps = {
+export type SelectOption<T> = {
+    label: string,
+    title?: string,
+    value?: T,
+    options?: SelectOption<T>[]
+}
+
+type SelectProps<T> = {
     value: string,
     placeholder: string,
-    options: string[] | string[][],
+    options: SelectOption<T>[],
     isDisabled?: boolean,
     onChange: (value: string) => void,
     className?: string,
     style?: React.CSSProperties
 }
 
-export function SelectorControl(props: SelectorControlProps) {
-    const children = props.options.length > 0 && props.options.map((item, i) => {
-        let value, option;
-        if (Array.isArray(item)) { [value, option] = item; } else { value = option = item; }
-        return <Option key={i} value={value}>{option}</Option>;
-    });
+export function SelectorControl<T>(props: SelectProps<T>) {
     return (
         <div className={props.className} style={props.style}>
             <Select
@@ -177,8 +179,8 @@ export function SelectorControl(props: SelectorControlProps) {
                 value={props.value}
                 disabled={props.isDisabled}
                 onChange={(e) => props.onChange(e)}
+                options={props.options}
             >
-                {children}
             </Select>
         </div>
     );
