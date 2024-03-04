@@ -2,10 +2,7 @@ import '../skin/selector.css';
 import '../skin/suggestions.css';
 
 import { useState, CSSProperties } from 'react';
-import Select from 'rc-select';
-import Upload, { UploadProps } from 'rc-upload';
 import Autosuggest, { ChangeEvent, SuggestionsFetchRequestedParams } from 'react-autosuggest';
-import { Icon, UploadSvg, PaperClipSvg } from '../icons';
 
 type AutosuggestControlProps = {
     value: string,
@@ -88,100 +85,4 @@ export function InputBoxControl(props: InputBoxControlProps) {
         style={props.style}
         onChange={(e) => props.onChange(e.target.value)}
     />;
-}
-
-type FileUploadControlProps = {
-    label?: string
-    acceptFormats: string[],
-    allowCompressed?: boolean,
-    onChange: (value: File) => void,
-    onValidationError: (message: string) => void,
-    style?: React.CSSProperties,
-    className?: string
-}
-
-export function FileUploadControl(props: FileUploadControlProps) {
-
-    const uploadProps: UploadProps = {
-        beforeUpload: (file) => {
-            const name = file.name.toLowerCase();
-            if (isValidFormat(name, props.acceptFormats, props.allowCompressed)) {
-                props.onChange(file);
-            } else {
-                props.onValidationError('File format is not supported. Allowed formats: ' + props.acceptFormats);
-            }
-            return false;
-        }
-    };
-
-    const isValidFormat = (name: string, allowedFormats: string[], allowCompressed = false): boolean => {
-        let isValid = false;
-        for (const format of allowedFormats) {
-            isValid = isValid || name.endsWith(format);
-            if (allowCompressed)
-                isValid = isValid || name.endsWith(format + '.gz');
-        }
-        return isValid;
-    };
-
-    return (
-        <Upload style={{ outline: 'none' }} {...uploadProps}>
-            <button className={props.className}>
-                <Icon
-                    svg={UploadSvg}
-                />
-                <span className='btn-upload-label'>{props.label || 'Upload File'}</span>
-            </button>
-        </Upload>
-    );
-}
-
-type UploadedFileProps = {
-    name: string;
-    className?: string,
-    style?: React.CSSProperties
-}
-
-export function UploadedFile(props: UploadedFileProps) {
-    return (
-        <div className={props.className} style={props.style}>
-            <span style={{ padding: '3px' }}>{props.name}</span>
-            <Icon
-                svg={PaperClipSvg}
-                className='upload-icon'
-            />
-        </div>
-    );
-}
-
-export type SelectOption<T> = {
-    label: string,
-    title?: string,
-    value?: T,
-    options?: SelectOption<T>[]
-}
-
-type SelectProps<T> = {
-    value: string,
-    placeholder: string,
-    options: SelectOption<T>[],
-    isDisabled?: boolean,
-    onChange: (value: string) => void,
-    className?: string,
-    style?: React.CSSProperties
-}
-
-export function SelectorControl<T>(props: SelectProps<T>) {
-    return (
-        <div className={props.className} style={props.style}>
-            <Select
-                placeholder={props.placeholder}
-                value={props.value}
-                disabled={props.isDisabled}
-                onChange={(e) => props.onChange(e)}
-                options={props.options}
-            >
-            </Select>
-        </div>
-    );
 }

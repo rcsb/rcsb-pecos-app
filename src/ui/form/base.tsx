@@ -2,16 +2,11 @@ import { useState, useEffect } from 'react';
 import classNames from 'classnames';
 
 import {
-    InputBoxControl,
-    SelectorControl,
-    FileUploadControl,
-    UploadedFile,
-    AutosuggestControl,
-    SelectOption
+    InputBoxControl
 } from '../controls/controls-input';
 
 import { createInstanceLabel, isValidEntryId } from '../../utils/identifier';
-import { StructureFileFormat } from '../../auto/alignment/alignment-request';
+import Select from 'rc-select';
 
 type BaseProps = {
     value?: string | number,
@@ -20,22 +15,11 @@ type BaseProps = {
     isDisabled?: boolean
 }
 
-type FileUploadProps = {
-    value: File
-    onUpdate: (value: File) => void;
-    onError: (mesage: string) => void;
-}
-
-export function EntryInputComponent(props: BaseProps & {
-    suggestFn: (v: string) => Promise<string[]>
-}) {
-    return <AutosuggestControl
-        value={String(props.value)}
-        label={props.label}
-        onChange={props.onChange}
-        suggestHandler={props.suggestFn}
-        className={classNames('inp', 'inp-entry')}
-    />;
+export type SelectOption<T> = {
+    label: string,
+    title?: string,
+    value?: T,
+    options?: SelectOption<T>[]
 }
 
 export function AsymSelectorComponent(props: BaseProps & {
@@ -65,14 +49,15 @@ export function AsymSelectorComponent(props: BaseProps & {
     };
 
     if (options.length > 0) {
-        return <SelectorControl
-            value={String(props.value)}
-            placeholder='Chain ID'
-            options={options}
-            isDisabled={props.isDisabled}
-            onChange={props.onChange}
-            className='inp-select'
-        />;
+        return <div className='inp-select'>
+            <Select
+                value={String(props.value)}
+                placeholder='Chain ID'
+                options={options}
+                disabled={props.isDisabled}
+                onChange={props.onChange}
+            />
+        </div>;
     } else {
         return <AsymInputComponent
             value=''
@@ -104,51 +89,4 @@ export function ResidueInputComponent(props: BaseProps) {
         className={classNames('inp', 'inp-num')}
     />;
 
-}
-
-export function FormatInputComponent(props: BaseProps) {
-    const options: SelectOption<StructureFileFormat>[] = [
-        {
-            label: 'mmCIF',
-            value: 'mmcif'
-        },
-        {
-            label: 'PDB',
-            value: 'pdb'
-        }
-    ];
-    return <SelectorControl
-        value={String(props.value)}
-        placeholder='Format'
-        options={options}
-        onChange={props.onChange}
-        className='inp-format'
-    />;
-}
-
-export function WebLinkInputComponent(props: BaseProps) {
-    return <InputBoxControl
-        type='text'
-        value={props.value}
-        onChange={props.onChange}
-        label='https://'
-        className={classNames('inp', 'inp-link')}
-    />;
-}
-
-export function FileInputComponent(props: FileUploadProps) {
-    if (!props.value) {
-        return <FileUploadControl
-            acceptFormats={['cif', 'bcif', 'pdb', 'ent']}
-            allowCompressed={false}
-            label='Upload File'
-            onChange={props.onUpdate}
-            onValidationError={props.onError}
-            className='btn-upload'
-        />;
-    } else {
-        return <UploadedFile
-            name={props.value.name}
-        />;
-    }
 }

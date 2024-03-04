@@ -5,11 +5,8 @@ import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import Collapse, { Panel } from 'rc-collapse';
 
-import { RequestState } from '../../state/request';
 import {
     QueryRequest,
-    MethodName,
-    toMethodImpl,
     Structure,
     StructureEntryImpl,
     StructureWebLinkImpl,
@@ -17,625 +14,64 @@ import {
 } from '../../utils/request';
 
 import { ActionButtonControl } from '../controls/controls-button';
-import { AddActionControl, DeleteActionControl, SelectableControl } from '../controls/controls-action';
+import { AddActionControl, DeleteActionControl } from '../controls/controls-action';
 
 import { horizontal, vertical } from '../../utils/constants';
 import { isEntry, isUploadedFile, isUrl, useObservable } from '../../utils/helper';
 
 import {
-    WebLinkInputComponent,
-    FormatInputComponent,
     AsymInputComponent,
     ResidueInputComponent,
-    FileInputComponent,
-    EntryInputComponent,
-    AsymSelectorComponent
+    AsymSelectorComponent,
+    SelectOption
 } from './base';
 
 import {
-    JFATCATRigid,
-    JFATCATFlexible,
-    JCE,
-    JCECP,
-    SmithWaterman3D,
-    QCP,
     StructureInstanceSelection,
     StructureEntry,
-    StructureFileUpload,
+    StructureFileUpload as CoordinatesByFileUpload,
     StructureWebLink,
     StructureFileFormat
 } from '../../auto/alignment/alignment-request';
 
-import { AutosuggestControl, InputBoxControl, SelectOption, SelectorControl } from '../controls/controls-input';
-import { Icon, LineArrowDownSvg, HelpCircleSvg } from '../icons';
+import {
+    AutosuggestControl,
+    InputBoxControl
+} from '../controls/controls-input';
+import { Icon, LineArrowDownSvg, PaperClipSvg, UploadSvg } from '../icons';
 import { ApplicationContext } from '../../context';
 import { isValidMgnifyId, isValidUniprotId } from '../../utils/identifier';
-
-const numInpClass = classNames('inp', 'inp-num');
+import Select from 'rc-select';
+import { StructureAlignmentMethod } from './input-method';
+import Upload, { UploadProps } from 'rc-upload';
 
 type StructureImpl = StructureEntryImpl | StructureFileUploadImpl | StructureWebLinkImpl;
-type StructureInputOption = 'Entry ID' | 'UniProt ID' | 'File URL' | 'File Upload' | 'AlphaFold DB' | 'ESMAtlas';
+type StructureInputOption = 'rcsb-entry' | 'rcsb-uniprot' | 'file-url' | 'file-upload' | 'alphafold-db' | 'esm-atlas';
 const structureOptions: { [key in StructureInputOption]: () => StructureImpl } = {
-    'Entry ID': () => new StructureEntryImpl(),
-    'UniProt ID': () => new StructureEntryImpl(),
-    'File URL': () => new StructureWebLinkImpl(),
-    'File Upload': () => new StructureFileUploadImpl(),
-    'AlphaFold DB': () => new StructureWebLinkImpl(),
-    'ESMAtlas': () => new StructureWebLinkImpl()
+    'rcsb-entry': () => new StructureEntryImpl(),
+    'rcsb-uniprot': () => new StructureEntryImpl(),
+    'file-url': () => new StructureWebLinkImpl(),
+    'file-upload': () => new StructureFileUploadImpl(),
+    'alphafold-db': () => new StructureWebLinkImpl(),
+    'esm-atlas': () => new StructureWebLinkImpl()
 };
 
-type DisplayMethod = Exclude<MethodName, QCP['name']>;
-
-function FatCatRigidParams(props: {ctx: RequestState}) {
-    const next = props.ctx.copy();
-    const nextParams = (next.query.context.method as JFATCATRigid).parameters;
-    const currParams = (props.ctx.state.query.context.method as JFATCATRigid).parameters;
-    return (
-        <table className='method-params'>
-            <tbody>
-                <tr>
-                    <td>RMSD Cutoff:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.rmsd_cutoff || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.rmsd_cutoff = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='RMSD cutoff for AFP detection'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>AFP Distance Cutoff:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.afp_dist_cutoff || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.afp_dist_cutoff = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The distance cutoff used when calculating connectivity of AFP pairs'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Fragment Length:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.fragment_length || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.fragment_length = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The length of the fragments'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    );
+function RcsbEntryById(props: {
+    ctx: ApplicationContext,
+    value: string,
+    onChange: (value: string) => void,
+    suggestFn: (v: string) => Promise<string[]>
+}) {
+    return <AutosuggestControl
+        value={props.value}
+        label={'Entry ID'}
+        onChange={props.onChange}
+        suggestHandler={props.suggestFn}
+        className={classNames('inp', 'inp-entry')}
+    />;
 }
 
-function FatCatFlexParams(props: {ctx: RequestState}) {
-    const next = props.ctx.copy();
-    const nextParams = (next.query.context.method as JFATCATFlexible).parameters;
-    const currParams = (props.ctx.state.query.context.method as JFATCATFlexible).parameters;
-    return (
-        <table className='method-params'>
-            <tbody>
-                <tr>
-                    <td>RMSD Cutoff:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.rmsd_cutoff || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.rmsd_cutoff = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='RMSD cutoff for AFP detection'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>AFP Distance Cutoff:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.afp_dist_cutoff || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.afp_dist_cutoff = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The distance cutoff used when calculating connectivity of AFP pairs'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Fragment Length:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.fragment_length || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.fragment_length = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The length of the fragments'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Max Twists Number:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.max_num_twists || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.max_num_twists = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The number of twists that are allowed to be introduced. If set to 0 alignments are run in rigid mode'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    );
-}
-
-function CeParams(props: {ctx: RequestState}) {
-    const next = props.ctx.copy();
-    const nextParams = (next.query.context.method as JCE).parameters;
-    const currParams = (props.ctx.state.query.context.method as JCE).parameters;
-    return (
-        <table className='method-params'>
-            <tbody>
-                <tr>
-                    <td>Maximum Gap Size:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.gap_max_size || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_max_size = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Maximum gap size G, that is applied during the AFP extension'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Gap Opening Penalty:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.gap_opening_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_opening_penalty = parseFloat(e.target.value);
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap opening penalty during alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Gap Extension Penalty:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.gap_extension_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_extension_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap extension penalty during alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Fragment Size:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.fragment_size || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.fragment_size = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Fragment size of Aligned Fragment Pairs (AFPs)'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>RMSD Threshold:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.rmsd_threshold || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.rmsd_threshold = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='RMSD threshold used while tracing the Aligned Fragment Pair (AFP) fragments'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Maximum RMSD:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.max_opt_rmsd || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.max_opt_rmsd = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Maximum RMSD at which to stop alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    );
-}
-
-function CeCpParams(props: {ctx: RequestState}) {
-    const next = props.ctx.copy();
-    const nextParams = (next.query.context.method as JCECP).parameters;
-    const currParams = (props.ctx.state.query.context.method as JCECP).parameters;
-    return (
-        <table className='method-params'>
-            <tbody>
-                <tr>
-                    <td>Maximum Gap Size:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.gap_max_size || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_max_size = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Maximum gap size G, that is applied during the AFP extension'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Gap Opening Penalty:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.gap_opening_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_opening_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap opening penalty during alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Gap Extension Penalty:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.gap_extension_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_extension_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap extension penalty during alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Fragment Size:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.fragment_size || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.fragment_size = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Fragment size of Aligned Fragment Pairs (AFPs)'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>RMSD Threshold:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.rmsd_threshold || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.rmsd_threshold = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='RMSD threshold used while tracing the Aligned Fragment Pair (AFP) fragments'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Maximum RMSD:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.max_opt_rmsd || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.max_opt_rmsd = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Maximum RMSD at which to stop alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Min CP Block Length:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.min_cp_length || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.min_cp_length = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Minimum length for a Circular Permutation block to consider'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    );
-}
-
-function SmithWatermanParams(props: {ctx: RequestState}) {
-    const next = props.ctx.copy();
-    const nextParams = (next.query.context.method as SmithWaterman3D).parameters;
-    const currParams = (props.ctx.state.query.context.method as SmithWaterman3D).parameters;
-    return (
-        <table className='method-params'>
-            <tbody>
-                <tr>
-                    <td>Gap Opening Penalty:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.gap_opening_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_opening_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap opening penalty'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                    <td>Gap Extension Penalty:</td>
-                    <td>
-                        <input
-                            type='number'
-                            value={currParams?.gap_extension_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_extension_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap extension penalty'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    );
-}
-
-function StructureAlignmentMethodParams(props: {ctx: RequestState}) {
-    const method = props.ctx.state.query.context.method.name;
-    switch (method) {
-        case 'fatcat-rigid':
-            return <FatCatRigidParams ctx={props.ctx} />;
-        case 'fatcat-flexible':
-            return <FatCatFlexParams ctx={props.ctx} />;
-        case 'ce':
-            return <CeParams ctx={props.ctx} />;
-        case 'ce-cp':
-            return <CeCpParams ctx={props.ctx} />;
-        case 'smith-waterman-3d':
-            return <SmithWatermanParams ctx={props.ctx} />;
-        default:
-            throw new Error('Unsupported method: ' + method);
-    }
-}
-
-function StructureAlignmentMethod(props: {ctx: RequestState}) {
-
-    const [paramsVisible, setVisibility] = useState(false);
-
-    const toggleVisibility = () => {
-        setVisibility(!paramsVisible);
-    };
-
-    const onMethodUpdate = (value: string) => {
-        setVisibility(false);
-        const request = props.ctx.copy();
-        request.query.context.method = toMethodImpl({ name: value as MethodName });
-        props.ctx.push(request);
-    };
-
-    const method = props.ctx.state.query.context.method;
-    const options: SelectOption<DisplayMethod>[] = [
-        {
-            label: 'Rigid Methods',
-            title: '',
-            options: [
-                {
-                    label: 'jFATCAT (rigid)',
-                    value: 'fatcat-rigid'
-                },
-                {
-                    label: 'jCE',
-                    value: 'ce'
-                },
-                {
-                    label: 'TM-align',
-                    value: 'tm-align'
-                },
-                {
-                    label: 'Smith-Waterman 3D',
-                    value: 'smith-waterman-3d'
-                }
-            ]
-        },
-        {
-            label: 'Flexible Methods',
-            options: [
-                {
-                    label: 'jFATCAT (flexible)',
-                    value: 'fatcat-flexible'
-                },
-                {
-                    label: 'jCE-CP',
-                    value: 'ce-cp'
-                }
-            ]
-        }
-    ];
-    return <>
-        <div className={horizontal}>
-            <SelectorControl
-                placeholder='Method Name'
-                value={method.name}
-                options={options}
-                isDisabled={false}
-                onChange={onMethodUpdate}
-                className='inp-method'
-            />
-            {('parameters' in method) &&
-            <ActionButtonControl
-                label='Parameters'
-                onClick={toggleVisibility}
-                className={classNames('btn-action', 'btn-menu')}
-            />}
-        </div>
-        {paramsVisible &&
-        <StructureAlignmentMethodParams
-            ctx={props.ctx}
-        />}
-    </>;
-}
-
-function StructureSelectorByUniprotId(props: {
+function RcsbEntryByUniprotId(props: {
     ctx: ApplicationContext,
     onChange: (value: string) => void
 }) {
@@ -667,18 +103,103 @@ function StructureSelectorByUniprotId(props: {
             suggestHandler={props.ctx.search().suggestUniprotID.bind(props.ctx.search())}
             className={classNames('inp', 'inp-entry')}
         />
-        <SelectorControl
+        <Select
             value={'Select protein chain'}
             placeholder='Chain ID'
             options={options}
-            isDisabled={options.length === 0}
+            disabled={options.length === 0}
             onChange={props.onChange}
             className='inp-select'
         />
     </>;
 }
 
-function AlphaFoldDbStructureSelector(props: {
+function CoordinatesByFileUpload(props: {
+    value: File
+    onChange: (value: File) => void;
+    onError: (mesage: string) => void;
+}) {
+    const acceptFormats = ['cif', 'bcif', 'pdb', 'ent'];
+    if (!props.value) {
+        const uploadProps: UploadProps = {
+            beforeUpload: (file) => {
+                const name = file.name.toLowerCase();
+                if (isValidFormat(name, acceptFormats, false)) {
+                    props.onChange(file);
+                } else {
+                    props.onError('File format is not supported. Allowed formats: ' + acceptFormats);
+                }
+                return false;
+            }
+        };
+
+        const isValidFormat = (name: string, allowedFormats: string[], allowCompressed = false): boolean => {
+            let isValid = false;
+            for (const format of allowedFormats) {
+                isValid = isValid || name.endsWith(format);
+                if (allowCompressed)
+                    isValid = isValid || name.endsWith(format + '.gz');
+            }
+            return isValid;
+        };
+
+        return (
+            <Upload style={{ outline: 'none' }} {...uploadProps}>
+                <button className={'btn-upload'}>
+                    <Icon
+                        svg={UploadSvg}
+                    />
+                    <span className='btn-upload-label'>{'Upload File'}</span>
+                </button>
+            </Upload>
+        );
+    } else {
+        return <div>
+            <span style={{ padding: '3px' }}>{props.value.name}</span>
+            <Icon
+                svg={PaperClipSvg}
+                className='upload-icon'
+            />
+        </div>;
+    }
+}
+
+function CoordinatesByWebLink(props: {
+    value: string,
+    format: string,
+    onValueChange: (value: string) => void,
+    onFormatChange: (value: string) => void,
+}) {
+    const options: SelectOption<StructureFileFormat>[] = [
+        {
+            label: 'mmCIF',
+            value: 'mmcif'
+        },
+        {
+            label: 'PDB',
+            value: 'pdb'
+        }
+    ];
+    return <>
+        <input
+            type='text'
+            value={props.value}
+            placeholder='https://'
+            onChange={(e) => props.onValueChange(e.target.value)}
+            className={classNames('inp', 'inp-link')}
+        />
+        <div className='inp-format'>
+            <Select
+                value={props.format}
+                placeholder='Format'
+                options={options}
+                onChange={props.onFormatChange}
+            />
+        </div>
+    </>;
+}
+
+function AlphaFoldEntryByUniprtId(props: {
     ctx: ApplicationContext,
     onChange: (value: string) => void
 }) {
@@ -711,14 +232,14 @@ function AlphaFoldDbStructureSelector(props: {
     />;
 }
 
-// https://api.esmatlas.com/fetchPredictedStructure/MGYP001006757307.cif
-function ESMAtlasStructureSelector(props: {
+function ESMAtlasEntryByMGnifyId(props: {
     ctx: ApplicationContext,
     onChange: (value: string) => void
 }) {
     const [mgnifyId, updateMgnifyId] = useState('');
     useEffect(() => { getESMAtlasStructureByMgnifyId(); }, [mgnifyId]);
 
+    // https://api.esmatlas.com/fetchPredictedStructure/MGYP001006757307.cif
     const base = 'https://api.esmatlas.com/fetchPredictedStructure/';
     const getESMAtlasStructureByMgnifyId = async () => {
         if (isValidMgnifyId(mgnifyId)) {
@@ -755,11 +276,11 @@ export function StructureAlignmentInput(props: {
         const list = new Array<StructureInputOption>();
         state.query.context.structures.map((s, i) => {
             if (isEntry(s)) {
-                list[i] = 'Entry ID';
+                list[i] = 'rcsb-entry';
             } else if (isUrl(s)) {
-                list[i] = 'File URL';
+                list[i] = 'file-url';
             } else if (isUploadedFile(s)) {
-                list[i] = 'File Upload';
+                list[i] = 'file-upload';
             } else {
                 throw new Error('Initialization from state is not implemented. Structure: ' + s);
             }
@@ -800,13 +321,48 @@ export function StructureAlignmentInput(props: {
     };
 
     const renderMutateAction = (index: number, text: string) => {
-        return <SelectableControl
-            component={<Icon
-                svg={LineArrowDownSvg}
-                title={text}
-            />}
-            options={Object.keys(structureOptions)}
-            onClick={(value?: string) => onMutation(index, value)}
+
+        const options: SelectOption<StructureInputOption>[] = [
+            {
+                label: 'RCSB.org',
+                title: '',
+                options: [
+                    {
+                        label: 'Entry ID',
+                        value: 'rcsb-entry'
+                    },
+                    {
+                        label: 'UniProt ID',
+                        value: 'rcsb-uniprot'
+                    }
+                ]
+            },
+            {
+                label: 'External Sources',
+                options: [
+                    {
+                        label: 'AlphaFold DB',
+                        value: 'alphafold-db'
+                    },
+                    {
+                        label: 'ESMAtlas',
+                        value: 'esm-atlas'
+                    },
+                    {
+                        label: 'File Upload',
+                        value: 'file-upload'
+                    },
+                    {
+                        label: 'File URL',
+                        value: 'file-url'
+                    }
+                ]
+            }
+        ];
+        return <Select
+            getRawInputElement={() => <Icon svg={LineArrowDownSvg} title={text}/>}
+            options={options}
+            onChange={(v?: string) => onMutation(index, v)}
         />;
     };
 
@@ -844,8 +400,8 @@ export function StructureAlignmentInput(props: {
                     <AddActionControl
                         info='Click to add a new entry'
                         onClick={() => {
-                            updateStructure(count, structureOptions['Entry ID']());
-                            updateStructureList(count, 'Entry ID');
+                            updateStructure(count, structureOptions['rcsb-entry']());
+                            updateStructureList(count, 'rcsb-entry');
                         }}
                         className='add-new-item'
                     />
@@ -905,7 +461,7 @@ export function StructureAlignmentInput(props: {
         </>;
     };
 
-    const renderStructureEntry = (index: number) => {
+    const renderRcsbEntryOption = (index: number) => {
 
         const s = structure(handler.state, index) as StructureEntry;
 
@@ -916,9 +472,9 @@ export function StructureAlignmentInput(props: {
         };
 
         return <>
-            <EntryInputComponent
+            <RcsbEntryById
+                ctx={props.ctx}
                 value={s.entry_id}
-                label='Entry ID'
                 suggestFn={props.ctx.search().suggestEntriesByID.bind(props.ctx.search())}
                 onChange={(v) => updateEntryId(v)}
             />
@@ -926,7 +482,7 @@ export function StructureAlignmentInput(props: {
         </>;
     };
 
-    const renderStructureUniprotId = (index: number) => {
+    const renderUniprotIdOption = (index: number) => {
 
         const updateStructureSelection = (v: string) => {
             const [entry_id, asym_id] = v.split('.');
@@ -937,21 +493,20 @@ export function StructureAlignmentInput(props: {
                 asym_id: asym_id
             };
             handler.push(next);
-            updateStructureList(index, 'Entry ID');
+            updateStructureList(index, 'rcsb-entry');
         };
 
         return <>
-            <StructureSelectorByUniprotId
+            <RcsbEntryByUniprotId
                 ctx={props.ctx}
                 onChange={(v) => updateStructureSelection(v)}
             />
         </>;
     };
 
-    const renderStructureAlphaFoldDb = (index: number) => {
+    const renderAlphaFoldDbOption = (index: number) => {
 
-        const updateStructureSelection = (v: string) => {
-
+        const update = (v: string) => {
             const next = handler.copy();
             const s = (structure(next, index) as StructureWebLink);
             s.url = v;
@@ -960,21 +515,20 @@ export function StructureAlignmentInput(props: {
                 asym_id: 'A'
             };
             handler.push(next);
-            updateStructureList(index, 'File URL');
+            updateStructureList(index, 'file-url');
         };
 
         return <>
-            <AlphaFoldDbStructureSelector
+            <AlphaFoldEntryByUniprtId
                 ctx={props.ctx}
-                onChange={(v) => updateStructureSelection(v)}
+                onChange={(v) => update(v)}
             />
         </>;
     };
 
-    const renderStructureESMAtlas = (index: number) => {
+    const renderESMAtlasOption = (index: number) => {
 
-        const updateStructureSelection = (v: string) => {
-
+        const update = (v: string) => {
             const next = handler.copy();
             const s = (structure(next, index) as StructureWebLink);
             s.url = v;
@@ -983,39 +537,39 @@ export function StructureAlignmentInput(props: {
                 asym_id: 'A'
             };
             handler.push(next);
-            updateStructureList(index, 'File URL');
+            updateStructureList(index, 'file-url');
         };
 
         return <>
-            <ESMAtlasStructureSelector
+            <ESMAtlasEntryByMGnifyId
                 ctx={props.ctx}
-                onChange={(v) => updateStructureSelection(v)}
+                onChange={(v) => update(v)}
             />
         </>;
     };
 
-    const renderStructureFileUpload = (index: number) => {
+    const renderFileUploadOption = (index: number) => {
 
         const file = handler.state.files[index];
 
         const updateFile = (value: File) => {
             const next = handler.copy();
-            (structure(next, index) as StructureFileUpload).format = guessFormat(value);
+            (structure(next, index) as CoordinatesByFileUpload).format = guessFormat(value);
             next.files[index] = value;
             handler.push(next);
         };
 
         return <>
-            <FileInputComponent
+            <CoordinatesByFileUpload
                 value={file}
-                onUpdate={(v) => updateFile(v)}
+                onChange={(v) => updateFile(v)}
                 onError={(message) => alert(message)}
             />
             {renderSelection(index, 'input')}
         </>;
     };
 
-    const renderStructureWebLink = (index: number) => {
+    const renderWebLinkOption = (index: number) => {
 
         const struct = structure(handler.state, index) as StructureWebLink;
 
@@ -1032,31 +586,29 @@ export function StructureAlignmentInput(props: {
         };
 
         return <>
-            <WebLinkInputComponent
+            <CoordinatesByWebLink
                 value={struct.url}
-                onChange={(v) => updateURL(v)}
-            />
-            <FormatInputComponent
-                value={struct.format}
-                onChange={(v) => updateFormat(v)}
+                format={struct.format}
+                onValueChange={(v) => updateURL(v)}
+                onFormatChange={(v) => updateFormat(v)}
             />
             {renderSelection(index, 'input')}
         </>;
     };
 
-    const renderStructureInputOption = (index: number, o: StructureInputOption) => {
-        if (o === 'Entry ID')
-            return renderStructureEntry(index);
-        else if (o === 'File URL')
-            return renderStructureWebLink(index);
-        else if (o === 'File Upload')
-            return renderStructureFileUpload(index);
-        else if (o === 'UniProt ID')
-            return renderStructureUniprotId(index);
-        else if (o === 'AlphaFold DB')
-            return renderStructureAlphaFoldDb(index);
-        else if (o === 'ESMAtlas')
-            return renderStructureESMAtlas(index);
+    const renderOption = (index: number, o: StructureInputOption) => {
+        if (o === 'rcsb-entry')
+            return renderRcsbEntryOption(index);
+        else if (o === 'rcsb-uniprot')
+            return renderUniprotIdOption(index);
+        else if (o === 'file-url')
+            return renderWebLinkOption(index);
+        else if (o === 'file-upload')
+            return renderFileUploadOption(index);
+        else if (o === 'alphafold-db')
+            return renderAlphaFoldDbOption(index);
+        else if (o === 'esm-atlas')
+            return renderESMAtlasOption(index);
     };
 
     const renderSelectedStructures = () => {
@@ -1065,7 +617,7 @@ export function StructureAlignmentInput(props: {
                 if (s !== undefined) {
                     return <div key={i} className={horizontal}>
                         {renderMutateControls(i)}
-                        {renderStructureInputOption(i, s)}
+                        {renderOption(i, s)}
                     </div>;
                 }
             })}
