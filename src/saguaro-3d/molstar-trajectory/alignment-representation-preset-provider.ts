@@ -1,3 +1,8 @@
+/*
+* Copyright (c) 2021 RCSB PDB and contributors, licensed under MIT, See LICENSE file for more info.
+* @author Joan Segura Mora <joan.segura@rcsb.org>
+* @author Yana Rose <yana.rose@rcsb.org>
+*/
 import { StructureRepresentationPresetProvider } from 'molstar/lib/mol-plugin-state/builder/structure/representation-preset';
 import { PluginContext } from 'molstar/lib/mol-plugin/context';
 import { PluginStateObject } from 'molstar/lib/mol-plugin-state/objects';

@@ -4,7 +4,6 @@
 * @author Joan Segura Mora <joan.segura@rcsb.org>
 * @author Yana Rose <yana.rose@rcsb.org>
 */
-
 import { PluginContext } from 'molstar/lib/mol-plugin/context';
 import { PluginStateObject } from 'molstar/lib/mol-plugin-state/objects';
 import { StateObjectRef } from 'molstar/lib/mol-state';
