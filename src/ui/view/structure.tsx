@@ -2,7 +2,7 @@ import { Subscription } from 'rxjs';
 import { useEffect } from 'react';
 
 import { ApplicationContext } from '../../context';
-import { AlignmentReference, CloseResidues } from '../../saguaro-3d/alignment-reference';
+import { AlignmentReference, ResidueCollection } from '../../saguaro-3d/alignment-reference';
 import {
     RcsbModuleDataProviderInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvModule/RcsbFvModuleInterface';
@@ -34,7 +34,7 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                                     to: SequenceReference.PdbInstance
                                 },
                                 trackFactories: {
-                                    alignmentTrackFactory: new AlignmentTrackFactory(alignmentReference.alignmentCloseResidues())
+                                    alignmentTrackFactory: new AlignmentTrackFactory(alignmentReference)
                                 }
                             }
                         };
@@ -87,7 +87,7 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                                         tooltip.style.visibility = 'hidden';
                                 });
                                 // Alignment data will be available for Mol* visualization
-                                (plugin.customState as { alignmentData: Map<string, CloseResidues> }).alignmentData = alignmentReference.alignmentCloseResidues();
+                                (plugin.customState as { alignmentData: Map<string, ResidueCollection> }).alignmentData = alignmentReference.alignmentCloseResidues();
                                 if (!plugin.representation.structure.themes.colorThemeRegistry.has(CloseResidueAlignmentColorThemeProvider))
                                     plugin.representation.structure.themes.colorThemeRegistry.add(CloseResidueAlignmentColorThemeProvider);
                                 if (!plugin.representation.structure.themes.colorThemeRegistry.has(HomogenousAlignmentColorThemeProvider))
