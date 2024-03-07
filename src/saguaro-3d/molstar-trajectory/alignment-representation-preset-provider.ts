@@ -82,8 +82,16 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
                 expressionsAlignedChain.push(MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]));
                 expressionsAlignedChain.push(AlignemntDataDescriptor.symbols.isIdentityUnit.symbol());
             } else if (type === 'polymer') {
-                expressionsOtherPolymerChains.push(MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]));
-                expressionsOtherPolymerChains.push(MS.core.logic.not([AlignemntDataDescriptor.symbols.isIdentityUnit.symbol()]));
+                if (asymId === instanceId) {
+                    // aligned chain ID partner needs an additinal 'idenity' check
+                    const e = MS.core.logic.and([
+                        MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]),
+                        MS.core.logic.not([AlignemntDataDescriptor.symbols.isIdentityUnit.symbol()])
+                    ]);
+                    expressionsOtherPolymerChains.push(e);
+                } else {
+                    expressionsOtherPolymerChains.push(MS.core.rel.eq([MS.ammp('label_asym_id'), asymId]));
+                }
             }
         }
 
@@ -106,19 +114,22 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
         representations['aligned'] = await buildRepr(plugin, alignedChainComponent, 'cartoon', STRUCTURAL_ALIGNMENT_HOMOGENOUS_COLOR);
 
         // creare component for other polymer chains
-        const polymerChainsComponent = await plugin.builders.structure.tryCreateComponentFromExpression(
-            structureCell,
-            MS.struct.generator.atomGroups({
-                'chain-test': MS.core.logic.and(expressionsOtherPolymerChains)
-            }),
-            `${structureCell.transform.ref}-polymer`,
-            {
-                // NOTE: this label format is needed for show/hide boxes in 1D view to work
-                label: `${entryId}${TagDelimiter.entity}${alignedEntityId}-polymer`
-            }
-        );
-        components['polymer'] = polymerChainsComponent;
-        representations['polymer'] = await buildRepr(plugin, polymerChainsComponent, 'cartoon', STRUCTURAL_ALIGNMENT_HOMOGENOUS_COLOR);
+        if (expressionsOtherPolymerChains.length > 0) {
+            console.log(expressionsOtherPolymerChains);
+            const polymerChainsComponent = await plugin.builders.structure.tryCreateComponentFromExpression(
+                structureCell,
+                MS.struct.generator.atomGroups({
+                    'chain-test': MS.core.logic.or(expressionsOtherPolymerChains)
+                }),
+                `${structureCell.transform.ref}-polymer`,
+                {
+                    // NOTE: this label format is needed for show/hide boxes in 1D view to work
+                    label: `${entryId}${TagDelimiter.entity}${alignedEntityId}-polymer`
+                }
+            );
+            components['polymer'] = polymerChainsComponent;
+            representations['polymer'] = await buildRepr(plugin, polymerChainsComponent, 'cartoon', STRUCTURAL_ALIGNMENT_HOMOGENOUS_COLOR);
+        }
 
         for (const expression of createSelectionExpressions(entryId)) {
             if (expression.tag === 'polymer')
