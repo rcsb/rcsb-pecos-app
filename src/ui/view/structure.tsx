@@ -5,7 +5,7 @@ import { ApplicationContext } from '../../context';
 import { AlignmentReference, ResidueCollection } from '../../saguaro-3d/alignment-reference';
 import {
     RcsbModuleDataProviderInterface
-} from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvModule/RcsbFvModuleInterface';
+} from '@rcsb/rcsb-saguaro-app/lib/RcsbFvWeb/RcsbFvModule/RcsbFvModuleInterface';
 import {
     RcsbLoadParamsProvider,
     RcsbStructuralAlignmentCollector

@@ -1,13 +1,16 @@
 import {
     TrackFactoryInterface
-} from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryInterface';
+} from '@rcsb/rcsb-saguaro-app/lib/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryInterface';
 import {
     AlignmentRequestContextType
-} from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryImpl/AlignmentTrackFactory';
+} from '@rcsb/rcsb-saguaro-app/lib/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryImpl/AlignmentTrackFactory';
 import { TargetAlignment } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
-import { RcsbFvDisplayTypes, RcsbFvRowConfigInterface } from '@rcsb/rcsb-saguaro';
-import { PlainAlignmentTrackFactory } from '@rcsb/rcsb-saguaro-app';
+import { RcsbFvDisplayTypes } from '@rcsb/rcsb-saguaro/lib/RcsbFv/RcsbFvConfig/RcsbFvDefaultConfigValues';
 import { ResidueCollection } from './alignment-reference';
+import { RcsbFvRowConfigInterface } from '@rcsb/rcsb-saguaro/lib/RcsbFv/RcsbFvConfig/RcsbFvConfigInterface';
+import {
+    PlainAlignmentTrackFactory
+} from '@rcsb/rcsb-saguaro-app/lib/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryImpl/PlainAlignmentTrackFactory';
 
 interface AlignmentResidueDescription {
     alignmentCloseResidues(): Map<string, ResidueCollection>;
