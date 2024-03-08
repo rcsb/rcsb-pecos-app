@@ -16,6 +16,7 @@ import { AlignmentTrackFactory } from '../../saguaro-3d/alignment-track-factory'
 import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
 import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
 import { CloseResidueAlignmentColorThemeProvider, HomogenousAlignmentColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
+import { SequenceTooltip } from '../../utils/sequence-tooltip';
 
 let panel3D: RcsbFv3DAlignmentProvider;
 export function StructureViewComponent(props: { ctx: ApplicationContext }) {
@@ -54,7 +55,8 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
                             additionalConfig: {
                                 boardConfig: {
                                     rowTitleWidth: 110,
-                                    disableMenu: true
+                                    disableMenu: true,
+                                    tooltipGenerator: new SequenceTooltip()
                                 },
                                 trackConfigModifier: {
                                     alignment: ()=> {

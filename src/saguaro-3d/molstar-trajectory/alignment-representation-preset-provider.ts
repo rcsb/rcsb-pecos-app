@@ -115,7 +115,6 @@ export const AlignmentRepresentationProvider = StructureRepresentationPresetProv
 
         // creare component for other polymer chains
         if (expressionsOtherPolymerChains.length > 0) {
-            console.log(expressionsOtherPolymerChains);
             const polymerChainsComponent = await plugin.builders.structure.tryCreateComponentFromExpression(
                 structureCell,
                 MS.struct.generator.atomGroups({
