@@ -18,7 +18,22 @@ type AlignmentMemberType = {
     target: AlignmentRefType;
 };
 
-export type AlignmentMapType = {entryId: string; instanceId: string; alignmentId: string; sequence: string; alignmentIndex: number; pairIndex: number; alignment: Alignment;};
+export type AlignmentMapType = {
+    entryId: string;
+    instanceId: string;
+    alignmentModelIndex: number;
+    alignmentId: string;
+    sequence: string;
+    alignmentIndex: number;
+    pairIndex: number;
+    alignment: Alignment;
+};
+
+export type CloseResidues = {
+    asymId: string
+    labelSeqIds: number[]
+}
+
 export class AlignmentReference {
     private alignmentRefMap: AlignmentRefType = [];
     private refId = 'none';
@@ -63,29 +78,35 @@ export class AlignmentReference {
         return buildAlignments(this.refId, this.alignmentRefMap, this.memberRefList.slice(1));
     }
 
-    private addUniqueAlignmentId(result: Alignment, alignmentIndex: number, pairIndex: 0|1 = 1): string {
-        const res = result.structures[pairIndex];
-        if (!res.selection)
+    private addUniqueAlignmentId(alignment: Alignment, alignmentIndex: number, pairIndex: 0|1 = 1): string {
+        const structure = alignment.structures[pairIndex];
+        if (!structure.selection)
             throw new Error('Missing entry_id and name from result');
         let entryId: string | undefined = undefined;
-        const asymId = 'asym_id' in res.selection ? res.selection.asym_id : undefined;
-        if ('entry_id' in res && res.entry_id && res.selection && 'asym_id' in res.selection)
-            entryId = res.entry_id;
-        else if ('name' in res && res.selection && 'asym_id' in res.selection)
-            entryId = res.name;
+        const asymId = 'asym_id' in structure.selection ? structure.selection.asym_id : undefined;
+        if ('entry_id' in structure && structure.entry_id && structure.selection && 'asym_id' in structure.selection)
+            entryId = structure.entry_id;
+        else if ('name' in structure && structure.selection && 'asym_id' in structure.selection)
+            entryId = structure.name;
         if (!entryId || !asymId)
             throw new Error('Missing entry_id and name from result');
-        if (!this.alignmentMap.has(`${entryId}${TagDelimiter.instance}${asymId}`)) {
-            this.alignmentMap.set(`${entryId}${TagDelimiter.instance}${asymId}`, {
+
+        const alignmentId = `${entryId}${TagDelimiter.instance}${asymId}`;
+
+        const alignmentModelIndex = (pairIndex === 0) ? 0 : alignmentIndex + 1;
+
+        if (!this.alignmentMap.has(alignmentId)) {
+            this.alignmentMap.set(alignmentId, {
                 entryId,
                 instanceId: asymId,
-                sequence: result.sequence_alignment?.[pairIndex].sequence ?? '',
+                alignmentModelIndex: alignmentModelIndex,
+                sequence: alignment.sequence_alignment?.[pairIndex].sequence ?? '',
                 alignmentIndex: alignmentIndex,
                 pairIndex: pairIndex,
-                alignmentId: `${entryId}${TagDelimiter.instance}${asymId}`,
-                alignment: result
+                alignmentId: alignmentId,
+                alignment: alignment
             });
-            return `${entryId}${TagDelimiter.instance}${asymId}`;
+            return alignmentId;
         } else {
             let tag = 1;
             while (this.alignmentMap.has(`${entryId}[${tag}]${TagDelimiter.instance}${asymId}`)) {
@@ -94,11 +115,12 @@ export class AlignmentReference {
             this.alignmentMap.set(`${entryId}[${tag}]${TagDelimiter.instance}${asymId}`, {
                 entryId,
                 instanceId: asymId,
-                sequence: result.sequence_alignment?.[pairIndex].sequence ?? '',
+                alignmentModelIndex: alignmentModelIndex,
+                sequence: alignment.sequence_alignment?.[pairIndex].sequence ?? '',
                 alignmentIndex: alignmentIndex,
                 pairIndex: pairIndex,
                 alignmentId: `${entryId}[${tag}]${TagDelimiter.instance}${asymId}`,
-                alignment: result
+                alignment: alignment
             });
             return `${entryId}[${tag}]${TagDelimiter.instance}${asymId}`;
         }
@@ -106,8 +128,7 @@ export class AlignmentReference {
 
     public getAlignmentEntry(alignmentId: string): AlignmentMapType {
         const pdb = this.alignmentMap.get(alignmentId);
-        if (pdb)
-            return pdb;
+        if (pdb) return pdb;
         throw new Error('Alignment Id not found');
     }
 
@@ -207,7 +228,49 @@ export class AlignmentReference {
         });
     }
 
+    alignmentCloseResidues(): Map<string, CloseResidues> {
+
+        const out: Map<string, CloseResidues> = new Map<string, CloseResidues>();
+
+        this.getMapAlignments().slice(1).forEach(alignment => {
+
+            const key = alignment.alignmentId;
+            const results = alignment.alignment;
+
+            if (!out.has(key)) {
+                out.set(key, {
+                    asymId: alignment.instanceId,
+                    labelSeqIds: []
+                });
+            }
+            results.structure_alignment.map(sa => sa.regions?.[1]).flat().forEach(reg=>{
+                if (!reg)
+                    return;
+                for (let n = 0; n < reg.length; n++) {
+                    out.get(key)?.labelSeqIds.push(reg.beg_seq_id + n);
+                }
+            });
+
+            const ref = this.getMapAlignments()[0];
+            const refKey = ref.alignmentId;
+            if (!out.has(refKey))
+                out.set(refKey, {
+                    asymId: ref.instanceId,
+                    labelSeqIds: []
+                });
+            results.structure_alignment.map(sa => sa.regions?.[0]).flat().forEach(reg=>{
+                if (!reg)
+                    return;
+                for (let n = 0; n < reg.length; n++) {
+                    out.get(refKey)?.labelSeqIds.push(reg.beg_seq_id + n);
+                }
+            });
+        });
+        return out;
+    }
 }
+
+
 
 function transformToGapedDomain(regions: AlignmentRegion[]): (number|undefined)[] {
     const out: (number|undefined)[] = [];

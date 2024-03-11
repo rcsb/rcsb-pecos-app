@@ -1,104 +1,103 @@
 import { Subscription } from 'rxjs';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { ApplicationContext } from '../../context';
-import { AlignmentReference } from '../../saguaro-3d/alignment-reference';
+import { AlignmentReference, CloseResidues } from '../../saguaro-3d/alignment-reference';
 import {
     RcsbModuleDataProviderInterface
 } from '@rcsb/rcsb-saguaro-app/build/dist/RcsbFvWeb/RcsbFvModule/RcsbFvModuleInterface';
 import {
-    alignmentCloseResidues,
-    ColorConfig, entryColors, RcsbLoadParamsProvider,
-    RcsbStructuralAlignmentProvider
-} from '../../saguaro-3d/external-alignment-provider';
+    RcsbLoadParamsProvider,
+    RcsbStructuralAlignmentCollector
+} from '../../saguaro-3d/alignment-collector';
 import { SequenceReference } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFv3D/RcsbFv3DAlignmentProvider';
 import { AlignmentTrackFactory } from '../../saguaro-3d/alignment-track-factory';
-import { ColorLists, convertHexToRgb } from '../../utils/color';
+import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
 import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
-import { EquivalentResiduesColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
-
+import { CloseResidueAlignmentColorThemeProvider, HomogenousAlignmentColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
 
 let panel3D: RcsbFv3DAlignmentProvider;
 export function StructureViewComponent(props: { ctx: ApplicationContext }) {
-
-    useEffect(()=>{
+    useEffect(() => {
         if (props.ctx.state.events.status.getValue() === 'ready' && props.ctx.state.data.response.state?.results) {
-            const structAlignResponse = props.ctx.state.data.response.state;
-            const alignmentReference = new AlignmentReference();
-            if (structAlignResponse.results) {
-                alignmentReference.init(structAlignResponse.results).then(()=>{
-                    const dataProvider: RcsbModuleDataProviderInterface = {
-                        alignments: {
-                            collector: new RcsbStructuralAlignmentProvider(structAlignResponse, alignmentReference),
-                            context: {
-                                queryId: 'structural-alignment',
-                                to: SequenceReference.PdbInstance
-                            },
-                            trackFactories: {
-                                alignmentTrackFactory: new AlignmentTrackFactory(alignmentCloseResidues(alignmentReference.getMapAlignments()))
+            const alignmentResponse = props.ctx.state.data.response.state;
+            if (alignmentResponse.results) {
+                const alignmentReference = new AlignmentReference();
+                alignmentReference.init(alignmentResponse.results)
+                    .then(() => {
+                        const dataProvider: RcsbModuleDataProviderInterface = {
+                            alignments: {
+                                collector: new RcsbStructuralAlignmentCollector(alignmentResponse, alignmentReference),
+                                context: {
+                                    queryId: 'structural-alignment',
+                                    to: SequenceReference.PdbInstance
+                                },
+                                trackFactories: {
+                                    alignmentTrackFactory: new AlignmentTrackFactory(alignmentReference.alignmentCloseResidues())
+                                }
                             }
-                        }
-                    };
-                    panel3D?.unmount();
-                    const colorConfig = new ColorConfig({
-                        closeResidues: alignmentCloseResidues(alignmentReference.getMapAlignments() ?? []),
-                        colors: entryColors(alignmentReference.getMapAlignments() ?? [])
-                    });
-                    let index = 0;
-                    panel3D = new RcsbFv3DAlignmentProvider({
-                        elementId: '1d-3d-div',
-                        config: {
-                            dataProvider: dataProvider,
-                            loadParamsProvider: new RcsbLoadParamsProvider(
-                                structAlignResponse,
-                                alignmentReference,
-                                colorConfig
-                            ),
-                            additionalContent: () => <></>
-                        },
-                        additionalConfig: {
-                            boardConfig: {
-                                rowTitleWidth: 110,
-                                disableMenu: true
+                        };
+                        panel3D?.unmount();
+
+                        let index = 0;
+                        panel3D = new RcsbFv3DAlignmentProvider({
+                            elementId: '1d-3d-div',
+                            config: {
+                                dataProvider: dataProvider,
+                                loadParamsProvider: new RcsbLoadParamsProvider(
+                                    alignmentResponse,
+                                    alignmentReference
+                                ),
+                                additionalContent: () => <></>
                             },
-                            trackConfigModifier: {
-                                alignment: ()=>{
-                                    const color = convertHexToRgb(ColorLists['set-1'][index++], 0.8);
-                                    return Promise.resolve({
-                                        titleFlagColor: color
-                                    });
+                            additionalConfig: {
+                                boardConfig: {
+                                    rowTitleWidth: 110,
+                                    disableMenu: true
+                                },
+                                trackConfigModifier: {
+                                    alignment: ()=> {
+                                        const color = getAlignmentColorRgb(index++, DefaultOpasityValue);
+                                        return Promise.resolve({
+                                            titleFlagColor: color
+                                        });
+                                    }
+                                },
+                                externalUiComponents: {
+                                    replace: []
                                 }
                             },
-                            externalUiComponents: {
-                                replace: []
+                            molstarProps: {
+                                showStructureSourceControls: false,
+                                showStrucmotifSubmitControls: false,
+                                showSuperpositionControls: false
                             }
-                        },
-                        molstarProps: {
-                            showStructureSourceControls: false,
-                            showStrucmotifSubmitControls: false,
-                            showSuperpositionControls: false
-                        }
-                    });
-                    panel3D.render().then(()=>{
-                        panel3D.pluginCall(plugin=>{
-                            (panel3D as unknown as {downloadSubscription: Subscription}).downloadSubscription = props.ctx.state.events.download.subscribe(() => exportHierarchy(plugin, { format: 'cif' }));
-                            // Hides / Displays molstar tooltip on panel expansion
-                            plugin.layout.events.updated.subscribe(()=>{
-                                const tooltip = (document.getElementsByClassName('msp-highlight-toast-wrapper').item(0) as HTMLElement);
-                                if (plugin.layout.state.isExpanded)
-                                    tooltip.style.visibility = 'visible';
-                                else
-                                    tooltip.style.visibility = 'hidden';
+                        });
+
+                        panel3D.render().then(() => {
+                            panel3D.pluginCall(plugin => {
+                                (panel3D as unknown as {downloadSubscription: Subscription}).downloadSubscription = props.ctx.state.events.download.subscribe(() => exportHierarchy(plugin, { format: 'cif' }));
+                                // Hides / Displays molstar tooltip on panel expansion
+                                plugin.layout.events.updated.subscribe(() => {
+                                    const tooltip = (document.getElementsByClassName('msp-highlight-toast-wrapper').item(0) as HTMLElement);
+                                    if (plugin.layout.state.isExpanded)
+                                        tooltip.style.visibility = 'visible';
+                                    else
+                                        tooltip.style.visibility = 'hidden';
+                                });
+                                // Alignment data will be available for Mol* visualization
+                                (plugin.customState as { alignmentData: Map<string, CloseResidues> }).alignmentData = alignmentReference.alignmentCloseResidues();
+                                if (!plugin.representation.structure.themes.colorThemeRegistry.has(CloseResidueAlignmentColorThemeProvider))
+                                    plugin.representation.structure.themes.colorThemeRegistry.add(CloseResidueAlignmentColorThemeProvider);
+                                if (!plugin.representation.structure.themes.colorThemeRegistry.has(HomogenousAlignmentColorThemeProvider))
+                                    plugin.representation.structure.themes.colorThemeRegistry.add(HomogenousAlignmentColorThemeProvider);
                             });
-                            if (!plugin.representation.structure.themes.colorThemeRegistry.has(EquivalentResiduesColorThemeProvider))
-                                plugin.representation.structure.themes.colorThemeRegistry.add(EquivalentResiduesColorThemeProvider);
                         });
                     });
-                });
             }
         } else {
-            setTimeout(()=>panel3D?.unmount());
+            setTimeout(() => panel3D?.unmount());
             (panel3D as unknown as {downloadSubscription: Subscription})?.downloadSubscription?.unsubscribe();
         }
     });

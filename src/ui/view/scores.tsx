@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useEffect, useState } from 'react';
 import { Alignment } from '../../auto/alignment/alignment-response';
 import { ApplicationContext } from '../../context';
-import { ColorLists, convertHexToRgb } from '../../utils/color';
+import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
 
 function round(value: number | undefined) {
     if (!value && value !== 0)
@@ -42,7 +43,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
     function showScores() {
         return data.map((alignment, n)=>{
             const data = scores(alignment);
-            const color = convertHexToRgb(ColorLists['set-1'][n + 1], 0.8);
+            const color = getAlignmentColorRgb(n + 1, DefaultOpasityValue);
             return (<tr key={n}>
                 <td style={{ backgroundColor: color }}></td>
                 <td>{data.entryId}</td>
@@ -62,7 +63,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
             return <></>;
         const entryId = 'entry_id' in alignment.structures[0] ? alignment.structures[0]['entry_id'] : ('name' in alignment.structures[0] ? alignment.structures[0]['name'] : 'NA');
         const chainId = alignment.structures[0].selection && 'asym_id' in alignment.structures[0].selection ? alignment.structures[0].selection['asym_id'] : 'NA';
-        const color = convertHexToRgb(ColorLists['set-1'][0], 0.8);
+        const color = getAlignmentColorRgb(0, DefaultOpasityValue);
         const seqLength = alignment.sequence_alignment?.[0].sequence?.length;
         const modeledLength = alignment.summary?.n_modeled_residues?.[0];
         return (<tr>
