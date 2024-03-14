@@ -7,7 +7,7 @@ export class SequenceTooltip implements RcsbFvTooltipInterface {
 
     private readonly STRUCTURAL_ALIGNMENT = 'STRUCTURAL ALIGNMENT';
     private readonly SEQUENCE_ALIGNMENT = 'SEQUENCE ALIGNMENT';
-    private readonly UNALIGNED_REGION = 'UNALIGNED REGION';
+    private readonly ALIGNMENT_UNAVAILABLE = 'ALIGNMENT UNAVAILABLE';
     private readonly ALIGNMENT_GAP = 'ALIGNMENT GAP';
 
     showTooltip(d: RcsbFvTrackDataAnnotationInterface): HTMLElement {
@@ -40,7 +40,7 @@ export class SequenceTooltip implements RcsbFvTooltipInterface {
         else if (d.value === 75)
             title = this.SEQUENCE_ALIGNMENT;
         else if (d.value === 25)
-            title = this.UNALIGNED_REGION;
+            title = this.ALIGNMENT_UNAVAILABLE;
         tooltipDiv.append(title);
 
         if (typeof d.provenanceName === 'string') {
