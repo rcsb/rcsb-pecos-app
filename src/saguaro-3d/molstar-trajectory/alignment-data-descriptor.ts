@@ -3,11 +3,11 @@ import { StructureElement, StructureProperties } from 'molstar/lib/mol-model/str
 import { CustomPropSymbol } from 'molstar/lib/mol-script/language/symbol';
 import { Type } from 'molstar/lib/mol-script/language/type';
 import { QuerySymbolRuntime, DefaultQueryRuntimeTable } from 'molstar/lib/mol-script/runtime/query/base';
-import { CloseResidues } from '../alignment-reference';
+import { ResidueCollection } from '../alignment-reference';
 
 export function isCloseResidue(l: StructureElement.Location) {
     const isIdentityMap = l.structure.inheritedPropertyData.rcsb_alignmentIsIdentityMap as Map<number, boolean>;
-    const closeResidues = l.structure.inheritedPropertyData.rcsb_alignmentCloseResidues as CloseResidues | undefined;
+    const closeResidues = l.structure.inheritedPropertyData.rcsb_alignmentCloseResidues as ResidueCollection | undefined;
     if (!closeResidues) return false;
 
     const isIdentityOp = isIdentityMap?.get(l.unit.id) ?? false;
