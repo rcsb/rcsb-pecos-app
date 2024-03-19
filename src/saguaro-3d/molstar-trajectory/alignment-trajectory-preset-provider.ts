@@ -12,7 +12,7 @@ import { ParamDefinition as PD } from 'molstar/lib/mol-util/param-definition';
 
 import { Model } from 'molstar/lib/mol-model/structure';
 import {
-    RigidTransformType, TransformMatrixType
+    RigidTransformType
 } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFvStructure/StructureUtils/StructureLoaderInterface';
 import { AlignmentRepresentationProvider } from './alignment-representation-preset-provider';
 import { AlignemntDataDescriptor } from './alignment-data-descriptor';
@@ -24,7 +24,7 @@ import { ModelExport } from 'molstar/lib/extensions/model-export/export';
 import { StructureSelectionQuery } from 'molstar/lib/mol-plugin-state/helpers/structure-selection-query';
 import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder';
 import { Mat4 } from 'molstar/lib/mol-math/linear-algebra/3d/mat4';
-import { CloseResidues } from '../alignment-reference';
+import { ResidueCollection } from '../alignment-reference';
 
 export type AlignmentTrajectoryParamsType = {
     pdb: {
@@ -108,7 +108,7 @@ export const AlignmentTrajectoryPresetProvider = TrajectoryHierarchyPresetProvid
         if (!structure.data) return {};
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const alignmentData = ((plugin.customState as any).alignmentData as Map<string, CloseResidues>);
+        const alignmentData = ((plugin.customState as any).alignmentData as Map<string, ResidueCollection>);
         structure.data.inheritedPropertyData.rcsb_alignmentModelIndex = params.modelIndex;
         structure.data.inheritedPropertyData.rcsb_alignmentCloseResidues = alignmentData.get(params.alignmentId);
         structure.data.inheritedPropertyData.rcsb_alignmentIsIdentityMap = isIdentityMap;

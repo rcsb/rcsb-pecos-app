@@ -3,11 +3,11 @@ import {
     AlignedRegion,
     AlignmentResponse,
 } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
-import { RcsbRequestContextManager } from '@rcsb/rcsb-saguaro-app';
+import { rcsbRequestCtxManager as RcsbRequestContextManager } from '@rcsb/rcsb-saguaro-app/lib/RcsbRequest/RcsbRequestContextManager';
 import { TagDelimiter } from '@rcsb/rcsb-api-tools/build/RcsbUtils/TagDelimiter';
 import {
     InstanceSequenceInterface
-} from '@rcsb/rcsb-saguaro-app/build/dist/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
+} from '@rcsb/rcsb-saguaro-app/lib/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
 import { Alignment, AlignmentRegion } from '../auto/alignment/alignment-response';
 
 type AlignmentRefType = (number|undefined)[];
@@ -29,17 +29,17 @@ export type AlignmentMapType = {
     alignment: Alignment;
 };
 
-export type CloseResidues = {
+export type ResidueCollection = {
     asymId: string
     labelSeqIds: number[]
 }
 
 export class AlignmentReference {
+
     private alignmentRefMap: AlignmentRefType = [];
     private refId = 'none';
     private alignmentRefGaps: Record<number, number> = {};
     private memberRefList: AlignmentMemberType[] = [];
-
     private readonly alignmentMap = new Map<string, AlignmentMapType>();
 
     public async init(results: Alignment[]) {
@@ -76,6 +76,106 @@ export class AlignmentReference {
 
     public buildAlignments(): AlignmentResponse {
         return buildAlignments(this.refId, this.alignmentRefMap, this.memberRefList.slice(1));
+    }
+
+    public alignmentCloseResidues(): Map<string, ResidueCollection> {
+
+        const out: Map<string, ResidueCollection> = new Map<string, ResidueCollection>();
+
+        this.getMapAlignments().slice(1).forEach(alignment => {
+
+            const key = alignment.alignmentId;
+            const results = alignment.alignment;
+
+            if (!out.has(key)) {
+                out.set(key, {
+                    asymId: alignment.instanceId,
+                    labelSeqIds: []
+                });
+            }
+            results.structure_alignment.map(sa => sa.regions?.[1]).flat().forEach(reg=>{
+                if (!reg)
+                    return;
+                for (let n = 0; n < reg.length; n++) {
+                    out.get(key)?.labelSeqIds.push(reg.beg_seq_id + n);
+                }
+            });
+
+            const ref = this.getMapAlignments()[0];
+            const refKey = ref.alignmentId;
+            if (!out.has(refKey))
+                out.set(refKey, {
+                    asymId: ref.instanceId,
+                    labelSeqIds: []
+                });
+            results.structure_alignment.map(sa => sa.regions?.[0]).flat().forEach(reg=>{
+                if (!reg)
+                    return;
+                for (let n = 0; n < reg.length; n++) {
+                    out.get(refKey)?.labelSeqIds.push(reg.beg_seq_id + n);
+                }
+            });
+        });
+        return out;
+    }
+
+    public unalignedResidues(): Map<string, ResidueCollection> {
+        const out: Map<string, ResidueCollection> = new Map<string, ResidueCollection>();
+        const ref = this.getMapAlignments()[0];
+        const unobserved = this.alignmentRefMap.filter((resId, index) => {
+            if (!resId)
+                return false;
+            return this.memberRefList.slice(1).filter(memberRef => {
+                return ((memberRef.map[index]) !== undefined && memberRef.target[memberRef.map[index] as number] !== undefined);
+            }).length === 0;
+        });
+        out.set(ref.alignmentId, {
+            asymId: ref.instanceId,
+            labelSeqIds: unobserved as number[]
+        });
+        this.memberRefList.slice(1).forEach((memberRef, index)=> {
+            const ref = this.getMapAlignments()[index + 1];
+            const unobserved = memberRef.map
+                .filter((resId, index) => {
+                    return resId !== undefined && this.alignmentRefMap[index] === undefined;
+                })
+                .map(
+                    resId => memberRef.target[resId as number]
+                );
+            out.set(ref.alignmentId, {
+                asymId: ref.instanceId,
+                labelSeqIds: unobserved as number[]
+            });
+        });
+        return out;
+    }
+
+    public getAlignmentEntry(alignmentId: string): AlignmentMapType {
+        const pdb = this.alignmentMap.get(alignmentId);
+        if (pdb) return pdb;
+        throw new Error('Alignment Id not found');
+    }
+
+    public getMapAlignments(): AlignmentMapType[] {
+        return Array.from(this.alignmentMap.values());
+    }
+
+    public async getSequences(): Promise<InstanceSequenceInterface[]> {
+        const out = Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length > 0).map(v=>({
+            rcsbId: v.alignmentId,
+            sequence: v.sequence
+        }));
+        const missingSeq = await RcsbRequestContextManager.getInstanceSequences(
+            Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length === 0).map(
+                v=>`${v.entryId}${TagDelimiter.instance}${v.instanceId}`
+            ).filter((value, index, list)=> list.indexOf(value) === index)
+        );
+        return out.concat(
+            Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length === 0).map(v=>({
+                rcsbId: v.alignmentId,
+                sequence: missingSeq.find(s=>s.rcsbId === `${v.entryId}${TagDelimiter.instance}${v.instanceId}`)?.sequence ?? ''
+            }))
+        );
     }
 
     private addUniqueAlignmentId(alignment: Alignment, alignmentIndex: number, pairIndex: 0|1 = 1): string {
@@ -124,34 +224,6 @@ export class AlignmentReference {
             });
             return `${entryId}[${tag}]${TagDelimiter.instance}${asymId}`;
         }
-    }
-
-    public getAlignmentEntry(alignmentId: string): AlignmentMapType {
-        const pdb = this.alignmentMap.get(alignmentId);
-        if (pdb) return pdb;
-        throw new Error('Alignment Id not found');
-    }
-
-    public getMapAlignments(): AlignmentMapType[] {
-        return Array.from(this.alignmentMap.values());
-    }
-
-    public async getSequences(): Promise<InstanceSequenceInterface[]> {
-        const out = Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length > 0).map(v=>({
-            rcsbId: v.alignmentId,
-            sequence: v.sequence
-        }));
-        const missingSeq = await RcsbRequestContextManager.getInstanceSequences(
-            Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length === 0).map(
-                v=>`${v.entryId}${TagDelimiter.instance}${v.instanceId}`
-            ).filter((value, index, list)=> list.indexOf(value) === index)
-        );
-        return out.concat(
-            Array.from(this.alignmentMap.values()).filter(v=>v.sequence.length === 0).map(v=>({
-                rcsbId: v.alignmentId,
-                sequence: missingSeq.find(s=>s.rcsbId === `${v.entryId}${TagDelimiter.instance}${v.instanceId}`)?.sequence ?? ''
-            }))
-        );
     }
 
     private addRef(id: string, alignment: AlignmentRefType, target: AlignmentRefType): void {
@@ -228,46 +300,6 @@ export class AlignmentReference {
         });
     }
 
-    alignmentCloseResidues(): Map<string, CloseResidues> {
-
-        const out: Map<string, CloseResidues> = new Map<string, CloseResidues>();
-
-        this.getMapAlignments().slice(1).forEach(alignment => {
-
-            const key = alignment.alignmentId;
-            const results = alignment.alignment;
-
-            if (!out.has(key)) {
-                out.set(key, {
-                    asymId: alignment.instanceId,
-                    labelSeqIds: []
-                });
-            }
-            results.structure_alignment.map(sa => sa.regions?.[1]).flat().forEach(reg=>{
-                if (!reg)
-                    return;
-                for (let n = 0; n < reg.length; n++) {
-                    out.get(key)?.labelSeqIds.push(reg.beg_seq_id + n);
-                }
-            });
-
-            const ref = this.getMapAlignments()[0];
-            const refKey = ref.alignmentId;
-            if (!out.has(refKey))
-                out.set(refKey, {
-                    asymId: ref.instanceId,
-                    labelSeqIds: []
-                });
-            results.structure_alignment.map(sa => sa.regions?.[0]).flat().forEach(reg=>{
-                if (!reg)
-                    return;
-                for (let n = 0; n < reg.length; n++) {
-                    out.get(refKey)?.labelSeqIds.push(reg.beg_seq_id + n);
-                }
-            });
-        });
-        return out;
-    }
 }
 
 
