@@ -422,15 +422,17 @@ export function StructureAlignmentInput(props: {
             handler.push(next);
         };
 
-        const updateBegResId = (beg?: number) => {
+        const updateBegResId = (beg: string) => {
             const next = handler.copy();
-            selection(structure(next, index)).beg_seq_id = beg;
+            const n = Number(beg);
+            selection(structure(next, index)).beg_seq_id = !isNaN(n) && n > 0 ? n : undefined;
             handler.push(next);
         };
 
-        const updateEndResId = (end?: number) => {
+        const updateEndResId = (end: string) => {
             const next = handler.copy();
-            selection(structure(next, index)).end_seq_id = end;
+            const n = Number(end);
+            selection(structure(next, index)).end_seq_id = !isNaN(n) && n > 0 ? n : undefined;
             handler.push(next);
         };
         return <>
@@ -449,15 +451,15 @@ export function StructureAlignmentInput(props: {
             />}
             <ResidueInputComponent
                 label='Beg'
-                value={sele.beg_seq_id}
+                value={sele.beg_seq_id || ''}
                 isDisabled={!sele.asym_id}
-                onChange={(v) => updateBegResId(Number(v))}
+                onChange={updateBegResId}
             />
             <ResidueInputComponent
                 label='End'
-                value={sele.end_seq_id}
+                value={sele.end_seq_id || ''}
                 isDisabled={!sele.asym_id}
-                onChange={(v) => updateEndResId(Number(v))}
+                onChange={updateEndResId}
             />
         </>;
     };
