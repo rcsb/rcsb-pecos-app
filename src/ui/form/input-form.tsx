@@ -360,6 +360,7 @@ export function StructureAlignmentInput(props: {
             }
         ];
         return <Select
+            dropdownMatchSelectWidth={false}
             getRawInputElement={() => <Icon svg={LineArrowDownSvg} title={text}/>}
             options={options}
             onChange={(v?: string) => onMutation(index, v)}

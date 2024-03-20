@@ -488,3 +488,7 @@
     outline: none;
     width: 100%;
   }
+
+  .rc-virtual-list-holder {
+    max-height: fit-content !important;
+  }
