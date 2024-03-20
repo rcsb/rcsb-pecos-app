@@ -428,9 +428,9 @@ export function StructureAlignmentInput(props: {
             handler.push(next);
         };
 
-        const updateEndResId = (beg?: number) => {
+        const updateEndResId = (end?: number) => {
             const next = handler.copy();
-            selection(structure(next, index)).end_seq_id = beg;
+            selection(structure(next, index)).end_seq_id = end;
             handler.push(next);
         };
         return <>
