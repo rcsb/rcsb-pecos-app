@@ -66,7 +66,7 @@ function RcsbEntryById(props: {
 }) {
     return <AutosuggestControl
         value={props.value}
-        label={'Entry ID'}
+        label={'3PQR, AF_AFP60325F1 '}
         onChange={props.onChange}
         suggestHandler={props.suggestFn}
         className={classNames('inp', 'inp-entry')}
@@ -331,15 +331,16 @@ export function StructureAlignmentInput(props: {
         const options: SelectOption<StructureInputOption>[] = [
             {
                 label: 'RCSB.org',
-                title: '',
                 options: [
                     {
                         label: 'Entry ID',
-                        value: 'rcsb-entry'
+                        value: 'rcsb-entry',
+                        title: 'Enter PDB or Computed Structure Model (CSM) ID'
                     },
                     {
                         label: 'UniProt ID',
-                        value: 'rcsb-uniprot'
+                        value: 'rcsb-uniprot',
+                        title: 'Enter UniProtKB ID for seuences with known 3D structure'
                     }
                 ]
             },
@@ -348,19 +349,23 @@ export function StructureAlignmentInput(props: {
                 options: [
                     {
                         label: 'AlphaFold DB',
-                        value: 'alphafold-db'
+                        value: 'alphafold-db',
+                        title: 'Enter UniProtKB ID to fetch a structure from AlphaFold Protein Structure Database'
                     },
                     {
                         label: 'ESMAtlas',
-                        value: 'esm-atlas'
+                        value: 'esm-atlas',
+                        title: 'Enter MGnify protein ID from the MGnify protein sequence database to fetch a structure from ESM Metagenomic Atlas'
                     },
                     {
                         label: 'File Upload',
-                        value: 'file-upload'
+                        value: 'file-upload',
+                        title: 'Upload a file containing atomic structure coordinates in one of the followiing formats: PDBx/mmCIF, BinaryCIF, and Legacy PDB'
                     },
                     {
                         label: 'File URL',
-                        value: 'file-url'
+                        value: 'file-url',
+                        title: 'Reference atomic structure coordinates by providing a URL to a file'
                     }
                 ]
             }

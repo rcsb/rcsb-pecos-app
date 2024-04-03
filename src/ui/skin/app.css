@@ -202,12 +202,24 @@
   box-shadow: none;
 }
 
-.inp-txt {
-  width: 70px;
+.inp-entry::-webkit-input-placeholder {
+  font-style: italic;
+}
+
+.inp-entry::-ms-input-placeholder {
+  font-style: italic;
+}
+
+.inp-entry::-moz-placeholder {
+  font-style: italic;
+}
+
+.inp-entry::-moz-placeholder {
+  font-style: italic;
 }
 
 .inp-entry {
-  width: 90px;
+  width: 180px;
 }
 
 .inp-link {
