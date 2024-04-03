@@ -64,13 +64,16 @@ function RcsbEntryById(props: {
     onChange: (value: string) => void,
     suggestFn: (v: string) => Promise<string[]>
 }) {
-    return <AutosuggestControl
-        value={props.value}
-        label={'3PQR, AF_AFP60325F1 '}
-        onChange={props.onChange}
-        suggestHandler={props.suggestFn}
-        className={classNames('inp', 'inp-entry')}
-    />;
+    return <div className='inp-outer'>
+        <label className='inp-label'>Entry ID</label>
+        <AutosuggestControl
+            value={props.value}
+            label={'3PQR, AF_AFP60325F1 '}
+            onChange={props.onChange}
+            suggestHandler={props.suggestFn}
+            className={classNames('inp', 'inp-entry')}
+        />
+    </div>;
 }
 
 function RcsbEntryByUniprotId(props: {
@@ -98,18 +101,21 @@ function RcsbEntryByUniprotId(props: {
     };
 
     return <>
-        <AutosuggestControl
-            value={uniprotId || ''}
-            label={'UniProt ID'}
-            onChange={updateUniprotId}
-            suggestHandler={props.ctx.search().suggestUniprotID.bind(props.ctx.search())}
-            className={classNames('inp', 'inp-entry')}
-        />
-        <div className='inp-select'>
+        <div className='inp-outer'>
+            <label className='inp-label'>UniProtKB ID</label>
+            <AutosuggestControl
+                value={uniprotId || ''}
+                label={'P06213'}
+                onChange={updateUniprotId}
+                suggestHandler={props.ctx.search().suggestUniprotID.bind(props.ctx.search())}
+                className={classNames('inp', 'inp-entry')}
+            />
+        </div>
+        <div id='arrow-top' className='inp-outer inp-select'>
+            <label className='inp-label'>Protein Chain</label>
             <Select
-                value={'Select protein chain'}
+                value={options.length === 0 ? '' : options[0].label }
                 dropdownMatchSelectWidth={false}
-                placeholder='Chain ID'
                 suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
                 options={options}
                 disabled={options.length === 0}
@@ -149,22 +155,28 @@ function CoordinatesByFileUpload(props: {
         };
 
         return (
-            <Upload style={{ outline: 'none' }} {...uploadProps}>
-                <button className={'btn-upload'}>
-                    <Icon
-                        svg={UploadSvg}
-                    />
-                    <span className='btn-upload-label'>{'Upload File'}</span>
-                </button>
-            </Upload>
+            <div className='inp-outer'>
+                <label className='inp-label'>File</label>
+                <Upload style={{ outline: 'none' }} {...uploadProps}>
+                    <button className={'btn-upload'}>
+                        <Icon
+                            svg={UploadSvg}
+                        />
+                        <span className='btn-upload-label'>{'Upload File'}</span>
+                    </button>
+                </Upload>
+            </div>
         );
     } else {
-        return <div>
-            <span style={{ padding: '3px' }}>{props.value.name}</span>
-            <Icon
-                svg={PaperClipSvg}
-                className='upload-icon'
-            />
+        return <div className='inp-outer'>
+            <label className='inp-label'>File</label>
+            <div style={{ display: 'inline' }}>
+                <span style={{ padding: '3px' }}>{props.value.name}</span>
+                <Icon
+                    svg={PaperClipSvg}
+                    className='upload-icon'
+                />
+            </div>
         </div>;
     }
 }
@@ -186,14 +198,18 @@ function CoordinatesByWebLink(props: {
         }
     ];
     return <>
-        <input
-            type='text'
-            value={props.value}
-            placeholder='https://'
-            onChange={(e) => props.onValueChange(e.target.value)}
-            className={classNames('inp', 'inp-link')}
-        />
-        <div className='inp-format'>
+        <div className='inp-outer'>
+            <label className='inp-label'>URL</label>
+            <input
+                type='text'
+                value={props.value}
+                placeholder='https://'
+                onChange={(e) => props.onValueChange(e.target.value)}
+                className={classNames('inp', 'inp-link')}
+            />
+        </div>
+        <div className='inp-outer inp-format'>
+            <label className='inp-label'>Format</label>
             <Select
                 value={props.format}
                 suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
@@ -228,14 +244,16 @@ function AlphaFoldEntryByUniprtId(props: {
         }
     };
 
-    return <InputBoxControl
-        type='text'
-        value={uniprotId || ''}
-        label='UniProt ID'
-        onChange={updateUniprotId}
-        style={{ width: '90px' }}
-        className='inp'
-    />;
+    return <div className='inp-outer'>
+        <label className='inp-label'>AlphaFold DB: UniProtKB ID</label>
+        <InputBoxControl
+            type='text'
+            value={uniprotId || ''}
+            label='Q5VSL9'
+            onChange={updateUniprotId}
+            className={classNames('inp', 'inp-entry')}
+        />
+    </div>;
 }
 
 function ESMAtlasEntryByMGnifyId(props: {
@@ -254,14 +272,16 @@ function ESMAtlasEntryByMGnifyId(props: {
         }
     };
 
-    return <InputBoxControl
-        type='text'
-        value={mgnifyId || ''}
-        label='MGnify Protein ID'
-        onChange={updateMgnifyId}
-        style={{ width: '180px' }}
-        className='inp'
-    />;
+    return <div className='inp-outer'>
+        <label className='inp-label'>ESM Atlas: MGnify Protein ID</label>
+        <InputBoxControl
+            type='text'
+            value={mgnifyId || ''}
+            label='MGYP001006757307'
+            onChange={updateMgnifyId}
+            className={classNames('inp', 'inp-entry')}
+        />
+    </div>;
 }
 
 export function StructureAlignmentInput(props: {
@@ -379,7 +399,7 @@ export function StructureAlignmentInput(props: {
     };
 
     const renderMutateControls = (index: number) => {
-        return <span>
+        return <span style={{ paddingTop: '25px' }}>
             <DeleteActionControl
                 info='Click to remove this item'
                 className={classNames('upload-icon delete-icon')}
@@ -445,31 +465,39 @@ export function StructureAlignmentInput(props: {
             handler.push(next);
         };
         return <>
-            {type === 'selection' &&
-            <AsymSelectorComponent
-                entry_id={(s as StructureEntry).entry_id}
-                fetchFn={props.ctx.data().asymIds}
-                value={sele.asym_id}
-                onOptsAvailable={(v) => updateAsymId(v)}
-                onChange={(v) => updateAsymId(v)}
-            />}
-            {type === 'input' &&
-            <AsymInputComponent
-                value={sele.asym_id}
-                onChange={(v) => updateAsymId(v)}
-            />}
-            <ResidueInputComponent
-                label='Beg'
-                value={sele.beg_seq_id}
-                isDisabled={!sele.asym_id}
-                onChange={(v) => updateBegResId(Number(v))}
-            />
-            <ResidueInputComponent
-                label='End'
-                value={sele.end_seq_id}
-                isDisabled={!sele.asym_id}
-                onChange={(v) => updateEndResId(Number(v))}
-            />
+            <div className='inp-outer'>
+                <label className='inp-label'>Chain ID</label>
+                {type === 'selection' &&
+                <AsymSelectorComponent
+                    entry_id={(s as StructureEntry).entry_id}
+                    fetchFn={props.ctx.data().asymIds}
+                    value={sele.asym_id}
+                    onOptsAvailable={(v) => updateAsymId(v)}
+                    onChange={(v) => updateAsymId(v)}
+                />}
+                {type === 'input' &&
+                <AsymInputComponent
+                    value={sele.asym_id}
+                    label='A'
+                    onChange={(v) => updateAsymId(v)}
+                />}
+            </div>
+            <div className='inp-outer'>
+                <label className='inp-label'>Begin</label>
+                <ResidueInputComponent
+                    value={sele.beg_seq_id}
+                    isDisabled={!sele.asym_id}
+                    onChange={(v) => updateBegResId(Number(v))}
+                />
+            </div>
+            <div className='inp-outer'>
+                <label className='inp-label'>End</label>
+                <ResidueInputComponent
+                    value={sele.end_seq_id}
+                    isDisabled={!sele.asym_id}
+                    onChange={(v) => updateEndResId(Number(v))}
+                />
+            </div>
         </>;
     };
 

@@ -202,20 +202,16 @@
   box-shadow: none;
 }
 
-.inp-entry::-webkit-input-placeholder {
-  font-style: italic;
+.inp-outer {
+  display: inline-grid;
 }
 
-.inp-entry::-ms-input-placeholder {
-  font-style: italic;
+#arrow-top > .rc-select > .rc-select-arrow {
+  top: 30px !important
 }
 
-.inp-entry::-moz-placeholder {
-  font-style: italic;
-}
-
-.inp-entry::-moz-placeholder {
-  font-style: italic;
+.inp-label {
+  font-size: smaller;
 }
 
 .inp-entry {

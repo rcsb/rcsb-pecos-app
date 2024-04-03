@@ -53,7 +53,6 @@ export function AsymSelectorComponent(props: BaseProps & {
         return <div className='inp-select'>
             <Select
                 value={String(props.value)}
-                placeholder='Chain ID'
                 suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
                 options={options}
                 disabled={props.isDisabled}
@@ -72,8 +71,8 @@ export function AsymSelectorComponent(props: BaseProps & {
 export function AsymInputComponent(props: BaseProps) {
     return <InputBoxControl
         type='text'
+        label={props.label}
         value={props.value}
-        label='Chain ID'
         isDisabled={props.isDisabled}
         onChange={props.onChange}
         style={{ width: '70px' }}
