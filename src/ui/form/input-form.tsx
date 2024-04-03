@@ -108,6 +108,7 @@ function RcsbEntryByUniprotId(props: {
         <div className='inp-select'>
             <Select
                 value={'Select protein chain'}
+                dropdownMatchSelectWidth={false}
                 placeholder='Chain ID'
                 suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
                 options={options}

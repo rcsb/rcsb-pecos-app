@@ -490,5 +490,6 @@
   }
 
   .rc-virtual-list-holder {
-    /* max-height: fit-content !important; */
+    height: fit-content !important;
+    max-height: 300px !important;
   }
