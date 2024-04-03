@@ -27,7 +27,7 @@
     "@rcsb/rcsb-molstar": "^2.9.3",
     "@rcsb/rcsb-saguaro": "^3.0.8",
     "@rcsb/rcsb-saguaro-3d": "^4.0.11",
-    "@rcsb/rcsb-saguaro-app": "^6.0.13",
+    "@rcsb/rcsb-saguaro-app": "^6.0.14",
     "@types/react": "18.2.64",
     "@types/react-dom": "18.2.21",
     "classnames": "^2.5.1",
