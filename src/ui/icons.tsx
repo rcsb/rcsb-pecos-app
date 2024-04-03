@@ -54,14 +54,15 @@ const _LineArrowDownSvg = <svg
 </svg>;
 export function LineArrowDownSvg() { return _LineArrowDownSvg; }
 
-const _SolidArrowDownSvg = <svg
-    width="1em"
-    height="1em"
-    viewBox="0 0 20 20"
-    fill="currentColor">
-    <path d="M7 10l5 5 5-5z"/>
-</svg>;
-export function SolidArrowDownSvg() { return _SolidArrowDownSvg; }
+export function SolidArrowDownSvg(width: string, higth: string, viewBox: string) {
+    return <svg
+        width={width}
+        height={higth}
+        viewBox={viewBox}
+        fill="currentColor">
+        <path d="M7 10l5 5 5-5z"/>
+    </svg>;
+}
 
 const _PlusSignSvg = <svg
     viewBox="0 0 22 22"

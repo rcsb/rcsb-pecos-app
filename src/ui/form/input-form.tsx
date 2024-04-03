@@ -38,7 +38,7 @@ import {
     AutosuggestControl,
     InputBoxControl
 } from '../controls/controls-input';
-import { Icon, LineArrowDownSvg, PaperClipSvg, UploadSvg } from '../icons';
+import { Icon, LineArrowDownSvg, PaperClipSvg, SolidArrowDownSvg, UploadSvg } from '../icons';
 import { ApplicationContext } from '../../context';
 import { isValidMgnifyId, isValidUniprotId } from '../../utils/identifier';
 import Select from 'rc-select';
@@ -55,6 +55,8 @@ const structureOptions: { [key in StructureInputOption]: () => StructureImpl } =
     'alphafold-db': () => new StructureWebLinkImpl(),
     'esm-atlas': () => new StructureWebLinkImpl()
 };
+
+
 
 function RcsbEntryById(props: {
     ctx: ApplicationContext,
@@ -103,14 +105,16 @@ function RcsbEntryByUniprotId(props: {
             suggestHandler={props.ctx.search().suggestUniprotID.bind(props.ctx.search())}
             className={classNames('inp', 'inp-entry')}
         />
-        <Select
-            value={'Select protein chain'}
-            placeholder='Chain ID'
-            options={options}
-            disabled={options.length === 0}
-            onChange={props.onChange}
-            className='inp-select'
-        />
+        <div className='inp-select'>
+            <Select
+                value={'Select protein chain'}
+                placeholder='Chain ID'
+                suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
+                options={options}
+                disabled={options.length === 0}
+                onChange={props.onChange}
+            />
+        </div>
     </>;
 }
 
@@ -191,6 +195,7 @@ function CoordinatesByWebLink(props: {
         <div className='inp-format'>
             <Select
                 value={props.format}
+                suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
                 placeholder='Format'
                 options={options}
                 onChange={props.onFormatChange}

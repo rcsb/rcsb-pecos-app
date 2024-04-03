@@ -7,6 +7,7 @@ import {
 
 import { createInstanceLabel, isValidEntryId } from '../../utils/identifier';
 import Select from 'rc-select';
+import { SolidArrowDownSvg } from '../icons';
 
 type BaseProps = {
     value?: string | number,
@@ -53,6 +54,7 @@ export function AsymSelectorComponent(props: BaseProps & {
             <Select
                 value={String(props.value)}
                 placeholder='Chain ID'
+                suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
                 options={options}
                 disabled={props.isDisabled}
                 onChange={props.onChange}

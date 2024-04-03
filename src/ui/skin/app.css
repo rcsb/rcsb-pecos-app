@@ -798,6 +798,7 @@
 
 .arrow-down-icon {
   cursor: pointer;
+  position: fixed;
 }
 
 .add-new-item-container {
@@ -836,7 +837,7 @@
 }
 
 .arrow-down-icon:hover {
-  color: green;
+  color: white;
 }
 
 .dropdown {

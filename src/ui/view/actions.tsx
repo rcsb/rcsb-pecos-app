@@ -66,7 +66,7 @@ export function DownloadAssetsComponent(props: { ctx: ApplicationContext }) {
             <button className='btn-action btn-submit' style={style}>
                 <Icon svg={DownloadSvg} className='download-icon'/>
                     Export
-                <Icon svg={SolidArrowDownSvg} className='arrow-drop-down-icon'/>
+                <Icon svg={() => SolidArrowDownSvg('45', '20', '-5 3 20 20')} className='arrow-down-icon'/>
             </button>
         </Dropdown>
     );

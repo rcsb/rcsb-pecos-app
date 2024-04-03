@@ -7,7 +7,7 @@ import { RequestState } from '../../state/request';
 import { horizontal } from '../../utils/constants';
 import { MethodName, toMethodImpl } from '../../utils/request';
 import { ActionButtonControl } from '../controls/controls-button';
-import { HelpCircleSvg } from '../icons';
+import { HelpCircleSvg, SolidArrowDownSvg } from '../icons';
 import { SelectOption } from './base';
 
 const numInpClass = classNames('inp', 'inp-num');
@@ -564,6 +564,7 @@ export function StructureAlignmentMethod(props: {ctx: RequestState}) {
             <div className='inp-method'>
                 <Select
                     placeholder='Method Name'
+                    suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
                     value={method.name}
                     options={options}
                     disabled={false}

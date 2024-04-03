@@ -490,5 +490,5 @@
   }
 
   .rc-virtual-list-holder {
-    max-height: fit-content !important;
+    /* max-height: fit-content !important; */
   }
