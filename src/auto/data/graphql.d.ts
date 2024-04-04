@@ -8204,7 +8204,7 @@ export type RcsbEntityHostOrganism = {
    */
   readonly ncbi_taxonomy_id?: Maybe<Scalars['Int']['output']>;
   /** An identifier for an entity segment. */
-  readonly pdbx_src_id: Scalars['String']['output'];
+  readonly pdbx_src_id: Scalars['Int']['output'];
   /**
    * A code indicating the provenance of the host organism.
    *
@@ -8340,7 +8340,7 @@ export type RcsbEntitySourceOrganism = {
    */
   readonly ncbi_taxonomy_id?: Maybe<Scalars['Int']['output']>;
   /** An identifier for the entity segment. */
-  readonly pdbx_src_id: Scalars['String']['output'];
+  readonly pdbx_src_id: Scalars['Int']['output'];
   /**
    * Reference to the provenance of the source organism details for the entity.
    *  Primary data indicates information obtained from the same source as the structural model.
@@ -13488,3 +13488,18 @@ export type PolymerInstancesQueryVariables = Exact<{
 
 
 export type PolymerInstancesQuery = { readonly polymer_entity_instances?: ReadonlyArray<{ readonly rcsb_polymer_entity_instance_container_identifiers?: { readonly asym_id: string, readonly auth_asym_id?: string | null } | null, readonly polymer_entity?: { readonly entry?: { readonly rcsb_id: string } | null, readonly rcsb_polymer_entity?: { readonly pdbx_description?: string | null } | null, readonly entity_poly?: { readonly pdbx_seq_one_letter_code_can?: string | null, readonly rcsb_sample_sequence_length?: number | null } | null, readonly rcsb_entity_source_organism?: ReadonlyArray<{ readonly ncbi_scientific_name?: string | null } | null> | null } | null } | null> | null };
+
+export type ReferenceSequenceCoverageQueryVariables = Exact<{
+  ids: ReadonlyArray<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ReferenceSequenceCoverageQuery = { readonly polymer_entity_instances?: ReadonlyArray<{ readonly rcsb_id: string, readonly polymer_entity?: { readonly rcsb_polymer_entity_align?: ReadonlyArray<{ readonly reference_database_accession?: string | null, readonly aligned_regions?: ReadonlyArray<{ readonly ref_beg_seq_id?: number | null, readonly length?: number | null } | null> | null } | null> | null } | null } | null> | null };
+
+export type SequenceLengthQueryVariables = Exact<{
+  entryId: Scalars['String']['input'];
+  asymId: Scalars['String']['input'];
+}>;
+
+
+export type SequenceLengthQuery = { readonly polymer_entity_instance?: { readonly polymer_entity?: { readonly entity_poly?: { readonly rcsb_sample_sequence_length?: number | null } | null } | null } | null };

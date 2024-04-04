@@ -249,7 +249,7 @@ function AlphaFoldEntryByUniprtId(props: {
             placeholder={'Q5VSL9'}
             className={classNames('inp', 'inp-entry')}
             onChange={(e) => updateUniprotId(e.target.value)}
-        />;
+        />
     </div>;
 }
 
@@ -277,7 +277,7 @@ function ESMAtlasEntryByMGnifyId(props: {
             placeholder={'MGYP001006757307'}
             className={classNames('inp', 'inp-entry')}
             onChange={(e) => updateMgnifyId(e.target.value)}
-        />;
+        />
     </div>;
 }
 
@@ -471,6 +471,33 @@ export function StructureAlignmentInput(props: {
             selection(structure(next, index)).end_seq_id = beg;
             handler.push(next);
         };
+
+        const getBegSeqId = (s: Structure) => {
+            if (isEntry(s)) {
+                if (s.selection) {
+                    const sele = selection(s);
+                    if (sele.asym_id) {
+                        return sele.beg_seq_id || 1;
+                    }
+                }
+            }
+            return '';
+        };
+
+        const getEndSeqId = (s: Structure) => {
+            if (isEntry(s)) {
+                if (s.selection) {
+                    const sele = selection(s);
+                    if (sele.asym_id && sele.end_seq_id) {
+                        return sele.end_seq_id;
+                    } else if (sele.asym_id) {
+                        props.ctx.data().sequenceLength(s.entry_id, sele.asym_id).then(resId => updateEndResId(resId));
+                    }
+                }
+            }
+            return '';
+        };
+
         return <>
             <div className='inp-outer'>
                 <label className='inp-label'>Chain ID</label>
@@ -492,7 +519,7 @@ export function StructureAlignmentInput(props: {
             <div className='inp-outer'>
                 <label className='inp-label'>Begin</label>
                 <ResidueInputComponent
-                    value={sele.beg_seq_id}
+                    value={getBegSeqId(s)}
                     isDisabled={!sele.asym_id}
                     onChange={(v) => updateBegResId(Number(v))}
                 />
@@ -500,7 +527,7 @@ export function StructureAlignmentInput(props: {
             <div className='inp-outer'>
                 <label className='inp-label'>End</label>
                 <ResidueInputComponent
-                    value={sele.end_seq_id}
+                    value={getEndSeqId(s)}
                     isDisabled={!sele.asym_id}
                     onChange={(v) => updateEndResId(Number(v))}
                 />

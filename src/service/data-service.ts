@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { AppConfigs } from '..';
-import { AsymIdsQueryVariables, PolymerInstancesQueryVariables, Query } from '../auto/data/graphql';
-import { asymIdsQuery, polymerInstancesQuery, referenceSequenceCoverageQuery } from '../auto/data/query.gql';
+import { AsymIdsQueryVariables, PolymerInstancesQueryVariables, Query, SequenceLengthQueryVariables } from '../auto/data/graphql';
+import { asymIdsQuery, polymerInstancesQuery, referenceSequenceCoverageQuery, sequenceLengthQuery } from '../auto/data/query.gql';
 import { memoizeOneArgAsync, trimTrailingChars } from '../utils/helper';
 
 export type InstanceData = {
@@ -101,7 +101,6 @@ export class DataService {
         const coverage = new Map();
         const vars: PolymerInstancesQueryVariables = { ids: instanceIds };
         const data = await this.fetch<PolymerInstancesQueryVariables>(referenceSequenceCoverageQuery, vars);
-        console.log(data);
         if (data && data.polymer_entity_instances) {
             data.polymer_entity_instances.map(i => {
                 const key = i?.rcsb_id;
@@ -116,5 +115,17 @@ export class DataService {
             });
         }
         return coverage;
+    }
+
+    async sequenceLength(entryId: string, asymId: string): Promise<number> {
+        const vars: SequenceLengthQueryVariables = {
+            entryId: entryId,
+            asymId: asymId
+        };
+        const data = await this.fetch<SequenceLengthQueryVariables>(sequenceLengthQuery, vars);
+        if (data && data.polymer_entity_instance) {
+            return data.polymer_entity_instance.polymer_entity!.entity_poly!.rcsb_sample_sequence_length!;
+        }
+        return 0;
     }
 }

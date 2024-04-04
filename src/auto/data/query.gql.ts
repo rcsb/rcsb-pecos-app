@@ -59,3 +59,15 @@ query referenceSequenceCoverage($ids: [String]!) {
   }
 }  
 `;
+
+export const sequenceLengthQuery = /* GraphQL */ `
+query sequenceLength($entryId: String!, $asymId: String!) {
+  polymer_entity_instance(entry_id: $entryId, asym_id: $asymId) {
+    polymer_entity {
+      entity_poly {
+        rcsb_sample_sequence_length
+      }
+    }
+  }
+}  
+`;
