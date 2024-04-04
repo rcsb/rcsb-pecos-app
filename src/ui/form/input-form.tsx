@@ -3,7 +3,7 @@ import '../skin/collapse.css';
 import classNames from 'classnames';
 
 import React, { useEffect, useState } from 'react';
-import Collapse, { Panel } from 'rc-collapse';
+import Collapse, { CollapseProps } from 'rc-collapse';
 
 import {
     QueryRequest,
@@ -704,6 +704,34 @@ export function StructureAlignmentInput(props: {
         setStructureList(initStructureListState(handler.state));
     };
 
+    const foo = () => {
+        return <div className={vertical}>
+            {renderSelectedStructures()}
+            <br/>
+            <StructureAlignmentMethod ctx={handler} />
+            <div className={horizontal} style={{ justifyContent: 'flex-end' }}>
+                <ActionButtonControl
+                    label='Compare'
+                    isDisabled={!handler.state.isSubmittable()}
+                    onClick={() => props.onSubmit(request)}
+                    className={classNames('btn-action', 'btn-submit')}
+                />
+                <ActionButtonControl
+                    label='Clear'
+                    onClick={() => clearForm()}
+                    className={classNames('btn-action', 'btn-clear')}
+                />
+            </div>
+        </div>;
+    };
+
+    const items: CollapseProps['items'] = [
+        {
+            label: 'Compare Protein Structures',
+            children: foo()
+        }
+    ];
+
     return (
         <div className='box-row'>
             <Collapse
@@ -712,27 +740,8 @@ export function StructureAlignmentInput(props: {
                 onChange={(key: React.Key | React.Key[]) => {
                     updateKey(key as string[]);
                 }}
+                items={items}
             >
-                <Panel header='Compare Protein Structures'>
-                    <div className={vertical}>
-                        {renderSelectedStructures()}
-                        <br/>
-                        <StructureAlignmentMethod ctx={handler} />
-                        <div className={horizontal} style={{ justifyContent: 'flex-end' }}>
-                            <ActionButtonControl
-                                label='Compare'
-                                isDisabled={!handler.state.isSubmittable()}
-                                onClick={() => props.onSubmit(request)}
-                                className={classNames('btn-action', 'btn-submit')}
-                            />
-                            <ActionButtonControl
-                                label='Clear'
-                                onClick={() => clearForm()}
-                                className={classNames('btn-action', 'btn-clear')}
-                            />
-                        </div>
-                    </div>
-                </Panel>
             </Collapse>
         </div>
     );
