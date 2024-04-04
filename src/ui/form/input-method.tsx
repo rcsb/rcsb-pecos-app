@@ -529,19 +529,23 @@ export function StructureAlignmentMethod(props: {ctx: RequestState}) {
             options: [
                 {
                     label: 'jFATCAT (rigid)',
-                    value: 'fatcat-rigid'
+                    value: 'fatcat-rigid',
+                    title: 'Rigid-body protein structure comparison for identification of the largest structurally conserved core'
                 },
                 {
                     label: 'jCE',
-                    value: 'ce'
+                    value: 'ce',
+                    title: 'Rigid-body protein structure comparison for identification of the optimal set of substructural similarities'
                 },
                 {
                     label: 'TM-align',
-                    value: 'tm-align'
+                    value: 'tm-align',
+                    title: 'Fast TM-score based protein structure copmarison for proteins with similar global topology'
                 },
                 {
                     label: 'Smith-Waterman 3D',
-                    value: 'smith-waterman-3d'
+                    value: 'smith-waterman-3d',
+                    title: 'Sequence-dependent protein structure comparison for close homologues'
                 }
             ]
         },
@@ -550,18 +554,21 @@ export function StructureAlignmentMethod(props: {ctx: RequestState}) {
             options: [
                 {
                     label: 'jFATCAT (flexible)',
-                    value: 'fatcat-flexible'
+                    value: 'fatcat-flexible',
+                    title: 'Flexible protein structure comparison for identification of internally rigid domains in the presence of large conformational changes'
                 },
                 {
                     label: 'jCE-CP',
-                    value: 'ce-cp'
+                    value: 'ce-cp',
+                    title: 'Flexible structure comparison for proteins with similar overall three-dimensional shape but diffrent connectivity (circular permutations)'
                 }
             ]
         }
     ];
     return <>
         <div className={horizontal}>
-            <div className='inp-method'>
+            <div className='inp-outer inp-method'>
+                <label className='inp-label'>Alignment Method</label>
                 <Select
                     placeholder='Method Name'
                     suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
@@ -573,11 +580,13 @@ export function StructureAlignmentMethod(props: {ctx: RequestState}) {
                 />
             </div>
             {('parameters' in method) &&
-            <ActionButtonControl
-                label='Parameters'
-                onClick={toggleVisibility}
-                className={classNames('btn-action', 'btn-menu')}
-            />}
+            <div style={{ marginTop: '18px' }}>
+                <ActionButtonControl
+                    label='Parameters'
+                    onClick={toggleVisibility}
+                    className={classNames('btn-action', 'btn-menu')}
+                />
+            </div>}
         </div>
         {paramsVisible &&
         <StructureAlignmentMethodParams
