@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react';
 import classNames from 'classnames';
 
-import {
-    InputBoxControl
-} from '../controls/controls-input';
-
 import { createInstanceLabel, isValidEntryId } from '../../utils/identifier';
 import Select from 'rc-select';
 import { SolidArrowDownSvg } from '../icons';
@@ -69,25 +65,30 @@ export function AsymSelectorComponent(props: BaseProps & {
 }
 
 export function AsymInputComponent(props: BaseProps) {
-    return <InputBoxControl
+    return <input
         type='text'
-        label={props.label}
         value={props.value}
-        isDisabled={props.isDisabled}
-        onChange={props.onChange}
+        placeholder={props.label}
+        disabled={props.isDisabled}
+        className={classNames('inp')}
         style={{ width: '70px' }}
-        className='inp'
+        onChange={(e) => props.onChange(e.target.value)}
     />;
 }
 
 export function ResidueInputComponent(props: BaseProps) {
-    return <InputBoxControl
-        type='number'
-        value={props.value}
-        label={props.label}
-        isDisabled={props.isDisabled}
-        onChange={props.onChange}
-        className={classNames('inp', 'inp-num')}
+    const toValue = (i: string) => {
+        const num = parseInt(i);
+        if (isNaN(num) || num < 1) return '';
+        else return num;
+    };
+    return <input
+        type='text'
+        value={toValue(String(props.value))}
+        placeholder={props.label}
+        disabled={props.isDisabled}
+        className={classNames('inp')}
+        style={{ width: '55px' }}
+        onChange={(e) => props.onChange(e.target.value)}
     />;
-
 }

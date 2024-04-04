@@ -64,25 +64,3 @@ export function AutosuggestControl(props: AutosuggestControlProps) {
         inputProps={inputProps}
     />;
 }
-
-type InputBoxControlProps = {
-    type: string,
-    value?: string | number,
-    label?: string,
-    isDisabled?: boolean,
-    onChange: (value: string) => void,
-    style?: React.CSSProperties,
-    className?: string
-}
-
-export function InputBoxControl(props: InputBoxControlProps) {
-    return <input
-        type={props.type}
-        value={props.value}
-        placeholder={props.label}
-        disabled={props.isDisabled}
-        className={props.className}
-        style={props.style}
-        onChange={(e) => props.onChange(e.target.value)}
-    />;
-}

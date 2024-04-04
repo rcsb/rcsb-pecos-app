@@ -35,8 +35,7 @@ import {
 } from '../../auto/alignment/alignment-request';
 
 import {
-    AutosuggestControl,
-    InputBoxControl
+    AutosuggestControl
 } from '../controls/controls-input';
 import { Icon, LineArrowDownSvg, PaperClipSvg, SolidArrowDownSvg, UploadSvg } from '../icons';
 import { ApplicationContext } from '../../context';
@@ -55,8 +54,6 @@ const structureOptions: { [key in StructureInputOption]: () => StructureImpl } =
     'alphafold-db': () => new StructureWebLinkImpl(),
     'esm-atlas': () => new StructureWebLinkImpl()
 };
-
-
 
 function RcsbEntryById(props: {
     ctx: ApplicationContext,
@@ -246,13 +243,13 @@ function AlphaFoldEntryByUniprtId(props: {
 
     return <div className='inp-outer'>
         <label className='inp-label'>AlphaFold DB: UniProtKB ID</label>
-        <InputBoxControl
+        <input
             type='text'
             value={uniprotId || ''}
-            label='Q5VSL9'
-            onChange={updateUniprotId}
+            placeholder={'Q5VSL9'}
             className={classNames('inp', 'inp-entry')}
-        />
+            onChange={(e) => updateUniprotId(e.target.value)}
+        />;
     </div>;
 }
 
@@ -274,13 +271,13 @@ function ESMAtlasEntryByMGnifyId(props: {
 
     return <div className='inp-outer'>
         <label className='inp-label'>ESM Atlas: MGnify Protein ID</label>
-        <InputBoxControl
+        <input
             type='text'
             value={mgnifyId || ''}
-            label='MGYP001006757307'
-            onChange={updateMgnifyId}
+            placeholder={'MGYP001006757307'}
             className={classNames('inp', 'inp-entry')}
-        />
+            onChange={(e) => updateMgnifyId(e.target.value)}
+        />;
     </div>;
 }
 
@@ -675,6 +672,11 @@ export function StructureAlignmentInput(props: {
         </>;
     };
 
+    const clearForm = () => {
+        handler.clear();
+        setStructureList(initStructureListState(handler.state));
+    };
+
     return (
         <div className='box-row'>
             <Collapse
@@ -698,7 +700,7 @@ export function StructureAlignmentInput(props: {
                             />
                             <ActionButtonControl
                                 label='Clear'
-                                onClick={() => handler.clear()}
+                                onClick={() => clearForm()}
                                 className={classNames('btn-action', 'btn-clear')}
                             />
                         </div>

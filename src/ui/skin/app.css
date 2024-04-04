@@ -241,10 +241,6 @@
   width: 100%;
 }
 
-.inp-num {
-  width: 55px;
-}
-
 /* SPACING */
 
 .box-row {
@@ -822,6 +818,10 @@
   width: 16px;
   height: 22px;
   border-radius: 4px;
+}
+
+.new-item-area {
+  margin-top: 20px;
 }
 
 .new-item-area:hover {
