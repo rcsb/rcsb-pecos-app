@@ -62,7 +62,7 @@ function RcsbEntryById(props: {
     suggestFn: (v: string) => Promise<string[]>
 }) {
     return <div className='inp-outer'>
-        <label className='inp-label'>Entry ID</label>
+        <span className='inp-label'>Entry ID</span>
         <AutosuggestControl
             value={props.value}
             label={'3PQR, AF_AFP60325F1 '}
@@ -99,7 +99,7 @@ function RcsbEntryByUniprotId(props: {
 
     return <>
         <div className='inp-outer'>
-            <label className='inp-label'>UniProtKB ID</label>
+            <span className='inp-label'>UniProtKB ID</span>
             <AutosuggestControl
                 value={uniprotId.toUpperCase() || ''}
                 label={'P06213'}
@@ -109,7 +109,7 @@ function RcsbEntryByUniprotId(props: {
             />
         </div>
         <div id='arrow-top' className='inp-outer inp-select'>
-            <label className='inp-label'>Protein Chain</label>
+            <span className='inp-label'>Protein Chain</span>
             <Select
                 value={'Select chain'}
                 dropdownMatchSelectWidth={false}
@@ -153,7 +153,7 @@ function CoordinatesByFileUpload(props: {
 
         return (
             <div className='inp-outer'>
-                <label className='inp-label'>File</label>
+                <span className='inp-label'>File</span>
                 <Upload style={{ outline: 'none' }} {...uploadProps}>
                     <button className={'btn-upload'}>
                         <Icon
@@ -166,7 +166,7 @@ function CoordinatesByFileUpload(props: {
         );
     } else {
         return <div className='inp-outer'>
-            <label className='inp-label'>File</label>
+            <span className='inp-label'>File</span>
             <div style={{ display: 'inline' }}>
                 <span style={{ padding: '3px' }}>{props.value.name}</span>
                 <Icon
@@ -196,7 +196,7 @@ function CoordinatesByWebLink(props: {
     ];
     return <>
         <div className='inp-outer'>
-            <label className='inp-label'>URL</label>
+            <span className='inp-label'>URL</span>
             <input
                 type='text'
                 value={props.value}
@@ -206,7 +206,7 @@ function CoordinatesByWebLink(props: {
             />
         </div>
         <div className='inp-outer inp-format'>
-            <label className='inp-label'>Format</label>
+            <span className='inp-label'>Format</span>
             <Select
                 value={props.format}
                 suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
@@ -242,7 +242,7 @@ function AlphaFoldEntryByUniprtId(props: {
     };
 
     return <div className='inp-outer'>
-        <label className='inp-label'>AlphaFold DB: UniProtKB ID</label>
+        <span className='inp-label'>AlphaFold DB: UniProtKB ID</span>
         <input
             type='text'
             value={uniprotId.toUpperCase() || ''}
@@ -270,7 +270,7 @@ function ESMAtlasEntryByMGnifyId(props: {
     };
 
     return <div className='inp-outer'>
-        <label className='inp-label'>ESM Atlas: MGnify Protein ID</label>
+        <span className='inp-label'>ESM Atlas: MGnify Protein ID</span>
         <input
             type='text'
             value={mgnifyId.toUpperCase() || ''}
@@ -486,7 +486,7 @@ export function StructureAlignmentInput(props: {
 
         return <>
             <div className='inp-outer'>
-                <label className='inp-label'>Chain ID</label>
+                <span className='inp-label'>Chain ID</span>
                 {type === 'selection' &&
                 <AsymSelectorComponent
                     entry_id={(s as StructureEntry).entry_id}
@@ -503,7 +503,7 @@ export function StructureAlignmentInput(props: {
                 />}
             </div>
             <div className='inp-outer'>
-                <label className='inp-label'>Begin</label>
+                <span className='inp-label'>Begin</span>
                 <ResidueInputComponent
                     value={sele.beg_seq_id}
                     isDisabled={!sele.asym_id}
@@ -511,7 +511,7 @@ export function StructureAlignmentInput(props: {
                 />
             </div>
             <div className='inp-outer'>
-                <label className='inp-label'>End</label>
+                <span className='inp-label'>End</span>
                 <ResidueInputComponent
                     value={sele.end_seq_id}
                     isDisabled={!sele.asym_id}

@@ -568,7 +568,7 @@ export function StructureAlignmentMethod(props: {ctx: RequestState}) {
     return <>
         <div className={horizontal}>
             <div className='inp-outer inp-method'>
-                <label className='inp-label'>Alignment Method</label>
+                <span className='inp-label'>Alignment Method</span>
                 <Select
                     placeholder='Method Name'
                     suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
