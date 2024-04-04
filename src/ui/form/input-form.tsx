@@ -114,7 +114,7 @@ function RcsbEntryByUniprotId(props: {
         <div id='arrow-top' className='inp-outer inp-select'>
             <label className='inp-label'>Protein Chain</label>
             <Select
-                value={options.length === 0 ? '' : options[0].label }
+                value={'Select chain'}
                 dropdownMatchSelectWidth={false}
                 suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
                 options={options}
@@ -390,7 +390,17 @@ export function StructureAlignmentInput(props: {
                 ]
             }
         ];
+
+        const toOptionSelection = (index: number) => {
+            if (typeof structureList[index] === 'undefined') {
+                return '';
+            } else {
+                return structureList[index];
+            }
+        };
+
         return <Select
+            value={toOptionSelection(index)}
             dropdownMatchSelectWidth={false}
             getRawInputElement={() => <Icon svg={LineArrowDownSvg} title={text}/>}
             options={options}
