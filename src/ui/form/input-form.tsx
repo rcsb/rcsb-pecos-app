@@ -39,7 +39,7 @@ import {
 } from '../controls/controls-input';
 import { Icon, LineArrowDownSvg, PaperClipSvg, SolidArrowDownSvg, UploadSvg } from '../icons';
 import { ApplicationContext } from '../../context';
-import { isValidMgnifyId, isValidUniprotId } from '../../utils/identifier';
+import { isValidEntryId, isValidMgnifyId, isValidUniprotId } from '../../utils/identifier';
 import Select from 'rc-select';
 import { StructureAlignmentMethod } from './input-method';
 import Upload, { UploadProps } from 'rc-upload';
@@ -101,7 +101,7 @@ function RcsbEntryByUniprotId(props: {
         <div className='inp-outer'>
             <label className='inp-label'>UniProtKB ID</label>
             <AutosuggestControl
-                value={uniprotId || ''}
+                value={uniprotId.toUpperCase() || ''}
                 label={'P06213'}
                 onChange={updateUniprotId}
                 suggestHandler={props.ctx.search().suggestUniprotID.bind(props.ctx.search())}
@@ -245,7 +245,7 @@ function AlphaFoldEntryByUniprtId(props: {
         <label className='inp-label'>AlphaFold DB: UniProtKB ID</label>
         <input
             type='text'
-            value={uniprotId || ''}
+            value={uniprotId.toUpperCase() || ''}
             placeholder={'Q5VSL9'}
             className={classNames('inp', 'inp-entry')}
             onChange={(e) => updateUniprotId(e.target.value)}
@@ -273,7 +273,7 @@ function ESMAtlasEntryByMGnifyId(props: {
         <label className='inp-label'>ESM Atlas: MGnify Protein ID</label>
         <input
             type='text'
-            value={mgnifyId || ''}
+            value={mgnifyId.toUpperCase() || ''}
             placeholder={'MGYP001006757307'}
             className={classNames('inp', 'inp-entry')}
             onChange={(e) => updateMgnifyId(e.target.value)}
@@ -286,8 +286,8 @@ export function StructureAlignmentInput(props: {
     onSubmit: (r: QueryRequest) => void,
     isCollapsed: boolean
 }) {
-    const [activeKey, updateKey] = useState(['0']);
-    useEffect(() => { if (props.isCollapsed) updateKey([]); }, [props.isCollapsed]);
+    const [activeKey, setActiveKey] = useState<React.Key | React.Key[]>(['0']);
+    useEffect(() => { if (props.isCollapsed) setActiveKey([]); }, [props.isCollapsed]);
 
     const handler = props.ctx.state.data.request;
     const [request, setRequest] = useState(handler.state);
@@ -454,9 +454,21 @@ export function StructureAlignmentInput(props: {
         const s = structure(handler.state, index);
         const sele = selection(s);
 
-        const updateAsymId = (v: string) => {
+        const updateSelection = (entryId: string, asymId: string) => {
             const next = handler.copy();
-            selection(structure(next, index)).asym_id = v;
+            const sele = selection(structure(next, index));
+            if (isValidEntryId(entryId)) {
+                sele.asym_id = asymId;
+                sele.beg_seq_id = 1;
+                props.ctx.data().sequenceLength(entryId, asymId)
+                    .then(resId => sele.end_seq_id = resId)
+                    .then(() => handler.push(next));
+            }
+        };
+
+        const updateAsymId = (asymId: string) => {
+            const next = handler.copy();
+            selection(structure(next, index)).asym_id = asymId;
             handler.push(next);
         };
 
@@ -472,32 +484,6 @@ export function StructureAlignmentInput(props: {
             handler.push(next);
         };
 
-        const getBegSeqId = (s: Structure) => {
-            if (isEntry(s)) {
-                if (s.selection) {
-                    const sele = selection(s);
-                    if (sele.asym_id) {
-                        return sele.beg_seq_id || 1;
-                    }
-                }
-            }
-            return '';
-        };
-
-        const getEndSeqId = (s: Structure) => {
-            if (isEntry(s)) {
-                if (s.selection) {
-                    const sele = selection(s);
-                    if (sele.asym_id && sele.end_seq_id) {
-                        return sele.end_seq_id;
-                    } else if (sele.asym_id) {
-                        props.ctx.data().sequenceLength(s.entry_id, sele.asym_id).then(resId => updateEndResId(resId));
-                    }
-                }
-            }
-            return '';
-        };
-
         return <>
             <div className='inp-outer'>
                 <label className='inp-label'>Chain ID</label>
@@ -506,8 +492,8 @@ export function StructureAlignmentInput(props: {
                     entry_id={(s as StructureEntry).entry_id}
                     fetchFn={props.ctx.data().asymIds}
                     value={sele.asym_id}
-                    onOptsAvailable={(v) => updateAsymId(v)}
-                    onChange={(v) => updateAsymId(v)}
+                    onOptsAvailable={(asymId) => updateSelection((s as StructureEntry).entry_id, asymId)}
+                    onChange={(asymId) => updateSelection((s as StructureEntry).entry_id, asymId)}
                 />}
                 {type === 'input' &&
                 <AsymInputComponent
@@ -519,7 +505,7 @@ export function StructureAlignmentInput(props: {
             <div className='inp-outer'>
                 <label className='inp-label'>Begin</label>
                 <ResidueInputComponent
-                    value={getBegSeqId(s)}
+                    value={sele.beg_seq_id}
                     isDisabled={!sele.asym_id}
                     onChange={(v) => updateBegResId(Number(v))}
                 />
@@ -527,7 +513,7 @@ export function StructureAlignmentInput(props: {
             <div className='inp-outer'>
                 <label className='inp-label'>End</label>
                 <ResidueInputComponent
-                    value={getEndSeqId(s)}
+                    value={sele.end_seq_id}
                     isDisabled={!sele.asym_id}
                     onChange={(v) => updateEndResId(Number(v))}
                 />
@@ -542,6 +528,12 @@ export function StructureAlignmentInput(props: {
         const updateEntryId = (v: string) => {
             const next = handler.copy();
             (structure(next, index) as StructureEntry).entry_id = v;
+            if (!isValidEntryId(v)) {
+                const sele = selection(structure(next, index));
+                sele.asym_id = '';
+                sele.beg_seq_id = undefined;
+                sele.end_seq_id = undefined;
+            }
             handler.push(next);
         };
 
@@ -704,7 +696,7 @@ export function StructureAlignmentInput(props: {
         setStructureList(initStructureListState(handler.state));
     };
 
-    const foo = () => {
+    const alignmentTool = () => {
         return <div className={vertical}>
             {renderSelectedStructures()}
             <br/>
@@ -728,7 +720,7 @@ export function StructureAlignmentInput(props: {
     const items: CollapseProps['items'] = [
         {
             label: 'Compare Protein Structures',
-            children: foo()
+            children: alignmentTool()
         }
     ];
 
@@ -737,9 +729,7 @@ export function StructureAlignmentInput(props: {
             <Collapse
                 activeKey={activeKey}
                 className='panel-input-form'
-                onChange={(key: React.Key | React.Key[]) => {
-                    updateKey(key as string[]);
-                }}
+                onChange={setActiveKey}
                 items={items}
             >
             </Collapse>
