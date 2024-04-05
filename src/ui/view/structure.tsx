@@ -104,5 +104,14 @@ export function StructureViewComponent(props: { ctx: ApplicationContext }) {
         }
     });
 
-    return <div id={'1d-3d-div'} style={{ height: 515, marginTop: 10 }}></div>;
+    const render1D3D = props.ctx.state.events.status.getValue() === 'ready' && props.ctx.state.data.response.state?.results;
+    return (
+        <>
+            {render1D3D ? (
+                <div id={'1d-3d-div'} style={{ height: 515, marginTop: 10 }}></div>
+            ) : (
+                <></>
+            )}
+        </>
+    );
 }
