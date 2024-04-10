@@ -65,7 +65,7 @@ function RcsbEntryById(props: {
         <span className='inp-label'>Entry ID</span>
         <AutosuggestControl
             value={props.value}
-            label={'3PQR, AF_AFP60325F1 '}
+            label={'e.g., 3PQR, AF_AFP60325F1 '}
             onChange={props.onChange}
             suggestHandler={props.suggestFn}
             className={classNames('inp', 'inp-entry')}
@@ -102,7 +102,7 @@ function RcsbEntryByUniprotId(props: {
             <span className='inp-label'>UniProtKB ID</span>
             <AutosuggestControl
                 value={uniprotId.toUpperCase() || ''}
-                label={'P06213'}
+                label={'e.g., P06213'}
                 onChange={updateUniprotId}
                 suggestHandler={props.ctx.search().suggestUniprotID.bind(props.ctx.search())}
                 className={classNames('inp', 'inp-entry')}
@@ -246,7 +246,7 @@ function AlphaFoldEntryByUniprtId(props: {
         <input
             type='text'
             value={uniprotId.toUpperCase() || ''}
-            placeholder={'Q5VSL9'}
+            placeholder={'e.g., Q5VSL9'}
             className={classNames('inp', 'inp-entry')}
             onChange={(e) => updateUniprotId(e.target.value)}
         />
