@@ -474,15 +474,17 @@ export function StructureAlignmentInput(props: {
             handler.push(next);
         };
 
-        const updateBegResId = (beg?: number) => {
+        const updateBegResId = (val?: number) => {
             const next = handler.copy();
+            const beg = (val && val > 1) ? val : undefined;
             selection(structure(next, index)).beg_seq_id = beg;
             handler.push(next);
         };
 
-        const updateEndResId = (beg?: number) => {
+        const updateEndResId = (val?: number) => {
             const next = handler.copy();
-            selection(structure(next, index)).end_seq_id = beg;
+            const end = (val && val > 1) ? val : undefined;
+            selection(structure(next, index)).end_seq_id = end;
             handler.push(next);
         };
 

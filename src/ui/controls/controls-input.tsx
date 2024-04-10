@@ -15,6 +15,7 @@ type AutosuggestControlProps = {
 
 export function AutosuggestControl(props: AutosuggestControlProps) {
 
+    // TODO: could be configurable
     const debounceTimeoutMs = 500;
 
     const timeoutId = useRef<number | null>(null);

@@ -32,7 +32,6 @@ export type Parameters = Exclude<ParametrizedMethod['parameters'], undefined>;
 type KeysOfUnion<T> = T extends T ? keyof T: never;
 export type ParametersKeys = KeysOfUnion<Parameters>;
 
-const instanseRangeMin = 10;
 const defaultFileFormat: StructureFileFormat = 'mmcif';
 const defaultMethod: MethodName = 'fatcat-rigid';
 
@@ -220,6 +219,9 @@ export class QueryImpl implements StructureAlignmentQuery {
 }
 
 export class QueryRequest {
+    // TODO: could be configurable
+    instanseRangeMin = 10;
+
     query: StructureAlignmentQuery;
     files: File[];
     constructor(data?: {query: StructureAlignmentQuery; files?: File[];}) {
@@ -228,44 +230,45 @@ export class QueryRequest {
     }
     isSubmittable(): boolean {
         for (let i = 0; i < this.query.context.structures.length; i++) {
-            if (!isValidStructure(this.query.context.structures[i]))
+            if (!this.isValidStructure(this.query.context.structures[i]))
                 return false;
         }
         return this.query.context.structures.length >= 2;
     }
-}
 
-function isValidStructure(data: Structure) {
-    const actions: StructureActions<boolean> = [
-        (data: StructureEntry) => isValidStructureEntry(data),
-        (data: StructureWebLink) => isValidStructureWebLink(data),
-        (data: StructureFileUpload) => isValidStructureFileUpload(data)
-    ];
-    return applyToStructure(data, actions);
-}
+    private isValidStructure(data: Structure) {
+        const actions: StructureActions<boolean> = [
+            (data: StructureEntry) => this.isValidStructureEntry(data),
+            (data: StructureWebLink) => this.isValidStructureWebLink(data),
+            (data: StructureFileUpload) => this.isValidStructureFileUpload(data)
+        ];
+        return applyToStructure(data, actions);
+    }
 
-function isValidStructureEntry(data: StructureEntry) {
-    const isValidId = !!data.entry_id && isValidEntryId(data.entry_id);
-    return isValidId && isValidInstanceSelection(<StructureInstanceSelection> data.selection);
-}
+    private isValidStructureEntry(data: StructureEntry) {
+        const isValidId = !!data.entry_id && isValidEntryId(data.entry_id);
+        return isValidId && this.isValidInstanceSelection(<StructureInstanceSelection> data.selection);
+    }
 
-function isValidStructureFileUpload(data: StructureFileUpload) {
-    return data.format && isValidInstanceSelection(<StructureInstanceSelection> data.selection);
-}
+    private isValidStructureFileUpload(data: StructureFileUpload) {
+        return data.format && this.isValidInstanceSelection(<StructureInstanceSelection> data.selection);
+    }
 
-function isValidStructureWebLink(data: StructureWebLink) {
-    return !!data.url
-        && !!data.format
-        && isValidInstanceSelection(<StructureInstanceSelection> data.selection);
-}
+    private isValidStructureWebLink(data: StructureWebLink) {
+        return !!data.url
+            && !!data.format
+            && this.isValidInstanceSelection(<StructureInstanceSelection> data.selection);
+    }
 
-function isValidInstanceSelection(data?: StructureInstanceSelection) {
-    if (!data) return false;
-    const hasValidId = !!data.asym_id;
-    const isRangeOmitted = !data.beg_seq_id && !data.end_seq_id;
-    const selectedRangeHasRequiredLength = !!data.beg_seq_id && !!data.end_seq_id
-        && data.end_seq_id - data.beg_seq_id + 1 >= instanseRangeMin;
-    return hasValidId && (isRangeOmitted || selectedRangeHasRequiredLength);
+    private isValidInstanceSelection(data?: StructureInstanceSelection) {
+        if (!data) return false;
+        const hasValidId = !!data.asym_id;
+        // const isRangeOmitted = !data.beg_seq_id && !data.end_seq_id;
+        const selectedRangeHasRequiredLength = (!!data.beg_seq_id && !!data.end_seq_id)
+            ? data.end_seq_id - data.beg_seq_id + 1 >= this.instanseRangeMin
+            : true;
+        return hasValidId && selectedRangeHasRequiredLength;
+    }
 }
 
 export function toMethodImpl(data?: Method): Method {
