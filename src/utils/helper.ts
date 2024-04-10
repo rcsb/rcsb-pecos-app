@@ -7,8 +7,10 @@ import {
     StructureFileUpload,
     StructureWebLink
 } from '../auto/alignment/alignment-request';
-import { Structure } from './request';
+import { QueryRequest, Structure } from './request';
 import { StructureAlignmentResponse, StructureAlignmentMetadata } from '../auto/alignment/alignment-response';
+import { requestUrlParam, responseUrlParam, encodingUrlParam } from './constants';
+import { encodeJsonToBase64 } from './encoding';
 
 // STRUCTURE
 
@@ -204,4 +206,33 @@ export function getTransformationType(meta: StructureAlignmentMetadata): Transfo
     return (meta.alignment_method === 'fatcat-flexible' || meta.alignment_method === 'ce-cp')
         ? 'flexible'
         : 'rigid';
+}
+
+/**
+ * Results that contain URL require volatile API instance state and they should not
+ * be offered as bookmarkable
+ *
+ * @returns 'true' if all requested structures are part of the public repository
+ */
+export function isBookmarkableResult(apiResponse: StructureAlignmentResponse | undefined) {
+    if (!apiResponse)
+        return false;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    for (const alignment of apiResponse.results!) {
+        for (const s of alignment.structures) {
+            if (('format' in s) && !('url' in s))
+                return false;
+        }
+    }
+    return true;
+}
+
+export function createBookmarkableResultsURL(apiRequestState: QueryRequest, apiResponseState: StructureAlignmentResponse | undefined) {
+    const baseURL = window.location.href.split('?')[0];
+    const b64Request = encodeJsonToBase64(apiRequestState);
+    const requestParam = `${requestUrlParam}=${encodeURIComponent(b64Request)}`;
+    const b64Response = encodeJsonToBase64(apiResponseState);
+    const responseParam = `${responseUrlParam}=${encodeURIComponent(b64Response)}`;
+    const encodeParam = `${encodingUrlParam}=true`;
+    return baseURL + '?' + requestParam + '&' + responseParam + '&' + encodeParam;
 }

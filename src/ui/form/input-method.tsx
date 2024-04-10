@@ -25,6 +25,7 @@ function FatCatRigidParams(props: {ctx: RequestState}) {
                     <td>RMSD Cutoff:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.rmsd_cutoff || ''}
                             className={numInpClass}
@@ -43,6 +44,7 @@ function FatCatRigidParams(props: {ctx: RequestState}) {
                     <td>AFP Distance Cutoff:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.afp_dist_cutoff || ''}
                             className={numInpClass}
@@ -61,6 +63,7 @@ function FatCatRigidParams(props: {ctx: RequestState}) {
                     <td>Fragment Length:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.fragment_length || ''}
                             className={numInpClass}
@@ -93,6 +96,7 @@ function FatCatFlexParams(props: {ctx: RequestState}) {
                     <td>RMSD Cutoff:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.rmsd_cutoff || ''}
                             className={numInpClass}
@@ -111,6 +115,7 @@ function FatCatFlexParams(props: {ctx: RequestState}) {
                     <td>AFP Distance Cutoff:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.afp_dist_cutoff || ''}
                             className={numInpClass}
@@ -129,6 +134,7 @@ function FatCatFlexParams(props: {ctx: RequestState}) {
                     <td>Fragment Length:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.fragment_length || ''}
                             className={numInpClass}
@@ -149,6 +155,7 @@ function FatCatFlexParams(props: {ctx: RequestState}) {
                     <td>Max Twists Number:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.max_num_twists || ''}
                             className={numInpClass}
@@ -181,6 +188,7 @@ function CeParams(props: {ctx: RequestState}) {
                     <td>Maximum Gap Size:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.gap_max_size || ''}
                             className={numInpClass}
@@ -199,6 +207,7 @@ function CeParams(props: {ctx: RequestState}) {
                     <td>Gap Opening Penalty:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.gap_opening_penalty || ''}
                             className={numInpClass}
@@ -217,6 +226,7 @@ function CeParams(props: {ctx: RequestState}) {
                     <td>Gap Extension Penalty:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.gap_extension_penalty || ''}
                             className={numInpClass}
@@ -237,6 +247,7 @@ function CeParams(props: {ctx: RequestState}) {
                     <td>Fragment Size:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.fragment_size || ''}
                             className={numInpClass}
@@ -255,6 +266,7 @@ function CeParams(props: {ctx: RequestState}) {
                     <td>RMSD Threshold:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.rmsd_threshold || ''}
                             className={numInpClass}
@@ -273,6 +285,7 @@ function CeParams(props: {ctx: RequestState}) {
                     <td>Maximum RMSD:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.max_opt_rmsd || ''}
                             className={numInpClass}
@@ -305,6 +318,7 @@ function CeCpParams(props: {ctx: RequestState}) {
                     <td>Maximum Gap Size:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.gap_max_size || ''}
                             className={numInpClass}
@@ -323,6 +337,7 @@ function CeCpParams(props: {ctx: RequestState}) {
                     <td>Gap Opening Penalty:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.gap_opening_penalty || ''}
                             className={numInpClass}
@@ -341,6 +356,7 @@ function CeCpParams(props: {ctx: RequestState}) {
                     <td>Gap Extension Penalty:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.gap_extension_penalty || ''}
                             className={numInpClass}
@@ -361,6 +377,7 @@ function CeCpParams(props: {ctx: RequestState}) {
                     <td>Fragment Size:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.fragment_size || ''}
                             className={numInpClass}
@@ -379,6 +396,7 @@ function CeCpParams(props: {ctx: RequestState}) {
                     <td>RMSD Threshold:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.rmsd_threshold || ''}
                             className={numInpClass}
@@ -397,6 +415,7 @@ function CeCpParams(props: {ctx: RequestState}) {
                     <td>Maximum RMSD:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.max_opt_rmsd || ''}
                             className={numInpClass}
@@ -417,6 +436,7 @@ function CeCpParams(props: {ctx: RequestState}) {
                     <td>Min CP Block Length:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.min_cp_length || ''}
                             className={numInpClass}
@@ -449,6 +469,7 @@ function SmithWatermanParams(props: {ctx: RequestState}) {
                     <td>Gap Opening Penalty:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.gap_opening_penalty || ''}
                             className={numInpClass}
@@ -467,6 +488,7 @@ function SmithWatermanParams(props: {ctx: RequestState}) {
                     <td>Gap Extension Penalty:</td>
                     <td>
                         <input
+                            id='input-area'
                             type='number'
                             value={currParams?.gap_extension_penalty || ''}
                             className={numInpClass}

@@ -198,6 +198,7 @@ function CoordinatesByWebLink(props: {
         <div className='inp-outer'>
             <span className='inp-label'>URL</span>
             <input
+                id='input-area'
                 type='text'
                 value={props.value}
                 placeholder='https://'
@@ -244,6 +245,7 @@ function AlphaFoldEntryByUniprtId(props: {
     return <div className='inp-outer'>
         <span className='inp-label'>AlphaFold DB: UniProtKB ID</span>
         <input
+            id='input-area'
             type='text'
             value={uniprotId.toUpperCase() || ''}
             placeholder={'e.g., Q5VSL9'}
@@ -408,14 +410,14 @@ export function StructureAlignmentInput(props: {
     const renderMutateControls = (index: number) => {
         return <span style={{ paddingTop: '25px' }}>
             <DeleteActionControl
-                info='Click to remove this item'
+                info='Click to remove this input'
                 className={classNames('upload-icon delete-icon')}
                 onClick={() => {
                     deleteStructure(index);
                     deleteFromStructureList(index);
                 }}
             />
-            {renderMutateAction(index, 'Click to change an item type')}
+            {renderMutateAction(index, 'Click to change an input type')}
         </span>;
     };
 
@@ -437,14 +439,14 @@ export function StructureAlignmentInput(props: {
                 !disabled &&
                 <div className='new-item-area'>
                     <AddActionControl
-                        info='Click to add a new entry'
+                        info='Click to add a new Entry ID input'
                         onClick={() => {
                             updateStructure(count, structureOptions['rcsb-entry']());
                             updateStructureList(count, 'rcsb-entry');
                         }}
                         className='add-new-item'
                     />
-                    {renderMutateAction(count, 'Click to select a new item')}
+                    {renderMutateAction(count, 'Click to select a new input')}
                 </div>
             }
         </div>;
@@ -498,7 +500,7 @@ export function StructureAlignmentInput(props: {
                 {type === 'input' &&
                 <AsymInputComponent
                     value={sele.asym_id}
-                    label='A'
+                    label='e.g., A'
                     onChange={(v) => updateAsymId(v)}
                 />}
             </div>

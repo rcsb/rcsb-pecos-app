@@ -171,6 +171,19 @@
 
 /* INPUT FIELDS */
 
+#input-area::placeholder {
+  font-size: smaller;
+  font-style: italic;
+}
+#input-area::-webkit-input-placeholder {
+  font-size: smaller;
+  font-style: italic;
+}
+#input-area::-moz-placeholder {
+  font-size: smaller;
+  font-style: italic;
+}
+
 .inp {
   position: relative;
   height: 28px;

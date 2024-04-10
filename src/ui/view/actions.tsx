@@ -2,12 +2,11 @@ import { useState } from 'react';
 import Dropdown from 'rc-dropdown';
 import Menu, { Divider, Item as MenuItem } from 'rc-menu';
 
-import { encodeJsonToBase64 } from '../../utils/encoding';
 import { ApplicationContext, DownloadOptions } from '../../context';
 import { CopySvg, Icon, SolidArrowDownSvg, DownloadSvg } from '../icons';
-import { encodingUrlParam, requestUrlParam, responseUrlParam } from '../../utils/constants';
 import { exportSequenceAlignment, exportTransformations } from '../../utils/download';
 import { MenuInfo, MenuClickEventHandler } from 'rc-menu/es/interface';
+import { createBookmarkableResultsURL, isBookmarkableResult } from '../../utils/helper';
 
 const style: React.CSSProperties = { width: '150px' };
 
@@ -76,34 +75,6 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
 
     const [copied, setCopied] = useState(false);
 
-    /**
-     * Results that contain URL require volatile API instance state and they should not
-     * be offered as bookmarkable
-     *
-     * @returns 'true' if all requested structures are part of the public repository
-     */
-    function isBookmarkable() {
-        const results = props.ctx.state.data.response.state?.results;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        for (const alignment of results!) {
-            for (const s of alignment.structures) {
-                if (('format' in s) && !('url' in s))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    function createLink() {
-        const baseURL = window.location.href.split('?')[0];
-        const b64Request = encodeJsonToBase64(props.ctx.state.data.request.state);
-        const requestParam = `${requestUrlParam}=${encodeURIComponent(b64Request)}`;
-        const b64Response = encodeJsonToBase64(props.ctx.state.data.response.state);
-        const responseParam = `${responseUrlParam}=${encodeURIComponent(b64Response)}`;
-        const encodeParam = `${encodingUrlParam}=true`;
-        return baseURL + '?' + requestParam + '&' + responseParam + '&' + encodeParam;
-    }
-
     async function fallbackCopyToClipboard(text: string) {
         const textarea = document.createElement('textarea');
         textarea.value = text;
@@ -139,7 +110,7 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
 
     function copyLinkToClipboard() {
 
-        const text = createLink();
+        const text = createBookmarkableResultsURL(props.ctx.state.data.request.state, props.ctx.state.data.response.state);
         copyLinkToClipboardAsync(text)
             .then(() => {
                 if (willExpire()) {
@@ -154,7 +125,7 @@ export function CopyResultsComponent(props: { ctx: ApplicationContext }) {
     }
 
     return (<>
-        {isBookmarkable() &&
+        {isBookmarkableResult(props.ctx.state.data.response.state) &&
             <span title='This is an experimental feature and stored URLs might not be openable in a future version'>
                 {copied &&
                 <button id='copy-link-button' className='btn-action btn-submit' style={style}>

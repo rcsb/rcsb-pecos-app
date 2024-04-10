@@ -8,7 +8,7 @@ import { ResponseState } from './state/response';
 import { QueryRequest, StructureFileUploadImpl, StructureWebLinkImpl } from './utils/request';
 import { StructureAlignmentMetadata, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
-import { isEntry, buildError, getTransformationType } from './utils/helper';
+import { isEntry, buildError, getTransformationType, isBookmarkableResult, createBookmarkableResultsURL } from './utils/helper';
 import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
 
@@ -113,7 +113,11 @@ export class ApplicationContext {
         } else {
             this.error('Results MUST be provided');
         }
-        updateWindowURL();
+
+        const newUrl = (isBookmarkableResult(response))
+            ? createBookmarkableResultsURL(this.state.data.request.state, response)
+            : undefined;
+        updateWindowURL(newUrl, true);
     }
 
     private error(message: string) {
@@ -206,9 +210,11 @@ export class ApplicationContext {
     }
 }
 
-function updateWindowURL(url?: string) {
+function updateWindowURL(url?: string, preserveHistory?: boolean) {
     if (window) {
         if (!url) url = window.location.href.split('?')[0];
-        window.history.replaceState({}, '', url);
+        (preserveHistory)
+            ? window.history.replaceState({}, '', url)
+            : window.history.pushState({}, '', url);
     }
 }

@@ -66,6 +66,7 @@ export function AsymSelectorComponent(props: BaseProps & {
 
 export function AsymInputComponent(props: BaseProps) {
     return <input
+        id='input-area'
         type='text'
         value={props.value}
         placeholder={props.label}
@@ -83,6 +84,7 @@ export function ResidueInputComponent(props: BaseProps) {
         else return num;
     };
     return <input
+        id='input-area'
         type='text'
         value={toValue(String(props.value))}
         placeholder={props.label}

@@ -37,13 +37,11 @@ export function AutosuggestControl(props: AutosuggestControlProps) {
 
     function onFetchAction(request: SuggestionsFetchRequestedParams): void {
         if (timeoutId.current !== null) {
-            console.log('Cancel event for ', request.value, timeoutId.current);
             window.clearTimeout(timeoutId.current);
         }
 
         timeoutId.current = window.setTimeout(() => {
             timeoutId.current = null;
-            console.log('Execute event for ', request.value, timeoutId.current);
             props.suggestHandler(request.value).then((values) => {
                 if (values.length > 1) {
                     setSelection(undefined);
@@ -60,6 +58,7 @@ export function AutosuggestControl(props: AutosuggestControlProps) {
     }
 
     const inputProps = {
+        id: 'input-area',
         placeholder: props.label,
         value: props.value,
         className: props.className,
