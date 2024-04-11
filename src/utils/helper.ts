@@ -236,3 +236,7 @@ export function createBookmarkableResultsURL(apiRequestState: QueryRequest, apiR
     const encodeParam = `${encodingUrlParam}=true`;
     return baseURL + '?' + requestParam + '&' + responseParam + '&' + encodeParam;
 }
+
+export function getPositiveNumber(val?: number) {
+    return (val && val >= 1) ? val : undefined;
+}

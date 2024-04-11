@@ -77,7 +77,7 @@ export function AsymInputComponent(props: BaseProps) {
     />;
 }
 
-export function ResidueInputComponent(props: BaseProps) {
+export function IntegerInputComponent(props: BaseProps) {
     const toValue = (i: string) => {
         const num = parseInt(i);
         if (isNaN(num) || num < 1) return '';
@@ -92,5 +92,37 @@ export function ResidueInputComponent(props: BaseProps) {
         className={classNames('inp')}
         style={{ width: '55px' }}
         onChange={(e) => props.onChange(e.target.value)}
+    />;
+}
+
+export function FloatInputComponent(props: BaseProps) {
+
+    const [value, setValue] = useState<string>(String(props.value));
+
+    const update = (val: string) => {
+        const v = toValue(val);
+        setValue(v);
+        props.onChange(v);
+    };
+
+    const toValue = (i: string) => {
+        const regex = /\d+\.*(\d+)?/g;
+        const arr = i.match(regex);
+        if (arr && arr?.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return arr![0];
+        }
+        return '';
+    };
+
+    return <input
+        id='input-area'
+        type='text'
+        value={value || ''}
+        placeholder={props.label}
+        disabled={props.isDisabled}
+        className={classNames('inp')}
+        style={{ width: '75px' }}
+        onChange={(e) => update(e.target.value)}
     />;
 }

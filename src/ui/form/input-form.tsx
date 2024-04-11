@@ -17,11 +17,11 @@ import { ActionButtonControl } from '../controls/controls-button';
 import { AddActionControl, DeleteActionControl } from '../controls/controls-action';
 
 import { horizontal, vertical } from '../../utils/constants';
-import { isEntry, isUploadedFile, isUrl, useObservable } from '../../utils/helper';
+import { getPositiveNumber, isEntry, isUploadedFile, isUrl, useObservable } from '../../utils/helper';
 
 import {
     AsymInputComponent,
-    ResidueInputComponent,
+    IntegerInputComponent,
     AsymSelectorComponent,
     SelectOption
 } from './base';
@@ -276,7 +276,7 @@ function ESMAtlasEntryByMGnifyId(props: {
         <input
             type='text'
             value={mgnifyId.toUpperCase() || ''}
-            placeholder={'MGYP001006757307'}
+            placeholder={'e.g., MGYP001006757307'}
             className={classNames('inp', 'inp-entry')}
             onChange={(e) => updateMgnifyId(e.target.value)}
         />
@@ -476,15 +476,13 @@ export function StructureAlignmentInput(props: {
 
         const updateBegResId = (val?: number) => {
             const next = handler.copy();
-            const beg = (val && val > 1) ? val : undefined;
-            selection(structure(next, index)).beg_seq_id = beg;
+            selection(structure(next, index)).beg_seq_id = getPositiveNumber(val);
             handler.push(next);
         };
 
         const updateEndResId = (val?: number) => {
             const next = handler.copy();
-            const end = (val && val > 1) ? val : undefined;
-            selection(structure(next, index)).end_seq_id = end;
+            selection(structure(next, index)).end_seq_id = getPositiveNumber(val);
             handler.push(next);
         };
 
@@ -508,7 +506,7 @@ export function StructureAlignmentInput(props: {
             </div>
             <div className='inp-outer'>
                 <span className='inp-label'>Begin</span>
-                <ResidueInputComponent
+                <IntegerInputComponent
                     value={sele.beg_seq_id}
                     isDisabled={!sele.asym_id}
                     onChange={(v) => updateBegResId(Number(v))}
@@ -516,7 +514,7 @@ export function StructureAlignmentInput(props: {
             </div>
             <div className='inp-outer'>
                 <span className='inp-label'>End</span>
-                <ResidueInputComponent
+                <IntegerInputComponent
                     value={sele.end_seq_id}
                     isDisabled={!sele.asym_id}
                     onChange={(v) => updateEndResId(Number(v))}

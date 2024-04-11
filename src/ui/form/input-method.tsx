@@ -8,11 +8,24 @@ import { horizontal } from '../../utils/constants';
 import { MethodName, toMethodImpl } from '../../utils/request';
 import { ActionButtonControl } from '../controls/controls-button';
 import { HelpCircleSvg, SolidArrowDownSvg } from '../icons';
-import { SelectOption } from './base';
+import { FloatInputComponent, IntegerInputComponent, SelectOption } from './base';
 
 const numInpClass = classNames('inp', 'inp-num');
 
 type DisplayMethod = Exclude<MethodName, QCP['name']>;
+
+function createLabel(label: string, tooltip: string) {
+    return <span>
+        <span className='inp-label'>
+            {label}
+        </span>
+        <span
+            className='txt-tooltip'
+            data-flow='top'
+            data-tooltip={tooltip}> <HelpCircleSvg />
+        </span>
+    </span>;
+}
 
 function FatCatRigidParams(props: {ctx: RequestState}) {
     const next = props.ctx.copy();
@@ -22,62 +35,41 @@ function FatCatRigidParams(props: {ctx: RequestState}) {
         <table className='method-params'>
             <tbody>
                 <tr>
-                    <td>RMSD Cutoff:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.rmsd_cutoff || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.rmsd_cutoff = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='RMSD cutoff for AFP detection'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('RMSD Cutoff', 'RMSD cutoff for AFP detection')}
+                            <FloatInputComponent
+                                value={currParams?.rmsd_cutoff}
+                                onChange={(v) => {
+                                    nextParams!.rmsd_cutoff = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>AFP Distance Cutoff:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.afp_dist_cutoff || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.afp_dist_cutoff = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The distance cutoff used when calculating connectivity of AFP pairs'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('AFP Distance Cutoff', 'The distance cutoff used when calculating connectivity of AFP pairs')}
+                            <FloatInputComponent
+                                value={currParams?.afp_dist_cutoff}
+                                onChange={(v) => {
+                                    nextParams!.afp_dist_cutoff = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Fragment Length:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.fragment_length || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.fragment_length = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The length of the fragments'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Fragment Length', 'The length of the fragments')}
+                            <IntegerInputComponent
+                                value={currParams?.fragment_length}
+                                onChange={(v) => {
+                                    nextParams!.fragment_length = v ? parseInt(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
             </tbody>
