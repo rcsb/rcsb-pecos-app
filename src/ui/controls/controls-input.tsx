@@ -7,6 +7,7 @@ import Autosuggest, { ChangeEvent, SuggestionsFetchRequestedParams } from 'react
 type AutosuggestControlProps = {
     value: string,
     label?: string,
+    suggestDebounceMs: number,
     suggestHandler: (value: string) => Promise<string[]>,
     onChange: (value: string) => void,
     style?: CSSProperties,
@@ -14,9 +15,6 @@ type AutosuggestControlProps = {
 }
 
 export function AutosuggestControl(props: AutosuggestControlProps) {
-
-    // TODO: could be configurable
-    const debounceTimeoutMs = 500;
 
     const timeoutId = useRef<number | null>(null);
     const [selection, setSelection] = useState<string>();
@@ -55,7 +53,7 @@ export function AutosuggestControl(props: AutosuggestControlProps) {
                     setSuggestions([]);
                 }
             });
-        }, debounceTimeoutMs);
+        }, props.suggestDebounceMs);
     }
 
     const inputProps = {

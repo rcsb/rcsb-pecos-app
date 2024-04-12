@@ -21,6 +21,7 @@ const DefaultAppConfigs = {
             base: 'https://search.rcsb.org/rcsbsearch/v2',
             search: 'query',
             suggest: 'suggest',
+            suggestDebounceMs: 500,
             httpHeaders: {}
         },
         alignment: {

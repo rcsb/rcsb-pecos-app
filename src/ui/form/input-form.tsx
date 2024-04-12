@@ -67,6 +67,7 @@ function RcsbEntryById(props: {
             value={props.value}
             label={'e.g., 3PQR, AF_AFP60325F1 '}
             onChange={props.onChange}
+            suggestDebounceMs={props.ctx.configs.service.search.suggestDebounceMs}
             suggestHandler={props.suggestFn}
             className={classNames('inp', 'inp-entry')}
         />
@@ -104,6 +105,7 @@ function RcsbEntryByUniprotId(props: {
                 value={uniprotId.toUpperCase() || ''}
                 label={'e.g., P06213'}
                 onChange={updateUniprotId}
+                suggestDebounceMs={props.ctx.configs.service.search.suggestDebounceMs}
                 suggestHandler={props.ctx.search().suggestUniprotID.bind(props.ctx.search())}
                 className={classNames('inp', 'inp-entry')}
             />
@@ -274,6 +276,7 @@ function ESMAtlasEntryByMGnifyId(props: {
     return <div className='inp-outer'>
         <span className='inp-label'>ESM Atlas: MGnify Protein ID</span>
         <input
+            id='input-area'
             type='text'
             value={mgnifyId.toUpperCase() || ''}
             placeholder={'e.g., MGYP001006757307'}
