@@ -298,8 +298,6 @@ export function StructureAlignmentInput(props: {
     const [request, setRequest] = useState(handler.state);
     useObservable<QueryRequest>(handler.subject, setRequest);
 
-    // Allow to add up to 10 structures to the alignment request
-    const MAX_NUM_STRUCTURES = 10;
     const initStructureListState = (state: QueryRequest) => {
         const list = new Array<StructureInputOption>();
         state.query.context.structures.map((s, i) => {
@@ -426,7 +424,7 @@ export function StructureAlignmentInput(props: {
 
     const renderAddControls = () => {
         const count = structureList.length;
-        const disabled = count === MAX_NUM_STRUCTURES;
+        const disabled = count === props.ctx.configs.service.alignment.maxNumStructuresPairwise;
         return <div className={horizontal}>
             {
                 disabled &&

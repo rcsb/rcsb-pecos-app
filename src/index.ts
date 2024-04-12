@@ -32,7 +32,9 @@ const DefaultAppConfigs = {
             // Delay (in milliseconds) between the last retry and next API call to get the results
             pollingIntervalMs: 1000,
             // Maximum time (in milliseconds) the application waits to get results from the server
-            timeoutMs: 300 * 1000
+            timeoutMs: 300 * 1000,
+            // Maximum number of structures allowed as input for pairwise alignment
+            maxNumStructuresPairwise: 10
         },
         fileUpload: {
             base: 'https://user-upload.rcsb.org/v1/',
