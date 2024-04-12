@@ -219,8 +219,6 @@ export class QueryImpl implements StructureAlignmentQuery {
 }
 
 export class QueryRequest {
-    // TODO: could be configurable
-    instanseRangeMin = 10;
 
     query: StructureAlignmentQuery;
     files: File[];
@@ -263,9 +261,8 @@ export class QueryRequest {
     private isValidInstanceSelection(data?: StructureInstanceSelection) {
         if (!data) return false;
         const hasValidId = !!data.asym_id;
-        // const isRangeOmitted = !data.beg_seq_id && !data.end_seq_id;
         const selectedRangeHasRequiredLength = (!!data.beg_seq_id && !!data.end_seq_id)
-            ? data.end_seq_id - data.beg_seq_id + 1 >= this.instanseRangeMin
+            ? data.end_seq_id - data.beg_seq_id > 1
             : true;
         return hasValidId && selectedRangeHasRequiredLength;
     }
