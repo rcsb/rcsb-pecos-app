@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
+import '../skin/selector.css';
+import '../skin/suggestions.css';
 import classNames from 'classnames';
+import { useState, useEffect, CSSProperties, useRef } from 'react';
 
-import { createInstanceLabel, isValidEntryId } from '../../utils/identifier';
 import Select from 'rc-select';
+import Autosuggest, { SuggestionsFetchRequestedParams } from 'react-autosuggest';
+
 import { SolidArrowDownSvg } from '../icons';
+import { createInstanceLabel, isValidEntryId } from '../../utils/identifier';
 
 type BaseProps = {
     value?: string | number,
@@ -17,6 +21,77 @@ export type SelectOption<T> = {
     title?: string,
     value?: T,
     options?: SelectOption<T>[]
+}
+
+type AutosuggestProps = {
+    value: string,
+    label?: string,
+    suggestDebounceMs: number,
+    suggestHandler: (value: string) => Promise<string[]>,
+    onChange: (value: string) => void,
+    style?: CSSProperties,
+    className?: string
+}
+
+export function AutosuggestComponent(props: AutosuggestProps) {
+
+    const timeoutId = useRef<number | null>(null);
+    const [selection, setSelection] = useState<string>();
+    const [suggestions, setSuggestions] = useState<Array<string>>([]);
+
+    const onRenderAction = (value: string): JSX.Element => <div>{value}</div>;
+
+    function onSelectAction(_: React.FormEvent<HTMLElement>, data: Autosuggest.SuggestionSelectedEventData<string>): void {
+        const v = data.suggestion;
+        if (props.value !== v) props.onChange(v);
+    }
+
+    function onChangeAction(_: React.FormEvent<HTMLElement>, change: Autosuggest.ChangeEvent): void {
+        const value = change.newValue?.trim().toUpperCase() || '';
+        if (props.value !== value) {
+            props.onChange(value);
+        }
+    }
+
+    function onFetchAction(request: SuggestionsFetchRequestedParams): void {
+        if (timeoutId.current !== null) {
+            window.clearTimeout(timeoutId.current);
+        }
+
+        timeoutId.current = window.setTimeout(() => {
+            timeoutId.current = null;
+            props.suggestHandler(request.value).then((values) => {
+                if (values.length > 1) {
+                    setSelection(undefined);
+                    setSuggestions(values);
+                } else if (values.length === 1 && values[0] !== selection) {
+                    props.onChange(values[0]);
+                    setSelection(values[0]);
+                    setSuggestions([]);
+                } else { // clear suggestions
+                    setSuggestions([]);
+                }
+            });
+        }, props.suggestDebounceMs);
+    }
+
+    const inputProps = {
+        id: 'input-area',
+        placeholder: props.label,
+        value: props.value,
+        className: props.className,
+        onChange: onChangeAction
+    };
+
+    return <Autosuggest
+        suggestions={suggestions}
+        onSuggestionsFetchRequested={onFetchAction}
+        onSuggestionsClearRequested={() => setSuggestions([])}
+        onSuggestionSelected={onSelectAction}
+        getSuggestionValue={() => props.value}
+        renderSuggestion={onRenderAction}
+        inputProps={inputProps}
+    />;
 }
 
 export function AsymSelectorComponent(props: BaseProps & {
@@ -46,7 +121,7 @@ export function AsymSelectorComponent(props: BaseProps & {
     };
 
     if (options.length > 0) {
-        return <div className='inp-select'>
+        return <div className='inp-select' style={{ width: '70px' }}>
             <Select
                 value={String(props.value)}
                 suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
@@ -56,7 +131,7 @@ export function AsymSelectorComponent(props: BaseProps & {
             />
         </div>;
     } else {
-        return <AsymInputComponent
+        return <TextInputComponent
             value=''
             isDisabled={true}
             onChange={props.onChange}
@@ -64,7 +139,7 @@ export function AsymSelectorComponent(props: BaseProps & {
     }
 }
 
-export function AsymInputComponent(props: BaseProps) {
+export function TextInputComponent(props: BaseProps) {
     return <input
         id='input-area'
         type='text'
@@ -90,7 +165,7 @@ export function IntegerInputComponent(props: BaseProps) {
         placeholder={props.label}
         disabled={props.isDisabled}
         className={classNames('inp')}
-        style={{ width: '55px' }}
+        style={{ width: '70px' }}
         onChange={(e) => props.onChange(e.target.value)}
     />;
 }
@@ -122,7 +197,7 @@ export function FloatInputComponent(props: BaseProps) {
         placeholder={props.label}
         disabled={props.isDisabled}
         className={classNames('inp')}
-        style={{ width: '75px' }}
+        style={{ width: '70px' }}
         onChange={(e) => update(e.target.value)}
     />;
 }

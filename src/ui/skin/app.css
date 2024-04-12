@@ -228,7 +228,7 @@
 }
 
 .inp-entry {
-  width: 180px;
+  width: 200px;
 }
 
 .inp-link {
@@ -244,7 +244,6 @@
 }
 
 .inp-select {
-  width: 70px;
   width: max-content;
   position: relative;
 }

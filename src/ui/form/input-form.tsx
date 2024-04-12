@@ -20,10 +20,11 @@ import { horizontal, vertical } from '../../utils/constants';
 import { getPositiveNumber, isEntry, isUploadedFile, isUrl, useObservable } from '../../utils/helper';
 
 import {
-    AsymInputComponent,
+    TextInputComponent,
     IntegerInputComponent,
     AsymSelectorComponent,
-    SelectOption
+    SelectOption,
+    AutosuggestComponent
 } from './base';
 
 import {
@@ -34,9 +35,6 @@ import {
     StructureFileFormat
 } from '../../auto/alignment/alignment-request';
 
-import {
-    AutosuggestControl
-} from '../controls/controls-input';
 import { Icon, LineArrowDownSvg, PaperClipSvg, SolidArrowDownSvg, UploadSvg } from '../icons';
 import { ApplicationContext } from '../../context';
 import { isValidEntryId, isValidMgnifyId, isValidUniprotId } from '../../utils/identifier';
@@ -63,7 +61,7 @@ function RcsbEntryById(props: {
 }) {
     return <div className='inp-outer'>
         <span className='inp-label'>Entry ID</span>
-        <AutosuggestControl
+        <AutosuggestComponent
             value={props.value}
             label={'e.g., 3PQR, AF_AFP60325F1 '}
             onChange={props.onChange}
@@ -101,7 +99,7 @@ function RcsbEntryByUniprotId(props: {
     return <>
         <div className='inp-outer'>
             <span className='inp-label'>UniProtKB ID</span>
-            <AutosuggestControl
+            <AutosuggestComponent
                 value={uniprotId.toUpperCase() || ''}
                 label={'e.g., P06213'}
                 onChange={updateUniprotId}
@@ -499,7 +497,7 @@ export function StructureAlignmentInput(props: {
                     onChange={(asymId) => updateSelection((s as StructureEntry).entry_id, asymId)}
                 />}
                 {type === 'input' &&
-                <AsymInputComponent
+                <TextInputComponent
                     value={sele.asym_id}
                     label='e.g., A'
                     onChange={(v) => updateAsymId(v)}

@@ -10,8 +10,6 @@ import { ActionButtonControl } from '../controls/controls-button';
 import { HelpCircleSvg, SolidArrowDownSvg } from '../icons';
 import { FloatInputComponent, IntegerInputComponent, SelectOption } from './base';
 
-const numInpClass = classNames('inp', 'inp-num');
-
 type DisplayMethod = Exclude<MethodName, QCP['name']>;
 
 function createLabel(label: string, tooltip: string) {
@@ -85,83 +83,55 @@ function FatCatFlexParams(props: {ctx: RequestState}) {
         <table className='method-params'>
             <tbody>
                 <tr>
-                    <td>RMSD Cutoff:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.rmsd_cutoff || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.rmsd_cutoff = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='RMSD cutoff for AFP detection'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('RMSD Cutoff', 'RMSD cutoff for AFP detection')}
+                            <FloatInputComponent
+                                value={currParams?.rmsd_cutoff}
+                                onChange={(v) => {
+                                    nextParams!.rmsd_cutoff = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>AFP Distance Cutoff:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.afp_dist_cutoff || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.afp_dist_cutoff = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The distance cutoff used when calculating connectivity of AFP pairs'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('AFP Distance Cutoff', 'The distance cutoff used when calculating connectivity of AFP pairs')}
+                            <FloatInputComponent
+                                value={currParams?.afp_dist_cutoff}
+                                onChange={(v) => {
+                                    nextParams!.afp_dist_cutoff = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Fragment Length:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.fragment_length || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.fragment_length = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The length of the fragments'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Fragment Length', 'The length of the fragments')}
+                            <IntegerInputComponent
+                                value={currParams?.fragment_length}
+                                onChange={(v) => {
+                                    nextParams!.fragment_length = v ? parseInt(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Max Twists Number:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.max_num_twists || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.max_num_twists = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='The number of twists that are allowed to be introduced. If set to 0 alignments are run in rigid mode'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Max Number of Twists', 'The number of twists that are allowed to be introduced. If set to 0 alignments are run in rigid mode')}
+                            <IntegerInputComponent
+                                value={currParams?.fragment_length}
+                                onChange={(v) => {
+                                    nextParams!.fragment_length = v ? parseInt(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -177,121 +147,79 @@ function CeParams(props: {ctx: RequestState}) {
         <table className='method-params'>
             <tbody>
                 <tr>
-                    <td>Maximum Gap Size:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.gap_max_size || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_max_size = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Maximum gap size G, that is applied during the AFP extension'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Maximum Gap Size', 'Maximum gap size G, that is applied during the AFP extension')}
+                            <IntegerInputComponent
+                                value={currParams?.gap_max_size}
+                                onChange={(v) => {
+                                    nextParams!.gap_max_size = v ? parseInt(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Gap Opening Penalty:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.gap_opening_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_opening_penalty = parseFloat(e.target.value);
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap opening penalty during alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Gap Opening Penalty', 'Gap opening penalty during alignment optimization')}
+                            <FloatInputComponent
+                                value={currParams?.gap_opening_penalty}
+                                onChange={(v) => {
+                                    nextParams!.gap_opening_penalty = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Gap Extension Penalty:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.gap_extension_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_extension_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap extension penalty during alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Gap Extension Penalty', 'Gap extension penalty during alignment optimization')}
+                            <FloatInputComponent
+                                value={currParams?.gap_extension_penalty}
+                                onChange={(v) => {
+                                    nextParams!.gap_extension_penalty = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Fragment Size:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.fragment_size || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.fragment_size = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Fragment size of Aligned Fragment Pairs (AFPs)'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Fragment Size', 'Fragment size of Aligned Fragment Pairs (AFPs)')}
+                            <IntegerInputComponent
+                                value={currParams?.fragment_size}
+                                onChange={(v) => {
+                                    nextParams!.fragment_size = v ? parseInt(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>RMSD Threshold:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.rmsd_threshold || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.rmsd_threshold = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='RMSD threshold used while tracing the Aligned Fragment Pair (AFP) fragments'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('RMSD Threshold', 'RMSD threshold used while tracing the Aligned Fragment Pair (AFP) fragments')}
+                            <FloatInputComponent
+                                value={currParams?.rmsd_threshold}
+                                onChange={(v) => {
+                                    nextParams!.rmsd_threshold = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Maximum RMSD:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.max_opt_rmsd || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.max_opt_rmsd = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Maximum RMSD at which to stop alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Maximum RMSD', 'Maximum RMSD at which to stop alignment optimization')}
+                            <FloatInputComponent
+                                value={currParams?.max_opt_rmsd}
+                                onChange={(v) => {
+                                    nextParams!.max_opt_rmsd = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -307,142 +235,93 @@ function CeCpParams(props: {ctx: RequestState}) {
         <table className='method-params'>
             <tbody>
                 <tr>
-                    <td>Maximum Gap Size:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.gap_max_size || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_max_size = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Maximum gap size G, that is applied during the AFP extension'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Maximum Gap Size', 'Maximum gap size G, that is applied during the AFP extension')}
+                            <IntegerInputComponent
+                                value={currParams?.gap_max_size}
+                                onChange={(v) => {
+                                    nextParams!.gap_max_size = v ? parseInt(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Gap Opening Penalty:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.gap_opening_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_opening_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap opening penalty during alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Gap Opening Penalty', 'Gap opening penalty during alignment optimization')}
+                            <FloatInputComponent
+                                value={currParams?.gap_opening_penalty}
+                                onChange={(v) => {
+                                    nextParams!.gap_opening_penalty = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Gap Extension Penalty:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.gap_extension_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_extension_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap extension penalty during alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Gap Extension Penalty', 'Gap extension penalty during alignment optimization')}
+                            <FloatInputComponent
+                                value={currParams?.gap_extension_penalty}
+                                onChange={(v) => {
+                                    nextParams!.gap_extension_penalty = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Fragment Size:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.fragment_size || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.fragment_size = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Fragment size of Aligned Fragment Pairs (AFPs)'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Fragment Size', 'Fragment size of Aligned Fragment Pairs (AFPs)')}
+                            <IntegerInputComponent
+                                value={currParams?.fragment_size}
+                                onChange={(v) => {
+                                    nextParams!.fragment_size = v ? parseInt(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>RMSD Threshold:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.rmsd_threshold || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.rmsd_threshold = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='RMSD threshold used while tracing the Aligned Fragment Pair (AFP) fragments'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('RMSD Threshold', 'RMSD threshold used while tracing the Aligned Fragment Pair (AFP) fragments')}
+                            <FloatInputComponent
+                                value={currParams?.rmsd_threshold}
+                                onChange={(v) => {
+                                    nextParams!.rmsd_threshold = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Maximum RMSD:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.max_opt_rmsd || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.max_opt_rmsd = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Maximum RMSD at which to stop alignment optimization'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Maximum RMSD', 'Maximum RMSD at which to stop alignment optimization')}
+                            <FloatInputComponent
+                                value={currParams?.max_opt_rmsd}
+                                onChange={(v) => {
+                                    nextParams!.max_opt_rmsd = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Min CP Block Length:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.min_cp_length || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.min_cp_length = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Minimum length for a Circular Permutation block to consider'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Min CP Block Length', 'Minimum length for a Circular Permutation block to consider')}
+                            <IntegerInputComponent
+                                value={currParams?.max_opt_rmsd}
+                                onChange={(v) => {
+                                    nextParams!.max_opt_rmsd = v ? parseInt(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -458,43 +337,29 @@ function SmithWatermanParams(props: {ctx: RequestState}) {
         <table className='method-params'>
             <tbody>
                 <tr>
-                    <td>Gap Opening Penalty:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.gap_opening_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_opening_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap opening penalty'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Gap Opening Penalty', 'Gap opening penalty during alignment optimization')}
+                            <FloatInputComponent
+                                value={currParams?.gap_opening_penalty}
+                                onChange={(v) => {
+                                    nextParams!.gap_opening_penalty = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
-                    <td>Gap Extension Penalty:</td>
                     <td>
-                        <input
-                            id='input-area'
-                            type='number'
-                            value={currParams?.gap_extension_penalty || ''}
-                            className={numInpClass}
-                            onChange={(e) => {
-                                nextParams!.gap_extension_penalty = e.target.value ? parseFloat(e.target.value) : undefined;
-                                props.ctx.push(next);
-                            }}
-                        />
-                        <span
-                            data-tooltip='Gap extension penalty'
-                            data-flow='top'
-                            className='txt-tooltip'
-                        ><HelpCircleSvg />
-                        </span>
+                        <div className='inp-outer'>
+                            {createLabel('Gap Extension Penalty', 'Gap extension penalty during alignment optimization')}
+                            <FloatInputComponent
+                                value={currParams?.gap_extension_penalty}
+                                onChange={(v) => {
+                                    nextParams!.gap_extension_penalty = v ? parseFloat(v) : undefined;
+                                    props.ctx.push(next);
+                                }}
+                            />
+                        </div>
                     </td>
                 </tr>
             </tbody>
