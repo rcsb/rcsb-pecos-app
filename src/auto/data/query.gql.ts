@@ -37,6 +37,7 @@ query polymerInstances($ids: [String]!) {
       }
       rcsb_entity_source_organism {
         ncbi_scientific_name
+        ncbi_parent_scientific_name
       }
     }
   }

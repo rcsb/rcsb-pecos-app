@@ -60,7 +60,7 @@ function RcsbEntryById(props: {
     suggestFn: (v: string) => Promise<string[]>
 }) {
     return <div className='inp-outer'>
-        <span className='inp-label'>Entry ID</span>
+        <span className='inp-label'>RCSB PDB: Entry ID</span>
         <AutosuggestComponent
             value={props.value}
             label={'e.g., 3PQR, AF_AFP60325F1 '}
@@ -98,7 +98,7 @@ function RcsbEntryByUniprotId(props: {
 
     return <>
         <div className='inp-outer'>
-            <span className='inp-label'>UniProtKB ID</span>
+            <span className='inp-label'>RCSB PDB: UniProtKB ID</span>
             <AutosuggestComponent
                 value={uniprotId.toUpperCase() || ''}
                 label={'e.g., P06213'}
@@ -348,7 +348,7 @@ export function StructureAlignmentInput(props: {
 
         const options: SelectOption<StructureInputOption>[] = [
             {
-                label: 'RCSB.org',
+                label: 'RCSB PDB',
                 options: [
                     {
                         label: 'Entry ID',
@@ -397,13 +397,15 @@ export function StructureAlignmentInput(props: {
             }
         };
 
-        return <Select
-            value={toOptionSelection(index)}
-            dropdownMatchSelectWidth={false}
-            getRawInputElement={() => <Icon svg={LineArrowDownSvg} title={text}/>}
-            options={options}
-            onChange={(v?: string) => onMutation(index, v)}
-        />;
+        return <span className={classNames('dropdown', 'new-item-select')}>
+            <Select
+                value={toOptionSelection(index)}
+                dropdownMatchSelectWidth={false}
+                getRawInputElement={() => <Icon svg={LineArrowDownSvg} title={text}/>}
+                options={options}
+                onChange={(v?: string) => onMutation(index, v)}
+            />
+        </span>;
     };
 
     const renderMutateControls = (index: number) => {
@@ -436,7 +438,7 @@ export function StructureAlignmentInput(props: {
             }
             {
                 !disabled &&
-                <div className='new-item-area'>
+                <span style={{ marginTop: '20px' }}>
                     <AddActionControl
                         info='Click to add a new Entry ID input'
                         onClick={() => {
@@ -446,7 +448,7 @@ export function StructureAlignmentInput(props: {
                         className='add-new-item'
                     />
                     {renderMutateAction(count, 'Click to select a new input')}
-                </div>
+                </span>
             }
         </div>;
     };

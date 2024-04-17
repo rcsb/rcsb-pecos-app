@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { Alignment } from '../../auto/alignment/alignment-response';
 import { ApplicationContext } from '../../context';
 import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
+import { Icon, InfoCircleSvg } from '../icons';
+import { getCombinedInstanceId, isValidEntryId } from '../../utils/identifier';
 
 function round(value: number | undefined) {
     if (!value && value !== 0)
@@ -40,6 +42,15 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
         setData(props.ctx.state.data.response.state?.results ?? []);
     }, []);
 
+    const openInfo = (entryId: string, asymId: string) => {
+        const instanceId = getCombinedInstanceId(entryId, asymId);
+        props.ctx.data().polymerInstances([instanceId])
+            .then(arr => arr[0])
+            .then(data => {
+                alert(data.ncbi_scientific_name + ' (' + data.ncbi_parent_scientific_name + ')');
+            });
+    };
+
     function showScores() {
         return data.map((alignment, n)=>{
             const data = scores(alignment);
@@ -54,6 +65,14 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                 <td>{defined(data.length) ? data.length : '-'}</td>
                 <td>{defined(data.seqLength) ? data.seqLength : '-'}</td>
                 <td>{defined(data.modeledLength) ? data.modeledLength : '-'}</td>
+                <td>{data.entryId && isValidEntryId(data.entryId)}
+                    <Icon
+                        svg={InfoCircleSvg}
+                        title={''}
+                        className='info-icon'
+                        onClick={() => openInfo(data.entryId!, data.chainId)}
+                    />
+                </td>
             </tr>);
         });
     }
@@ -76,6 +95,14 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
             <td> - </td>
             <td>{defined(seqLength) ? seqLength : '-'}</td>
             <td>{defined(modeledLength) ? modeledLength : '-'}</td>
+            <td>{entryId && isValidEntryId(entryId)}
+                <Icon
+                    svg={InfoCircleSvg}
+                    title={''}
+                    className='info-icon'
+                    onClick={() => openInfo(entryId!, chainId)}
+                />
+            </td>
         </tr>);
     }
 
@@ -91,6 +118,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                 <th>Equivalent Residues</th>
                 <th>Sequence Length</th>
                 <th>Modelled Residues</th>
+                <th>Info</th>
             </tr>
         </thead>
         <tbody>

@@ -11,6 +11,7 @@ export type InstanceData = {
     auth_asym_id?: string,
     pdbx_description?: string,
     ncbi_scientific_name?: string,
+    ncbi_parent_scientific_name?: string
     pdbx_seq_one_letter_code_can?: string,
     rcsb_sample_sequence_length?: number
 };
@@ -44,7 +45,7 @@ export class DataService {
     }
 
     /**
-     * Queries Data API to fetch asym IDs for polymer ssequences:
+     * Queries Data API to fetch asym IDs for polymer sequences:
      * - protein sequences
      * - at least 10 residues long
      *
@@ -80,15 +81,20 @@ export class DataService {
         const data = await this.fetch<PolymerInstancesQueryVariables>(polymerInstancesQuery, vars);
         if (data && data.polymer_entity_instances) {
             return data.polymer_entity_instances.map(i => {
-                const organisms: string[] = [];
-                i!.polymer_entity!.rcsb_entity_source_organism?.forEach(o => { if (o && o!.ncbi_scientific_name) organisms.push(o!.ncbi_scientific_name); });
-                const scientificName = (organisms.length > 0) ? organisms.join(', ') : undefined;
+                const entity = i!.polymer_entity!;
+                const scientificName = (entity.rcsb_entity_source_organism)
+                    ? entity.rcsb_entity_source_organism.map(o => o?.ncbi_scientific_name).join(', ')
+                    : undefined;
+                const scientificParentName = (entity.rcsb_entity_source_organism)
+                    ? entity.rcsb_entity_source_organism.map(o => o?.ncbi_parent_scientific_name).join(', ')
+                    : undefined;
                 return {
                     entry_id: i!.polymer_entity!.entry!.rcsb_id,
                     asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.asym_id as string,
                     auth_asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.auth_asym_id as string,
                     pdbx_description: i!.polymer_entity!.rcsb_polymer_entity?.pdbx_description as string,
                     ncbi_scientific_name: scientificName,
+                    ncbi_parent_scientific_name: scientificParentName,
                     pdbx_seq_one_letter_code_can: i!.polymer_entity!.entity_poly!.pdbx_seq_one_letter_code_can as string,
                     rcsb_sample_sequence_length: i!.polymer_entity!.entity_poly!.rcsb_sample_sequence_length as number
                 };

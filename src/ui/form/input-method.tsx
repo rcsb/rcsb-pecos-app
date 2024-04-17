@@ -7,7 +7,7 @@ import { RequestState } from '../../state/request';
 import { horizontal } from '../../utils/constants';
 import { MethodName, toMethodImpl } from '../../utils/request';
 import { ActionButtonControl } from '../controls/controls-button';
-import { HelpCircleSvg, SolidArrowDownSvg } from '../icons';
+import { HelpCircleSvg, Icon, SolidArrowDownSvg } from '../icons';
 import { FloatInputComponent, IntegerInputComponent, SelectOption } from './base';
 
 type DisplayMethod = Exclude<MethodName, QCP['name']>;
@@ -17,11 +17,11 @@ function createLabel(label: string, tooltip: string) {
         <span className='inp-label'>
             {label}
         </span>
-        <span
-            className='txt-tooltip'
-            data-flow='top'
-            data-tooltip={tooltip}> <HelpCircleSvg />
-        </span>
+        <Icon
+            svg={HelpCircleSvg}
+            title={tooltip}
+            className='info-icon'
+        />
     </span>;
 }
 

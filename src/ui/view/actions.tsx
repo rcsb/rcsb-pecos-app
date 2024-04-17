@@ -3,7 +3,7 @@ import Dropdown from 'rc-dropdown';
 import Menu, { Divider, Item as MenuItem } from 'rc-menu';
 
 import { ApplicationContext, DownloadOptions } from '../../context';
-import { CopySvg, Icon, SolidArrowDownSvg, DownloadSvg } from '../icons';
+import { CopySvg, Icon, DownloadSvg } from '../icons';
 import { exportSequenceAlignment, exportTransformations } from '../../utils/download';
 import { MenuInfo, MenuClickEventHandler } from 'rc-menu/es/interface';
 import { createBookmarkableResultsURL, isBookmarkableResult } from '../../utils/helper';
@@ -65,7 +65,6 @@ export function DownloadAssetsComponent(props: { ctx: ApplicationContext }) {
             <button className='btn-action btn-submit' style={style}>
                 <Icon svg={DownloadSvg} className='download-icon'/>
                     Export
-                <Icon svg={() => SolidArrowDownSvg('45', '20', '-5 3 20 20')} className='arrow-down-icon'/>
             </button>
         </Dropdown>
     );

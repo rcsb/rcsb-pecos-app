@@ -2096,7 +2096,7 @@ export type EmImaging = {
    * The mode of imaging.
    *
    * Allowable values:
-   * BRIGHT FIELD, DARK FIELD, DIFFRACTION, OTHER
+   * 4D-STEM, BRIGHT FIELD, DARK FIELD, DIFFRACTION, OTHER
    *
    */
   readonly mode?: Maybe<Scalars['String']['output']>;
@@ -2457,7 +2457,7 @@ export type EntityPoly = {
    * (DT) for Thymidine-5'-monophosphate
    * (MSE) for Selenomethionine
    * (SEP) for Phosphoserine
-   * (PTO) for Phosphothreonine
+   * (TPO) for Phosphothreonine
    * (PTR) for Phosphotyrosine
    * (PCA) for Pyroglutamic acid
    * (UNK) for Unknown amino acid
@@ -4090,7 +4090,7 @@ export type PdbxInitialRefinementModel = {
    * This item identifies the resource of initial model used for refinement
    *
    * Allowable values:
-   * AlphaFold, ITasser, ModelArchive, Modeller, Other, PDB, PDB-Dev, RoseTTAFold, SwissModel
+   * AlphaFold, ITasser, InsightII, ModelArchive, Modeller, Other, PDB, PDB-Dev, PHYRE, Robetta, RoseTTAFold, SwissModel
    *
    */
   readonly source_name?: Maybe<Scalars['String']['output']>;
@@ -10492,7 +10492,7 @@ export type RcsbPolymerInstanceAnnotation = {
    * A type or category of the annotation.
    *
    * Allowable values:
-   * CATH, ECOD, SCOP, SCOP2
+   * CATH, ECOD, GlyGen, SCOP, SCOP2
    *
    */
   readonly type?: Maybe<Scalars['String']['output']>;

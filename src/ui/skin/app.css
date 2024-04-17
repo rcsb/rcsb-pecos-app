@@ -755,6 +755,11 @@
   color: currentColor;
 }
 
+.info-icon {
+  cursor: pointer;
+  padding-left: 5px;
+}
+
 .icon-container {
   padding: 3px;
 }
@@ -779,7 +784,7 @@
   fill: red;
 }
 
-.download-icon .copy-icon {
+.download-icon .copy-icon .info-icon {
   display: inline-block;
   color: inherit;
   font-style: normal;
@@ -827,6 +832,7 @@
 }
 
 .new-item-select {
+  cursor: pointer;
   width: 16px;
   height: 22px;
   border-radius: 4px;
