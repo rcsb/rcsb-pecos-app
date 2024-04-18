@@ -27,6 +27,16 @@ query polymerInstances($ids: [String]!) {
     polymer_entity {
       entry {
         rcsb_id
+        rcsb_entry_info {
+          resolution_combined
+          experimental_method
+        }
+        rcsb_ma_qa_metric_global {
+          ma_qa_metric_global {
+            type
+            value
+          }
+        }
       }
       rcsb_polymer_entity {
         pdbx_description

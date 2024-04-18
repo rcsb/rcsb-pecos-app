@@ -13,7 +13,10 @@ export type InstanceData = {
     ncbi_scientific_name?: string,
     ncbi_parent_scientific_name?: string
     pdbx_seq_one_letter_code_can?: string,
-    rcsb_sample_sequence_length?: number
+    rcsb_sample_sequence_length?: number,
+    experimental_method?: string,
+    resolution_combined?: number[],
+    ma_qa_metric_global?: number
 };
 
 type DataProviderConfigs = AppConfigs['service']['data'];
@@ -81,6 +84,7 @@ export class DataService {
         const data = await this.fetch<PolymerInstancesQueryVariables>(polymerInstancesQuery, vars);
         if (data && data.polymer_entity_instances) {
             return data.polymer_entity_instances.map(i => {
+                const entry = i!.polymer_entity!.entry!;
                 const entity = i!.polymer_entity!;
                 const scientificName = (entity.rcsb_entity_source_organism)
                     ? entity.rcsb_entity_source_organism.map(o => o?.ncbi_scientific_name).join(', ')
@@ -88,15 +92,29 @@ export class DataService {
                 const scientificParentName = (entity.rcsb_entity_source_organism)
                     ? entity.rcsb_entity_source_organism.map(o => o?.ncbi_parent_scientific_name).join(', ')
                     : undefined;
+                const method = entry.rcsb_entry_info.experimental_method
+                    ? entry.rcsb_entry_info.experimental_method
+                    : undefined;
+                const resolution = entry.rcsb_entry_info.resolution_combined
+                    ? entry.rcsb_entry_info.resolution_combined as number[]
+                    : undefined;
+                const pLDDT = (entry.rcsb_ma_qa_metric_global)
+                    ? entry.rcsb_ma_qa_metric_global[0]?.ma_qa_metric_global?.filter(function (el) {
+                        return el?.type === 'pLDDT';
+                    })[0]?.value
+                    : undefined;
                 return {
-                    entry_id: i!.polymer_entity!.entry!.rcsb_id,
+                    entry_id: entry.rcsb_id,
                     asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.asym_id as string,
                     auth_asym_id: i!.rcsb_polymer_entity_instance_container_identifiers!.auth_asym_id as string,
-                    pdbx_description: i!.polymer_entity!.rcsb_polymer_entity?.pdbx_description as string,
+                    pdbx_description: entity.rcsb_polymer_entity?.pdbx_description as string,
                     ncbi_scientific_name: scientificName,
                     ncbi_parent_scientific_name: scientificParentName,
-                    pdbx_seq_one_letter_code_can: i!.polymer_entity!.entity_poly!.pdbx_seq_one_letter_code_can as string,
-                    rcsb_sample_sequence_length: i!.polymer_entity!.entity_poly!.rcsb_sample_sequence_length as number
+                    pdbx_seq_one_letter_code_can: entity.entity_poly!.pdbx_seq_one_letter_code_can as string,
+                    rcsb_sample_sequence_length: entity.entity_poly!.rcsb_sample_sequence_length as number,
+                    experimental_method: method,
+                    resolution_combined: resolution,
+                    ma_qa_metric_global: pLDDT
                 };
             });
         }

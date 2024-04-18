@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import '../skin/modal.css';
+
 import { useEffect, useState } from 'react';
 import { Alignment } from '../../auto/alignment/alignment-response';
 import { ApplicationContext } from '../../context';
 import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
 import { Icon, InfoCircleSvg } from '../icons';
 import { getCombinedInstanceId, isValidEntryId } from '../../utils/identifier';
+import InfoModal from './info';
+import { InstanceData } from '../../service/data-service';
 
 function round(value: number | undefined) {
     if (!value && value !== 0)
@@ -37,6 +41,8 @@ function defined(num: number | number[] | undefined) {
 export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
 
     const [data, setData] = useState<Alignment[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState<InstanceData | undefined>(undefined);
 
     useEffect(() => {
         setData(props.ctx.state.data.response.state?.results ?? []);
@@ -47,8 +53,13 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
         props.ctx.data().polymerInstances([instanceId])
             .then(arr => arr[0])
             .then(data => {
-                alert(data.ncbi_scientific_name + ' (' + data.ncbi_parent_scientific_name + ')');
+                setModalContent(data);
+                setIsModalOpen(true);
             });
+    };
+
+    const closeInfo = () => {
+        setIsModalOpen(false);
     };
 
     function showScores() {
@@ -106,24 +117,33 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
         </tr>);
     }
 
-    return (<div className='box-row'><table className='tbl-members'>
-        <thead>
-            <tr>
-                <th style={{ width: '3px', padding: 0 }}></th>
-                <th>Entry</th>
-                <th>Chain</th>
-                <th>RMSD</th>
-                <th>TM-score</th>
-                <th>Identity</th>
-                <th>Equivalent Residues</th>
-                <th>Sequence Length</th>
-                <th>Modelled Residues</th>
-                <th>Info</th>
-            </tr>
-        </thead>
-        <tbody>
-            {showReference()}
-            {showScores()}
-        </tbody>
-    </table></div>);
+    return (
+        <div className='box-row'>
+            <table className='tbl-members'>
+                <thead>
+                    <tr>
+                        <th style={{ width: '3px', padding: 0 }}></th>
+                        <th>Entry</th>
+                        <th>Chain</th>
+                        <th>RMSD</th>
+                        <th>TM-score</th>
+                        <th>Identity</th>
+                        <th>Equivalent Residues</th>
+                        <th>Sequence Length</th>
+                        <th>Modelled Residues</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {showReference()}
+                    {showScores()}
+                </tbody>
+            </table>
+            <InfoModal
+                isModalOpen={isModalOpen}
+                modalContent={modalContent}
+                onClose={closeInfo}
+            />
+        </div>
+    );
 }

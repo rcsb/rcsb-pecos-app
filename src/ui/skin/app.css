@@ -758,6 +758,15 @@
 .info-icon {
   cursor: pointer;
   padding-left: 5px;
+  color: #5e6973;
+}
+
+.close-icon {
+  cursor: pointer;
+  padding-right: 15px;
+  padding-bottom: 5px;
+  position: relative;
+  float: right;
 }
 
 .icon-container {
