@@ -1,4 +1,4 @@
-.modal {
+.rcsb-alignment-modal {
     position: fixed;
     left: 0;
     top: 0;
@@ -11,14 +11,14 @@
     z-index: 9999999;
    }
 
-   .modal-content {
+   .rcsb-alignment-modal-content {
     border: 1px solid #fff;
     width: 500px;
     background-color: #fff;
     border-radius: 3px;
    }
 
-   .modal-main {
+   .rcsb-alignment-modal-main {
     margin: 20px;
     margin-bottom: 5px;
    }

@@ -44,9 +44,9 @@ const InfoModal = (props: { isModalOpen: boolean, modalContent: InstanceData | u
     };
 
     return (
-        <section className="modal">
-            <article className="modal-content">
-                <main className="modal-main">
+        <section className="rcsb-alignment-modal">
+            <article className="rcsb-alignment-modal-content">
+                <main className="rcsb-alignment-modal-main">
                     {entry()}
                     {molecule()}
                     {organism()}
