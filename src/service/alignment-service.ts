@@ -115,7 +115,6 @@ function toFormData(query: StructureAlignmentQuery, files?: File[]): FormData {
         query.options = opts;
     }
     const data = new FormData();
-    console.log(JSON.stringify(query));
     data.append('query', JSON.stringify(query));
     files?.map(f => data.append('files', f));
     return data;
