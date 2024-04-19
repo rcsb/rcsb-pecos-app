@@ -73,6 +73,7 @@ export class ApplicationContext {
             const data = params.get(requestUrlParam)!;
             const json = JSON.parse(data);
             const request = new QueryRequest(json);
+            await this.addResidueRanges(request);
             this.state.data.request.push(request);
             await this.align(request);
         }
@@ -150,6 +151,17 @@ export class ApplicationContext {
                 }
             }
         });
+    }
+
+    private async addResidueRanges(request: QueryRequest) {
+        for (const s of request.query.context.structures) {
+            if (isEntry(s)) {
+                const sele = s.selection as StructureInstanceSelection;
+                if (!sele.beg_seq_id) sele.beg_seq_id = 1;
+                if (!sele.end_seq_id) this._gql.sequenceLength(s.entry_id, sele.asym_id)
+                    .then(len => sele.end_seq_id = len);
+            }
+        }
     }
 
     private async processResponse(response: StructureAlignmentResponse) {
