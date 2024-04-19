@@ -62,7 +62,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
         setIsModalOpen(false);
     };
 
-    function showScores() {
+    const showScores = () => {
         return data.map((alignment, n)=>{
             const data = scores(alignment);
             const color = getAlignmentColorRgb(n + 1, DefaultOpasityValue);
@@ -76,17 +76,22 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                 <td>{defined(data.length) ? data.length : '-'}</td>
                 <td>{defined(data.seqLength) ? data.seqLength : '-'}</td>
                 <td>{defined(data.modeledLength) ? data.modeledLength : '-'}</td>
-                <td>{data.entryId && isValidEntryId(data.entryId)}
-                    <Icon
-                        svg={InfoCircleSvg}
-                        title={''}
-                        className='info-icon'
-                        onClick={() => openInfo(data.entryId!, data.chainId)}
-                    />
-                </td>
+                <td>{showInfo(data.entryId, data.chainId)}</td>
             </tr>);
         });
-    }
+    };
+
+    const showInfo = (entryId: string | undefined, asymId: string) => {
+        if (entryId && isValidEntryId(entryId)) {
+            return <Icon
+                svg={InfoCircleSvg}
+                title={''}
+                className='info-icon'
+                onClick={() => openInfo(entryId, asymId)}
+            />;
+        }
+    };
+
     function showReference() {
         const alignment = data[0];
         if (!alignment)
@@ -106,14 +111,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
             <td> - </td>
             <td>{defined(seqLength) ? seqLength : '-'}</td>
             <td>{defined(modeledLength) ? modeledLength : '-'}</td>
-            <td>{entryId && isValidEntryId(entryId)}
-                <Icon
-                    svg={InfoCircleSvg}
-                    title={''}
-                    className='info-icon'
-                    onClick={() => openInfo(entryId!, chainId)}
-                />
-            </td>
+            <td>{showInfo(entryId, chainId)}</td>
         </tr>);
     }
 
