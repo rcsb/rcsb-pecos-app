@@ -401,7 +401,7 @@ export function StructureAlignmentInput(props: {
             <Select
                 value={toOptionSelection(index)}
                 dropdownMatchSelectWidth={false}
-                getRawInputElement={() => <Icon svg={LineArrowDownSvg} title={text}/>}
+                getRawInputElement={() => <span title={text}><LineArrowDownSvg/></span>}
                 options={options}
                 onChange={(v?: string) => onMutation(index, v)}
             />
