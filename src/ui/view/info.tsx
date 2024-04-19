@@ -31,7 +31,7 @@ const InfoModal = (props: { isModalOpen: boolean, modalContent: InstanceData | u
     const quality = () => {
         if (props.modalContent?.resolution_combined) {
             const resolution = Math.min(...props.modalContent.resolution_combined);
-            return <><b>Resolution:</b> {resolution}<br/></>;
+            return <><b>Resolution:</b> {resolution} <span>&#8491;</span><br/></>;
         } else if (props.modalContent?.ma_qa_metric_global) {
             return <><b>pLDDT (global):</b> {props.modalContent.ma_qa_metric_global}<br/></>;
         }
