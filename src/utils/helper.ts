@@ -240,3 +240,12 @@ export function createBookmarkableResultsURL(apiRequestState: QueryRequest, apiR
 export function getPositiveNumber(val?: number) {
     return (val && val >= 1) ? val : undefined;
 }
+
+export function updateWindowURL(url?: string, preserveHistory?: boolean) {
+    if (window) {
+        if (!url) url = window.location.href.split('?')[0];
+        (preserveHistory)
+            ? window.history.replaceState({}, '', url)
+            : window.history.pushState({}, '', url);
+    }
+}

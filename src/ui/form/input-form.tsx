@@ -17,7 +17,7 @@ import { ActionButtonControl } from '../controls/controls-button';
 import { AddActionControl, DeleteActionControl } from '../controls/controls-action';
 
 import { horizontal, vertical } from '../../utils/constants';
-import { getPositiveNumber, isEntry, isUploadedFile, isUrl, useObservable } from '../../utils/helper';
+import { getPositiveNumber, updateWindowURL, useObservable } from '../../utils/helper';
 
 import {
     TextInputComponent,
@@ -41,10 +41,11 @@ import { isValidEntryId, isValidMgnifyId, isValidUniprotId } from '../../utils/i
 import Select from 'rc-select';
 import { StructureAlignmentMethod } from './input-method';
 import Upload, { UploadProps } from 'rc-upload';
+import { StructureInputOption } from '../../state/option';
 
 type StructureImpl = StructureEntryImpl | StructureFileUploadImpl | StructureWebLinkImpl;
-type StructureInputOption = 'rcsb-entry' | 'rcsb-uniprot' | 'file-url' | 'file-upload' | 'alphafold-db' | 'esm-atlas';
-const structureOptions: { [key in StructureInputOption]: () => StructureImpl } = {
+
+const optionsToStructure: { [key in StructureInputOption]: () => StructureImpl } = {
     'rcsb-entry': () => new StructureEntryImpl(),
     'rcsb-uniprot': () => new StructureEntryImpl(),
     'file-url': () => new StructureWebLinkImpl(),
@@ -272,7 +273,7 @@ function ESMAtlasEntryByMGnifyId(props: {
     };
 
     return <div className='inp-outer'>
-        <span className='inp-label'>ESM Atlas: MGnify Protein ID</span>
+        <span className='inp-label'>ESM Atlas: MGnify ID</span>
         <input
             id='input-area'
             type='text'
@@ -292,56 +293,41 @@ export function StructureAlignmentInput(props: {
     const [activeKey, setActiveKey] = useState<React.Key | React.Key[]>(['0']);
     useEffect(() => { if (props.isCollapsed) setActiveKey([]); }, [props.isCollapsed]);
 
-    const handler = props.ctx.state.data.request;
-    const [request, setRequest] = useState(handler.state);
-    useObservable<QueryRequest>(handler.subject, setRequest);
+    const requestData = props.ctx.state.data.request;
+    const [request, setRequest] = useState(requestData.state);
+    useObservable<QueryRequest>(requestData.subject, setRequest);
 
-    const initStructureListState = (state: QueryRequest) => {
-        const list = new Array<StructureInputOption>();
-        state.query.context.structures.map((s, i) => {
-            if (isEntry(s)) {
-                list[i] = 'rcsb-entry';
-            } else if (isUrl(s)) {
-                list[i] = 'file-url';
-            } else if (isUploadedFile(s)) {
-                list[i] = 'file-upload';
-            } else {
-                throw new Error('Initialization from state is not implemented. Structure: ' + s);
-            }
-        });
-        return list;
-    };
-    const [structureList, setStructureList] = useState(initStructureListState(handler.state));
+    const optionsData = props.ctx.state.data.options;
+    const [structureOptions, setStructureOptions] = useState(optionsData.state);
+    useObservable<StructureInputOption[]>(optionsData.subject, setStructureOptions);
 
     const updateStructure = (index: number, s: Structure) => {
-        const clone = handler.copy();
+        const clone = requestData.copy();
         clone.query.context.structures[index] = s;
-        handler.push(clone);
+        requestData.push(clone);
     };
 
     const deleteStructure = (index: number) => {
-        const filtered = handler.state.query.context.structures.filter((v, i) => i !== index);
-        const clone = handler.copy();
+        const filtered = requestData.state.query.context.structures.filter((v, i) => i !== index);
+        const clone = requestData.copy();
         clone.query.context.structures = filtered;
         if (clone.files[index]) clone.files.splice(index, 1);
-        handler.push(clone);
+        requestData.push(clone);
     };
 
-    const updateStructureList = (index: number, o: StructureInputOption) => {
-        const updated = [...structureList.slice(0, index), o, ...structureList.slice(index + 1)];
-        setStructureList(updated);
+    const updateOption = (index: number, o: StructureInputOption) => {
+        optionsData.push(o, index);
     };
 
-    const deleteFromStructureList = (index: number) => {
-        const updated = [...structureList.slice(0, index), ...structureList.slice(index + 1)];
-        setStructureList(updated);
+    const deleteOption = (index: number) => {
+        optionsData.remove(index);
     };
 
     const onMutation = (index: number, value?: string) => {
         if (!value) throw new Error('Undefined input option');
         const v = value as StructureInputOption;
-        updateStructure(index, structureOptions[v]());
-        updateStructureList(index, v);
+        updateStructure(index, optionsToStructure[v]());
+        updateOption(index, v);
     };
 
     const renderMutateAction = (index: number, text: string) => {
@@ -390,10 +376,10 @@ export function StructureAlignmentInput(props: {
         ];
 
         const toOptionSelection = (index: number) => {
-            if (typeof structureList[index] === 'undefined') {
+            if (typeof structureOptions[index] === 'undefined') {
                 return '';
             } else {
-                return structureList[index];
+                return structureOptions[index];
             }
         };
 
@@ -415,7 +401,7 @@ export function StructureAlignmentInput(props: {
                 className={classNames('upload-icon delete-icon')}
                 onClick={() => {
                     deleteStructure(index);
-                    deleteFromStructureList(index);
+                    deleteOption(index);
                 }}
             />
             {renderMutateAction(index, 'Click to change an input type')}
@@ -423,7 +409,7 @@ export function StructureAlignmentInput(props: {
     };
 
     const renderAddControls = () => {
-        const count = structureList.length;
+        const count = structureOptions.length;
         const disabled = count === props.ctx.configs.service.alignment.maxNumStructuresPairwise;
         return <div className={horizontal}>
             {
@@ -442,8 +428,8 @@ export function StructureAlignmentInput(props: {
                     <AddActionControl
                         info='Click to add a new Entry ID input'
                         onClick={() => {
-                            updateStructure(count, structureOptions['rcsb-entry']());
-                            updateStructureList(count, 'rcsb-entry');
+                            updateStructure(count, optionsToStructure['rcsb-entry']());
+                            updateOption(count, 'rcsb-entry');
                         }}
                         className='add-new-item'
                     />
@@ -454,37 +440,37 @@ export function StructureAlignmentInput(props: {
     };
 
     const renderSelection = (index: number, type: 'input' | 'selection') => {
-        const s = structure(handler.state, index);
+        const s = structure(requestData.state, index);
         const sele = selection(s);
 
         const updateSelection = (entryId: string, asymId: string) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             const sele = selection(structure(next, index));
             if (isValidEntryId(entryId)) {
                 sele.asym_id = asymId;
                 sele.beg_seq_id = 1;
                 props.ctx.data().sequenceLength(entryId, asymId)
                     .then(resId => sele.end_seq_id = resId)
-                    .then(() => handler.push(next));
+                    .then(() => requestData.push(next));
             }
         };
 
         const updateAsymId = (asymId: string) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             selection(structure(next, index)).asym_id = asymId;
-            handler.push(next);
+            requestData.push(next);
         };
 
         const updateBegResId = (val?: number) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             selection(structure(next, index)).beg_seq_id = getPositiveNumber(val);
-            handler.push(next);
+            requestData.push(next);
         };
 
         const updateEndResId = (val?: number) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             selection(structure(next, index)).end_seq_id = getPositiveNumber(val);
-            handler.push(next);
+            requestData.push(next);
         };
 
         return <>
@@ -526,10 +512,9 @@ export function StructureAlignmentInput(props: {
 
     const renderRcsbEntryOption = (index: number) => {
 
-        const s = structure(handler.state, index) as StructureEntry;
-
+        const s = structure(requestData.state, index) as StructureEntry;
         const updateEntryId = (v: string) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             (structure(next, index) as StructureEntry).entry_id = v;
             if (!isValidEntryId(v)) {
                 const sele = selection(structure(next, index));
@@ -537,7 +522,7 @@ export function StructureAlignmentInput(props: {
                 sele.beg_seq_id = undefined;
                 sele.end_seq_id = undefined;
             }
-            handler.push(next);
+            requestData.push(next);
         };
 
         return <>
@@ -555,14 +540,14 @@ export function StructureAlignmentInput(props: {
 
         const updateStructureSelection = (v: string) => {
             const [entry_id, asym_id] = v.split('.');
-            const next = handler.copy();
+            const next = requestData.copy();
             const s = (structure(next, index) as StructureEntry);
             s.entry_id = entry_id;
             s.selection = {
                 asym_id: asym_id
             };
-            handler.push(next);
-            updateStructureList(index, 'rcsb-entry');
+            requestData.push(next);
+            updateOption(index, 'rcsb-entry');
         };
 
         return <>
@@ -576,15 +561,15 @@ export function StructureAlignmentInput(props: {
     const renderAlphaFoldDbOption = (index: number) => {
 
         const update = (v: string) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             const s = (structure(next, index) as StructureWebLink);
             s.url = v;
             s.format = 'mmcif';
             s.selection = {
                 asym_id: 'A'
             };
-            handler.push(next);
-            updateStructureList(index, 'file-url');
+            requestData.push(next);
+            updateOption(index, 'file-url');
         };
 
         return <>
@@ -598,15 +583,15 @@ export function StructureAlignmentInput(props: {
     const renderESMAtlasOption = (index: number) => {
 
         const update = (v: string) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             const s = (structure(next, index) as StructureWebLink);
             s.url = v;
             s.format = 'mmcif';
             s.selection = {
                 asym_id: 'A'
             };
-            handler.push(next);
-            updateStructureList(index, 'file-url');
+            requestData.push(next);
+            updateOption(index, 'file-url');
         };
 
         return <>
@@ -618,14 +603,12 @@ export function StructureAlignmentInput(props: {
     };
 
     const renderFileUploadOption = (index: number) => {
-
-        const file = handler.state.files[index];
-
+        const file = requestData.state.files[index];
         const updateFile = (value: File) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             (structure(next, index) as CoordinatesByFileUpload).format = guessFormat(value);
             next.files[index] = value;
-            handler.push(next);
+            requestData.push(next);
         };
 
         return <>
@@ -640,18 +623,18 @@ export function StructureAlignmentInput(props: {
 
     const renderWebLinkOption = (index: number) => {
 
-        const struct = structure(handler.state, index) as StructureWebLink;
+        const struct = structure(requestData.state, index) as StructureWebLink;
 
         const updateURL = (v: string) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             (structure(next, index) as StructureWebLink).url = v;
-            handler.push(next);
+            requestData.push(next);
         };
 
         const updateFormat = (v: string) => {
-            const next = handler.copy();
+            const next = requestData.copy();
             (structure(next, index) as StructureWebLink).format = v as StructureFileFormat;
-            handler.push(next);
+            requestData.push(next);
         };
 
         return <>
@@ -682,7 +665,7 @@ export function StructureAlignmentInput(props: {
 
     const renderSelectedStructures = () => {
         return <>
-            {structureList.map((s, i) => {
+            {structureOptions.map((s, i) => {
                 if (s !== undefined) {
                     return <div key={i} className={horizontal}>
                         {renderMutateControls(i)}
@@ -695,19 +678,20 @@ export function StructureAlignmentInput(props: {
     };
 
     const clearForm = () => {
-        handler.clear();
-        setStructureList(initStructureListState(handler.state));
+        requestData.clear();
+        optionsData.clear();
+        updateWindowURL();
     };
 
     const alignmentTool = () => {
         return <div className={vertical}>
             {renderSelectedStructures()}
             <br/>
-            <StructureAlignmentMethod ctx={handler} />
+            <StructureAlignmentMethod ctx={requestData} />
             <div className={horizontal} style={{ justifyContent: 'flex-end' }}>
                 <ActionButtonControl
                     label='Compare'
-                    isDisabled={!handler.state.isSubmittable()}
+                    isDisabled={!requestData.state.isSubmittable()}
                     onClick={() => props.onSubmit(request)}
                     className={classNames('btn-action', 'btn-submit')}
                 />

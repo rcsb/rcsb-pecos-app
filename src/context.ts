@@ -8,7 +8,7 @@ import { ResponseState } from './state/response';
 import { QueryRequest, StructureFileUploadImpl, StructureWebLinkImpl } from './utils/request';
 import { StructureAlignmentMetadata, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
-import { isEntry, buildError, getTransformationType, isBookmarkableResult, createBookmarkableResultsURL } from './utils/helper';
+import { isEntry, buildError, getTransformationType, isBookmarkableResult, createBookmarkableResultsURL, updateWindowURL } from './utils/helper';
 import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
 
@@ -16,6 +16,7 @@ import { DataService } from './service/data-service';
 import { SearchService } from './service/search-service';
 import { FileUploadService } from './service/file-upload-service';
 import { StructureAlignmentService } from './service/alignment-service';
+import { OptionState } from './state/option';
 
 export type Status = 'init' | 'loading' | 'ready' | 'error';
 export type DownloadOptions = 'structure' | 'sequence' | 'transform' | 'all' | undefined;
@@ -36,6 +37,7 @@ export class ApplicationContext {
             target: new BehaviorSubject<number>(0)
         },
         data: {
+            options: new OptionState(),
             request: new RequestState(),
             response: new ResponseState()
         }
@@ -121,7 +123,7 @@ export class ApplicationContext {
         updateWindowURL(newUrl, true);
     }
 
-    private error(message: string) {
+    public error(message: string) {
         const response = buildError('', message);
         this.state.data.response.push(response);
         this.state.events.status.next('error');
@@ -193,40 +195,33 @@ export class ApplicationContext {
             .then((response) => {
                 this.processResponse(response);
             })
+            .then()
             .catch((e) => this.error(e.message));
     }
 
     public async uploadAtomicCoordinateFiles(request: QueryRequest) {
         if (request.files && request.files.length > 0) {
-            const clone = clonedeep(request);
+            const cloneRequest = clonedeep(request);
             for (let j = 0; j < request.query.context.structures.length; j++) {
                 const structure = request.query.context.structures[j];
                 if (structure instanceof StructureFileUploadImpl) {
-                    const file = clone.files[j]!;
+                    const file = cloneRequest.files[j]!;
                     const format = structure.format;
                     await this._files.upload(file, format)
-                        .then((response) => {
+                        .then(response => {
                             const uploaded = new StructureWebLinkImpl();
                             uploaded.url = response.url;
                             uploaded.name = file.name;
                             uploaded.format = response.format;
                             uploaded.selection = structure.selection;
-                            clone.query.context.structures[j] = uploaded;
+                            cloneRequest.query.context.structures[j] = uploaded;
+                            this.state.data.options.push('file-url', j);
                         })
                         .catch((e) => this.error(e.message));
                 }
             }
-            clone.files = [];
-            this.state.data.request.push(clone);
+            cloneRequest.files = [];
+            this.state.data.request.push(cloneRequest);
         }
-    }
-}
-
-function updateWindowURL(url?: string, preserveHistory?: boolean) {
-    if (window) {
-        if (!url) url = window.location.href.split('?')[0];
-        (preserveHistory)
-            ? window.history.replaceState({}, '', url)
-            : window.history.pushState({}, '', url);
     }
 }
