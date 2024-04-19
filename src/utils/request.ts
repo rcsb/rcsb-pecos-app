@@ -33,7 +33,7 @@ type KeysOfUnion<T> = T extends T ? keyof T: never;
 export type ParametersKeys = KeysOfUnion<Parameters>;
 
 const defaultFileFormat: StructureFileFormat = 'mmcif';
-const defaultMethod: MethodName = 'fatcat-rigid';
+const defaultMethod: MethodName = 'tm-align';
 
 class TMAlignImpl implements TMAlign {
     name: TMAlign['name'] = 'tm-align';
