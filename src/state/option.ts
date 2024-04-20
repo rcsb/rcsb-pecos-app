@@ -27,7 +27,8 @@ export class OptionState {
     }
 
     reset(options: StructureInputOption[]) {
-        this._subject.next(options);
+        this._state = options;
+        this._subject.next(this._state);
     }
 
     push(value: StructureInputOption, index: number) {
@@ -36,12 +37,14 @@ export class OptionState {
             value,
             ...this._state.slice(index + 1)
         ];
-        this._subject.next(next);
+        this._state = next;
+        this._subject.next(this._state);
     }
 
     remove(index: number) {
         const next = [...this._state.slice(0, index), ...this._state.slice(index + 1)];
-        this._subject.next(next);
+        this._state = next;
+        this._subject.next(this._state);
     }
 
     clear() {
