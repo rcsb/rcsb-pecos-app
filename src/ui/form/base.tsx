@@ -121,7 +121,7 @@ export function AsymSelectorComponent(props: BaseProps & {
     };
 
     if (options.length > 0) {
-        return <div className='inp-select' style={{ width: '70px' }}>
+        return <div className='inp-select' style={{ width: '70px', minWidth: 'max-content' }}>
             <Select
                 value={String(props.value)}
                 suffixIcon={() => SolidArrowDownSvg('20', '20', '5 3 20 20')}
