@@ -75,7 +75,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
 
     const showEntryId = (entryId: string | undefined) => {
         if (entryId && isValidEntryId(entryId)) {
-            const ref = props.ctx.configs.environment.rcsbOrg + '/structure/' + entryId;
+            const ref = props.ctx.configs.environment.base + '/structure/' + entryId;
             return <a href={ref}>{entryId}</a>;
         }
         return entryId;
@@ -126,7 +126,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
             <table className='tbl-members'>
                 <thead>
                     <tr>
-                        <th style={{ width: '36px', padding: 0 }}></th>
+                        <th style={{ width: '35px', padding: 0 }}></th>
                         <th>Entry</th>
                         <th>Chain</th>
                         <th>RMSD</th>

@@ -42,6 +42,9 @@ const DefaultAppConfigs = {
             download: 'download',
             httpHeaders: {}
         }
+    },
+    environment: {
+        base: 'https://www.rcsb.org'
     }
 };
 
