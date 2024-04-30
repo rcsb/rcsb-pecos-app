@@ -75,7 +75,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
 
     const showEntryId = (entryId: string | undefined) => {
         if (entryId && isValidEntryId(entryId)) {
-            const ref = 'https://www.rcsb.org/structure/' + entryId;
+            const ref = props.ctx.configs.environment.rcsbOrg + '/structure/' + entryId;
             return <a href={ref}>{entryId}</a>;
         }
         return entryId;
@@ -92,7 +92,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
         const modeledLength = alignment.summary?.n_modeled_residues?.[0];
         return (<tr>
             <td style={{ backgroundColor: color }}>{showInfo(entryId, chainId)}</td>
-            <td>{showEntryId(entryId)}</td>
+            <td style={{ paddingLeft: '10px' }}>{showEntryId(entryId)}</td>
             <td>{chainId}</td>
             <td> - </td>
             <td> - </td>
@@ -109,7 +109,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
             const color = getAlignmentColorRgb(n + 1, DefaultOpasityValue);
             return (<tr key={n}>
                 <td style={{ backgroundColor: color }}>{showInfo(data.entryId, data.chainId)}</td>
-                <td>{showEntryId(data.entryId)}</td>
+                <td style={{ paddingLeft: '10px' }}>{showEntryId(data.entryId)}</td>
                 <td>{data.chainId}</td>
                 <td>{defined(data.rmsd) ? round(data.rmsd) : '-'}</td>
                 <td>{defined(data.tmscore) ? round(data.tmscore) : '-'}</td>
@@ -126,7 +126,7 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
             <table className='tbl-members'>
                 <thead>
                     <tr>
-                        <th style={{ width: '35px', padding: 0 }}></th>
+                        <th style={{ width: '36px', padding: 0 }}></th>
                         <th>Entry</th>
                         <th>Chain</th>
                         <th>RMSD</th>

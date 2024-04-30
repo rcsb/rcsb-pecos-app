@@ -774,15 +774,9 @@
 }
 
 .close-icon {
-  padding-right: 15px;
-  padding-bottom: 5px;
+  padding: 10px 15px 0 0;
   position: relative;
   float: right;
-}
-
-#close-icon:hover {
-  cursor: pointer;
-  background-color: #f5f5f5;
 }
 
 .icon-container {

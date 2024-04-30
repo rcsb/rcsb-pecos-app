@@ -1,11 +1,26 @@
+import { useEffect } from 'react';
 import { InstanceData } from '../../service/data-service';
 import { getCombinedInstanceId } from '../../utils/identifier';
 import { CloseSvg, Icon } from '../icons';
 
 const InfoModal = (props: { isModalOpen: boolean, modalContent: InstanceData | undefined, onClose: () => void }) => {
+
     if (props.isModalOpen !== true || props.modalContent === undefined) {
         return null;
     }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && props.isModalOpen) {
+            props.onClose();
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('keydown', onKeyDown, false);
+        return () => {
+            document.removeEventListener('keydown', onKeyDown, false);
+        };
+    }, [props.isModalOpen]);
 
     const entry = () => {
         const id = (props.modalContent)
@@ -44,14 +59,22 @@ const InfoModal = (props: { isModalOpen: boolean, modalContent: InstanceData | u
     };
 
     return (
-        <section className="rcsb-alignment-modal">
+        <section className="rcsb-alignment-modal"
+            onClick={props.onClose}
+        >
             <article className="rcsb-alignment-modal-content">
-                <Icon
-                    className='close-icon'
-                    svg={CloseSvg}
-                    onClick={props.onClose}
-                />
-                <main className="rcsb-alignment-modal-main">
+                <div style={ { cursor: 'pointer' } }>
+                    <Icon
+                        className='close-icon'
+                        svg={CloseSvg}
+                        onClick={props.onClose}
+                    />
+                </div>
+                <main className="rcsb-alignment-modal-main"
+                    onClick={e => {
+                        // do not close modal if anything inside modal content is clicked
+                        e.stopPropagation();
+                    }}>
                     {entry()}
                     {molecule()}
                     {organism()}
