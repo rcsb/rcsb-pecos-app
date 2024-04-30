@@ -46,6 +46,11 @@ const InfoModal = (props: { isModalOpen: boolean, modalContent: InstanceData | u
     return (
         <section className="rcsb-alignment-modal">
             <article className="rcsb-alignment-modal-content">
+                <Icon
+                    className='close-icon'
+                    svg={CloseSvg}
+                    onClick={props.onClose}
+                />
                 <main className="rcsb-alignment-modal-main">
                     {entry()}
                     {molecule()}
@@ -53,11 +58,6 @@ const InfoModal = (props: { isModalOpen: boolean, modalContent: InstanceData | u
                     {methodology()}
                     {quality()}
                 </main>
-                <Icon
-                    className='close-icon'
-                    svg={CloseSvg}
-                    onClick={props.onClose}
-                />
             </article>
         </section>
     );

@@ -62,25 +62,6 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
         setIsModalOpen(false);
     };
 
-    const showScores = () => {
-        return data.map((alignment, n)=>{
-            const data = scores(alignment);
-            const color = getAlignmentColorRgb(n + 1, DefaultOpasityValue);
-            return (<tr key={n}>
-                <td style={{ backgroundColor: color }}></td>
-                <td>{data.entryId}</td>
-                <td>{data.chainId}</td>
-                <td>{defined(data.rmsd) ? round(data.rmsd) : '-'}</td>
-                <td>{defined(data.tmscore) ? round(data.tmscore) : '-'}</td>
-                <td>{defined(data.identity) ? (round(data.identity! * 100) !== 'NA' ? round(data.identity! * 100) + '%' : '-') : '-'} </td>
-                <td>{defined(data.length) ? data.length : '-'}</td>
-                <td>{defined(data.seqLength) ? data.seqLength : '-'}</td>
-                <td>{defined(data.modeledLength) ? data.modeledLength : '-'}</td>
-                <td>{showInfo(data.entryId, data.chainId)}</td>
-            </tr>);
-        });
-    };
-
     const showInfo = (entryId: string | undefined, asymId: string) => {
         if (entryId && isValidEntryId(entryId)) {
             return <Icon
@@ -90,6 +71,14 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                 onClick={() => openInfo(entryId, asymId)}
             />;
         }
+    };
+
+    const showEntryId = (entryId: string | undefined) => {
+        if (entryId && isValidEntryId(entryId)) {
+            const ref = 'https://www.rcsb.org/structure/' + entryId;
+            return <a href={ref}>{entryId}</a>;
+        }
+        return entryId;
     };
 
     function showReference() {
@@ -102,8 +91,8 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
         const seqLength = alignment.sequence_alignment?.[0].sequence?.length;
         const modeledLength = alignment.summary?.n_modeled_residues?.[0];
         return (<tr>
-            <td style={{ backgroundColor: color }}></td>
-            <td>{entryId}</td>
+            <td style={{ backgroundColor: color }}>{showInfo(entryId, chainId)}</td>
+            <td>{showEntryId(entryId)}</td>
             <td>{chainId}</td>
             <td> - </td>
             <td> - </td>
@@ -111,16 +100,33 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
             <td> - </td>
             <td>{defined(seqLength) ? seqLength : '-'}</td>
             <td>{defined(modeledLength) ? modeledLength : '-'}</td>
-            <td>{showInfo(entryId, chainId)}</td>
         </tr>);
     }
+
+    const showScores = () => {
+        return data.map((alignment, n)=>{
+            const data = scores(alignment);
+            const color = getAlignmentColorRgb(n + 1, DefaultOpasityValue);
+            return (<tr key={n}>
+                <td style={{ backgroundColor: color }}>{showInfo(data.entryId, data.chainId)}</td>
+                <td>{showEntryId(data.entryId)}</td>
+                <td>{data.chainId}</td>
+                <td>{defined(data.rmsd) ? round(data.rmsd) : '-'}</td>
+                <td>{defined(data.tmscore) ? round(data.tmscore) : '-'}</td>
+                <td>{defined(data.identity) ? (round(data.identity! * 100) !== 'NA' ? round(data.identity! * 100) + '%' : '-') : '-'} </td>
+                <td>{defined(data.length) ? data.length : '-'}</td>
+                <td>{defined(data.seqLength) ? data.seqLength : '-'}</td>
+                <td>{defined(data.modeledLength) ? data.modeledLength : '-'}</td>
+            </tr>);
+        });
+    };
 
     return (
         <div className='box-row'>
             <table className='tbl-members'>
                 <thead>
                     <tr>
-                        <th style={{ width: '3px', padding: 0 }}></th>
+                        <th style={{ width: '35px', padding: 0 }}></th>
                         <th>Entry</th>
                         <th>Chain</th>
                         <th>RMSD</th>
@@ -129,7 +135,6 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                         <th>Equivalent Residues</th>
                         <th>Sequence Length</th>
                         <th>Modelled Residues</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
