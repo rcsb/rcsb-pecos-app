@@ -5,10 +5,6 @@ import { CloseSvg, Icon } from '../icons';
 
 const InfoModal = (props: { isModalOpen: boolean, modalContent: InstanceData | undefined, onClose: () => void }) => {
 
-    if (props.isModalOpen !== true || props.modalContent === undefined) {
-        return null;
-    }
-
     const onKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && props.isModalOpen) {
             props.onClose();
@@ -21,6 +17,10 @@ const InfoModal = (props: { isModalOpen: boolean, modalContent: InstanceData | u
             document.removeEventListener('keydown', onKeyDown, false);
         };
     }, [props.isModalOpen]);
+
+    if (props.isModalOpen !== true || props.modalContent === undefined) {
+        return null;
+    }
 
     const entry = () => {
         const id = (props.modalContent)

@@ -93,11 +93,9 @@ export function HelpCircleSvg() { return _HelpCircleSvg; }
 
 const _InfoCircleSvg = <svg
     viewBox='0 0 48 48'
-    width='18px'
-    height='18px'
-    style={{ marginTop: '5px' }}
-    fill='currentColor'>
-    {/* <path d="M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10s10-4.477,10-10S17.523,2,12,2z M13,17h-2v-6h2V17z M13,9h-2V7h2V9z"/> */}
+    width='16px'
+    height='16px'
+    style={{ marginTop: '5px' }}>
     <circle className="" cx="24" cy="24" fill='#fff' r="21"/><g fill="#5e6973"><path d="m22 22h4v11h-4z"/><circle cx="24" cy="16.5" r="2.5"/></g>
 </svg>;
 export function InfoCircleSvg() { return _InfoCircleSvg; }
