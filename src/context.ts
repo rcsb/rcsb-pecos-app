@@ -8,7 +8,7 @@ import { ResponseState } from './state/response';
 import { QueryRequest, StructureFileUploadImpl, StructureWebLinkImpl } from './utils/request';
 import { StructureAlignmentMetadata, StructureAlignmentResponse, StructureInstanceSelection } from './auto/alignment/alignment-response';
 import { getCombinedInstanceIds } from './utils/identifier';
-import { isEntry, buildError, getTransformationType, isBookmarkableResult, createBookmarkableResultsURL, updateWindowURL } from './utils/helper';
+import { isEntry, buildError, getTransformationType, isBookmarkableResult, createBookmarkableResultsURL, updateWindowURL, isUrl } from './utils/helper';
 import { encodingUrlParam, requestUrlParam, responseUrlParam, uuidUrlParam } from './utils/constants';
 import { decodeBase64ToJson } from './utils/encoding';
 
@@ -68,6 +68,14 @@ export class ApplicationContext {
                 const requestData = params.get(requestUrlParam)!;
                 const request = (needsDecoding) ? decodeBase64ToJson(requestData) : JSON.parse(requestData);
                 const query = new QueryRequest(request);
+                for (let i = 0; i < query.query.context.structures.length; i++) {
+                    const s = query.query.context.structures[i];
+                    if (isEntry(s)) {
+                        this.state.data.options.push('rcsb-entry', i);
+                    } else if (isUrl(s)) {
+                        this.state.data.options.push('file-url', i);
+                    }
+                }
                 this.state.data.request.push(query);
             }
         } else if (params.has(requestUrlParam)) {
@@ -201,11 +209,11 @@ export class ApplicationContext {
 
     public async uploadAtomicCoordinateFiles(request: QueryRequest) {
         if (request.files && request.files.length > 0) {
-            const cloneRequest = clonedeep(request);
+            const next = clonedeep(request);
             for (let j = 0; j < request.query.context.structures.length; j++) {
                 const structure = request.query.context.structures[j];
                 if (structure instanceof StructureFileUploadImpl) {
-                    const file = cloneRequest.files[j]!;
+                    const file = next.files[j]!;
                     const format = structure.format;
                     await this._files.upload(file, format)
                         .then(response => {
@@ -214,14 +222,14 @@ export class ApplicationContext {
                             uploaded.name = file.name;
                             uploaded.format = response.format;
                             uploaded.selection = structure.selection;
-                            cloneRequest.query.context.structures[j] = uploaded;
+                            next.query.context.structures[j] = uploaded;
                             this.state.data.options.push('file-url', j);
                         })
                         .catch((e) => this.error(e.message));
                 }
             }
-            cloneRequest.files = [];
-            this.state.data.request.push(cloneRequest);
+            next.files = [];
+            this.state.data.request.push(next);
         }
     }
 }
