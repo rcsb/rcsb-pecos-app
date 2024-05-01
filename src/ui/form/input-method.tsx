@@ -419,7 +419,7 @@ export function StructureAlignmentMethod(props: {ctx: RequestState}) {
                 {
                     label: 'TM-align',
                     value: 'tm-align',
-                    title: 'Fast TM-score based protein structure copmarison for proteins with similar global topology'
+                    title: 'Fast TM-score based protein structure comparison for proteins with similar global topology'
                 },
                 {
                     label: 'Smith-Waterman 3D',
@@ -439,7 +439,7 @@ export function StructureAlignmentMethod(props: {ctx: RequestState}) {
                 {
                     label: 'jCE-CP',
                     value: 'ce-cp',
-                    title: 'Flexible structure comparison for proteins with similar overall three-dimensional shape but diffrent connectivity (circular permutations)'
+                    title: 'Flexible structure comparison for proteins with similar overall three-dimensional shape but different connectivity (circular permutations)'
                 }
             ]
         }
