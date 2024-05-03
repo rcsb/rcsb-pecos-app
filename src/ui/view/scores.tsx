@@ -132,9 +132,9 @@ export function AlignmentScoresComponent(props: { ctx: ApplicationContext }) {
                         <th>RMSD</th>
                         <th>TM-score</th>
                         <th>Identity</th>
-                        <th>Equivalent Residues</th>
+                        <th>Aligned Residues</th>
                         <th>Sequence Length</th>
-                        <th>Modelled Residues</th>
+                        <th>Modeled Residues</th>
                     </tr>
                 </thead>
                 <tbody>
