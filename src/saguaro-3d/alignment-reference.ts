@@ -56,22 +56,24 @@ export class AlignmentReference {
         await this.mergeAlignments(results);
     }
 
-    public addAlignment(id: string, alignment: AlignmentRefType, target: AlignmentRefType): void {
-        const gaps = findGaps(alignment);
+    public addAlignment(id: string, refAlignment: AlignmentRefType, target: AlignmentRefType): void {
+        const gaps = findGaps(refAlignment);
         for (const gapBeg in gaps) {
+            if (gapBeg === '0')
+                continue;
             if (this.alignmentRefGaps[gapBeg])
                 this.extendGap(parseInt(gapBeg), gaps[gapBeg]);
             else
                 this.addGap(parseInt(gapBeg), gaps[gapBeg]);
         }
-        const beg = alignment.filter(a=>(a && this.alignmentRefMap[0] && a < this.alignmentRefMap[0])) as number[];
+        const beg = refAlignment.filter(a=>(a && this.alignmentRefMap[0] && a < this.alignmentRefMap[0])) as number[];
         if (beg.length > 0)
             this.addBeg(beg);
         const n = this.alignmentRefMap[this.alignmentRefMap.length - 1] as number;
-        const end = alignment.filter(a=>(a && n && a > n)) as number[];
+        const end = refAlignment.filter(a=>(a && n && a > n)) as number[];
         if (end.length > 0)
             this.addEnd(end);
-        this.addRef(id, alignment, target);
+        this.addRef(id, refAlignment, target);
     }
 
     public buildAlignments(): AlignmentResponse {
@@ -226,16 +228,16 @@ export class AlignmentReference {
         }
     }
 
-    private addRef(id: string, alignment: AlignmentRefType, target: AlignmentRefType): void {
+    private addRef(id: string, refAlignment: AlignmentRefType, target: AlignmentRefType): void {
         const map: AlignmentRefType = Array(this.alignmentRefMap.length).fill(undefined);
-        alignment.forEach((v, n)=>{
+        refAlignment.forEach((v, n)=>{
             if (v === undefined)
                 return;
             const index = this.alignmentRefMap.findIndex(e=>e === v);
             if (index >= 0)
                 map[index] = n;
         });
-        const gaps = findGaps(alignment);
+        const gaps = findGaps(refAlignment);
         for (const gapBeg in gaps) {
             const index = this.alignmentRefMap.findIndex(v=>v === parseInt(gapBeg));
             for (let i = 1; i <= gaps[gapBeg]; i++) {
@@ -245,7 +247,7 @@ export class AlignmentReference {
         this.memberRefList.push({
             id,
             map,
-            ref: cloneDeep(alignment),
+            ref: cloneDeep(refAlignment),
             target: cloneDeep(target)
         });
     }
@@ -381,7 +383,7 @@ function findGaps(alignment: AlignmentRefType): Record<number, number> {
     let gapLength = 0;
     alignment.forEach((v, n)=>{
         if (!v) {
-            if (gapBeg === 0)
+            if (gapBeg === 0 && typeof alignment[n - 1] === 'number')
                 gapBeg = alignment[n - 1] as number;
             gapLength++;
         } else {

@@ -31,10 +31,10 @@ export class AlignmentTrackFactory implements TrackFactoryInterface<[AlignmentRe
         const closeResidues = this.alignmentResidueDescription.alignmentCloseResidues();
         const unalignedResidues = this.alignmentResidueDescription.unalignedResidues();
         const config = await this.plainAlignmentTrackFactory.getTrack(alignmentRequestContext, targetAlignment);
-        const alignmetArea = config.displayConfig?.find(dc => dc.displayType === RcsbFvDisplayTypes.BLOCK_AREA);
-        if (!alignmetArea) return config;
+        const alignmentArea = config.displayConfig?.find(dc => dc.displayType === RcsbFvDisplayTypes.BLOCK_AREA);
+        if (!alignmentArea) return config;
 
-        alignmetArea.displayData?.forEach(data => {
+        alignmentArea.displayData?.forEach(data => {
             if (
                 data.value === 100 &&
                 closeResidues.has(data.sourceId ?? '') &&
@@ -47,7 +47,7 @@ export class AlignmentTrackFactory implements TrackFactoryInterface<[AlignmentRe
             )
                 data.value = 25;
         });
-        alignmetArea.displayColor = {
+        alignmentArea.displayColor = {
             colors: ['#dcdcdc', '#dadada', '#d9d9ff', '#a8a8fd'],
             thresholds: [25, 50, 90]
         };
