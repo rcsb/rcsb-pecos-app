@@ -56,26 +56,6 @@ export class AlignmentReference {
         await this.mergeAlignments(results);
     }
 
-    public addAlignment(id: string, refAlignment: AlignmentRefType, target: AlignmentRefType): void {
-        const gaps = findGaps(refAlignment);
-        for (const gapBeg in gaps) {
-            if (gapBeg === '0')
-                continue;
-            if (this.alignmentRefGaps[gapBeg])
-                this.extendGap(parseInt(gapBeg), gaps[gapBeg]);
-            else
-                this.addGap(parseInt(gapBeg), gaps[gapBeg]);
-        }
-        const beg = refAlignment.filter(a=>(a && this.alignmentRefMap[0] && a < this.alignmentRefMap[0])) as number[];
-        if (beg.length > 0)
-            this.addBeg(beg);
-        const n = this.alignmentRefMap[this.alignmentRefMap.length - 1] as number;
-        const end = refAlignment.filter(a=>(a && n && a > n)) as number[];
-        if (end.length > 0)
-            this.addEnd(end);
-        this.addRef(id, refAlignment, target);
-    }
-
     public buildAlignments(): AlignmentResponse {
         return buildAlignments(this.refId, this.alignmentRefMap, this.memberRefList.slice(1));
     }
@@ -228,6 +208,76 @@ export class AlignmentReference {
         }
     }
 
+    private async mergeAlignments(results: Alignment[]): Promise<void> {
+        const result = results[0];
+        if (!result)
+            throw new Error('Results not available');
+        this.getMapAlignments().forEach((alignment)=>{
+            const result = alignment.alignment;
+            const alignmentId = alignment.alignmentId;
+            if (result.sequence_alignment)
+                this.addAlignment(alignmentId, transformToGapedDomain(result.sequence_alignment[0].regions), transformToGapedDomain(result.sequence_alignment[1].regions));
+            else if (result.structure_alignment && result.structure_alignment[0].regions && result.structure_alignment[1].regions)
+                this.addAlignment(alignmentId, transformToGapedDomain(result.structure_alignment[0].regions.flat()), transformToGapedDomain(result.structure_alignment[1].regions.flat()));
+        });
+    }
+
+    private addAlignment(id: string, refAlignment: AlignmentRefType, target: AlignmentRefType): void {
+        const gaps = findGaps(refAlignment);
+        for (const gapBeg in gaps) {
+            if (gapBeg === '0')
+                continue;
+            if (this.alignmentRefGaps[gapBeg])
+                this.extendGap(parseInt(gapBeg), gaps[gapBeg]);
+            else
+                this.addGap(parseInt(gapBeg), gaps[gapBeg]);
+        }
+        const beg = refAlignment.filter(a=>(a && this.alignmentRefMap[0] && a < this.alignmentRefMap[0])) as number[];
+        if (beg.length > 0)
+            this.addBeg(beg);
+        const n = this.alignmentRefMap[this.alignmentRefMap.length - 1] as number;
+        const end = refAlignment.filter(a=>(a && n && a > n)) as number[];
+        if (end.length > 0)
+            this.addEnd(end);
+        this.addRef(id, refAlignment, target);
+    }
+
+    private addGap(gapBeg: number, gapLength: number): void {
+        this.alignmentRefGaps[gapBeg] = gapLength;
+        const i = this.alignmentRefMap.findIndex((v)=>v === gapBeg) + 1;
+        this.alignmentRefMap.splice(i, 0, ...Array(gapLength).fill(undefined));
+        this.memberRefList.forEach(mr=>{
+            mr.map.splice(i, 0, ...Array(gapLength).fill(undefined));
+        });
+    }
+
+    private extendGap(gapBeg: number, gapLength: number): void {
+        if (!this.alignmentRefGaps[gapBeg] || this.alignmentRefGaps[gapBeg] >= gapLength)
+            return;
+        const delta = gapLength - this.alignmentRefGaps[gapBeg];
+        this.alignmentRefGaps[gapBeg] += delta;
+        const i = this.alignmentRefMap.findIndex((v)=>v === gapBeg) + 1;
+        this.alignmentRefMap.splice(i, 0, ...Array(delta).fill(undefined));
+        this.memberRefList.forEach(mr=>{
+            mr.map.splice(i, 0, ...Array(delta).fill(undefined));
+        });
+    }
+
+    private addBeg(indexList: number[]): void {
+        this.alignmentRefMap.splice(0, 0, ...indexList);
+        this.memberRefList.forEach(mr=>{
+            mr.map.splice(0, 0, ...Array(indexList.length).fill(undefined));
+        });
+    }
+
+    private addEnd(indexList: number[]): void {
+        const last = this.alignmentRefMap.length;
+        this.alignmentRefMap.splice(last, 0, ...indexList);
+        this.memberRefList.forEach(mr=>{
+            mr.map.splice(last, 0, ...Array(indexList.length).fill(undefined));
+        });
+    }
+
     private addRef(id: string, refAlignment: AlignmentRefType, target: AlignmentRefType): void {
         const map: AlignmentRefType = Array(this.alignmentRefMap.length).fill(undefined);
         refAlignment.forEach((v, n)=>{
@@ -252,59 +302,7 @@ export class AlignmentReference {
         });
     }
 
-    private addEnd(indexList: number[]): void {
-        const last = this.alignmentRefMap.length;
-        this.alignmentRefMap.splice(last, 0, ...indexList);
-        this.memberRefList.forEach(mr=>{
-            mr.map.splice(last, 0, ...Array(indexList.length).fill(undefined));
-        });
-    }
-
-    private addBeg(indexList: number[]): void {
-        this.alignmentRefMap.splice(0, 0, ...indexList);
-        this.memberRefList.forEach(mr=>{
-            mr.map.splice(0, 0, ...Array(indexList.length).fill(undefined));
-        });
-    }
-
-    private addGap(gapBeg: number, gapLength: number): void {
-        this.alignmentRefGaps[gapBeg] = gapLength;
-        const i = this.alignmentRefMap.findIndex((v)=>v === gapBeg) + 1;
-        this.alignmentRefMap.splice(i, 0, ...Array(gapLength).fill(undefined));
-        this.memberRefList.forEach(mr=>{
-            mr.map.splice(i, 0, ...Array(gapLength).fill(undefined));
-        });
-    }
-
-    private extendGap(gapBeg: number, gapLength: number): void {
-        if (!this.alignmentRefGaps[gapBeg] || this.alignmentRefGaps[gapBeg] >= gapLength)
-            return;
-        const delta = gapLength - this.alignmentRefGaps[gapBeg];
-        this.alignmentRefGaps[gapBeg] += delta;
-        const i = this.alignmentRefMap.findIndex((v)=>v === gapBeg) + 1;
-        this.alignmentRefMap.splice(i, 0, ...Array(delta).fill(undefined));
-        this.memberRefList.forEach(mr=>{
-            mr.map.splice(i, 0, ...Array(delta).fill(undefined));
-        });
-    }
-
-    private async mergeAlignments(results: Alignment[]): Promise<void> {
-        const result = results[0];
-        if (!result)
-            throw new Error('Results not available');
-        this.getMapAlignments().forEach((alignment)=>{
-            const result = alignment.alignment;
-            const alignmentId = alignment.alignmentId;
-            if (result.sequence_alignment)
-                this.addAlignment(alignmentId, transformToGapedDomain(result.sequence_alignment[0].regions), transformToGapedDomain(result.sequence_alignment[1].regions));
-            else if (result.structure_alignment && result.structure_alignment[0].regions && result.structure_alignment[1].regions)
-                this.addAlignment(alignmentId, transformToGapedDomain(result.structure_alignment[0].regions.flat()), transformToGapedDomain(result.structure_alignment[1].regions.flat()));
-        });
-    }
-
 }
-
-
 
 function transformToGapedDomain(regions: AlignmentRegion[]): (number|undefined)[] {
     const out: (number|undefined)[] = [];
