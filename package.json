@@ -1,6 +1,6 @@
 {
   "name": "@rcsb/rcsb-pecos-app",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "RCSB 3D Structure Alignment Application",
   "license": "MIT",
   "homepage": "https://github.com/rcsb/rcsb-pecos-app#readme",

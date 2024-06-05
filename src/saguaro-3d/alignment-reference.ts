@@ -341,38 +341,24 @@ function buildAlignments(refId: string, alignmentRefMap: AlignmentRefType, align
 }
 
 function buildRegions(alignment: AlignmentRefType): AlignedRegion[] {
-    const out: AlignedRegion[] = [];
-    let begIndex = 0;
-    let begPos = 0;
-    alignment.forEach((v, n)=>{
+    const regions: [number, number][][] = [[]];
+    alignment.forEach((v, resIdx)=>{
         if (!v) {
-            if (begIndex > 0) {
-                out.push({
-                    query_begin: begIndex,
-                    target_begin: begPos,
-                    query_end: n,
-                    target_end: begPos + (n - begIndex)
-                });
-                begIndex = 0;
-                begPos = 0;
+            if (regions.slice(-1)[0].length > 0) {
+                regions.push([]);
             }
+        } else if ((resIdx - 1 > 0) && (v - (alignment[resIdx - 1] ?? v)) > 1) {
+            regions.push([[v, resIdx]]);
         } else {
-            if (begIndex === 0) {
-                begIndex = n + 1;
-                begPos = v;
-            }
+            regions.slice(-1)[0].push([v, resIdx]);
         }
     });
-    if (begPos > 0) {
-        const n = alignment.length;
-        out.push({
-            query_begin: begIndex,
-            target_begin: begPos,
-            query_end: n,
-            target_end: alignment[n - 1] as number
-        });
-    }
-    return out;
+    return regions.filter(region=>region.length > 0).map(region=>({
+        query_begin: region[0][1],
+        target_begin: region[0][0],
+        query_end: region.slice(-1)[0][1],
+        target_end: region.slice(-1)[0][0]
+    }));
 }
 
 function findGaps(alignment: AlignmentRefType): Record<number, number> {
