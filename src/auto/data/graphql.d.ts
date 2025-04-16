@@ -646,6 +646,7 @@ export type CoreEntry = {
   readonly branched_entities?: Maybe<ReadonlyArray<Maybe<CoreBranchedEntity>>>;
   readonly cell?: Maybe<Cell>;
   readonly citation?: Maybe<ReadonlyArray<Maybe<Citation>>>;
+  readonly database_2?: Maybe<ReadonlyArray<Maybe<Database2>>>;
   readonly diffrn?: Maybe<ReadonlyArray<Maybe<Diffrn>>>;
   readonly diffrn_detector?: Maybe<ReadonlyArray<Maybe<DiffrnDetector>>>;
   readonly diffrn_radiation?: Maybe<ReadonlyArray<Maybe<DiffrnRadiation>>>;
@@ -677,6 +678,8 @@ export type CoreEntry = {
   readonly exptl?: Maybe<ReadonlyArray<Maybe<Exptl>>>;
   readonly exptl_crystal?: Maybe<ReadonlyArray<Maybe<ExptlCrystal>>>;
   readonly exptl_crystal_grow?: Maybe<ReadonlyArray<Maybe<ExptlCrystalGrow>>>;
+  readonly ihm_entry_collection_mapping?: Maybe<ReadonlyArray<Maybe<IhmEntryCollectionMapping>>>;
+  readonly ihm_external_reference_info?: Maybe<ReadonlyArray<Maybe<IhmExternalReferenceInfo>>>;
   readonly ma_data?: Maybe<ReadonlyArray<Maybe<MaData>>>;
   /** Get all non-polymer (non-solvent) entities for this entry. */
   readonly nonpolymer_entities?: Maybe<ReadonlyArray<Maybe<CoreNonpolymerEntity>>>;
@@ -711,6 +714,11 @@ export type CoreEntry = {
   readonly pdbx_serial_crystallography_sample_delivery_injection?: Maybe<ReadonlyArray<Maybe<PdbxSerialCrystallographySampleDeliveryInjection>>>;
   readonly pdbx_soln_scatter?: Maybe<ReadonlyArray<Maybe<PdbxSolnScatter>>>;
   readonly pdbx_soln_scatter_model?: Maybe<ReadonlyArray<Maybe<PdbxSolnScatterModel>>>;
+  readonly pdbx_vrpt_summary?: Maybe<PdbxVrptSummary>;
+  readonly pdbx_vrpt_summary_diffraction?: Maybe<ReadonlyArray<Maybe<PdbxVrptSummaryDiffraction>>>;
+  readonly pdbx_vrpt_summary_em?: Maybe<ReadonlyArray<Maybe<PdbxVrptSummaryEm>>>;
+  readonly pdbx_vrpt_summary_geometry?: Maybe<ReadonlyArray<Maybe<PdbxVrptSummaryGeometry>>>;
+  readonly pdbx_vrpt_summary_nmr?: Maybe<ReadonlyArray<Maybe<PdbxVrptSummaryNmr>>>;
   /** Get all polymer entities for this entry. */
   readonly polymer_entities?: Maybe<ReadonlyArray<Maybe<CorePolymerEntity>>>;
   /** Get literature information from PubMed database. */
@@ -732,6 +740,8 @@ export type CoreEntry = {
    *
    */
   readonly rcsb_id: Scalars['String']['output'];
+  readonly rcsb_ihm_dataset_list?: Maybe<ReadonlyArray<Maybe<RcsbIhmDatasetList>>>;
+  readonly rcsb_ihm_dataset_source_db_reference?: Maybe<ReadonlyArray<Maybe<RcsbIhmDatasetSourceDbReference>>>;
   readonly rcsb_ma_qa_metric_global?: Maybe<ReadonlyArray<Maybe<RcsbMaQaMetricGlobal>>>;
   readonly rcsb_primary_citation?: Maybe<RcsbPrimaryCitation>;
   readonly refine?: Maybe<ReadonlyArray<Maybe<Refine>>>;
@@ -789,6 +799,8 @@ export type CoreNonpolymerEntityInstance = {
   /** Get non-polymer entity for this non-polymer entity instance. */
   readonly nonpolymer_entity?: Maybe<CoreNonpolymerEntity>;
   readonly pdbx_struct_special_symmetry?: Maybe<ReadonlyArray<Maybe<PdbxStructSpecialSymmetry>>>;
+  readonly pdbx_vrpt_summary_entity_fit_to_map?: Maybe<ReadonlyArray<Maybe<PdbxVrptSummaryEntityFitToMap>>>;
+  readonly pdbx_vrpt_summary_entity_geometry?: Maybe<ReadonlyArray<Maybe<PdbxVrptSummaryEntityGeometry>>>;
   /**
    * A unique identifier for each object in this entity instance container formed by
    *  an 'dot' (.) separated concatenation of entry and entity instance identifiers.
@@ -922,6 +934,8 @@ export type CorePolymerEntity = {
 
 export type CorePolymerEntityInstance = {
   readonly pdbx_struct_special_symmetry?: Maybe<ReadonlyArray<Maybe<PdbxStructSpecialSymmetry>>>;
+  readonly pdbx_vrpt_summary_entity_fit_to_map?: Maybe<ReadonlyArray<Maybe<PdbxVrptSummaryEntityFitToMap>>>;
+  readonly pdbx_vrpt_summary_entity_geometry?: Maybe<ReadonlyArray<Maybe<PdbxVrptSummaryEntityGeometry>>>;
   /** Get polymer entity for this polymer entity instance. */
   readonly polymer_entity?: Maybe<CorePolymerEntity>;
   /**
@@ -992,6 +1006,44 @@ export type CurrentEntry = {
   readonly rcsb_repository_holdings_current_entry_container_identifiers?: Maybe<RcsbRepositoryHoldingsCurrentEntryContainerIdentifiers>;
 };
 
+export type Database2 = {
+  /**
+   * The code assigned by the database identified in
+   *  _database_2.database_id.
+   *
+   * Examples:
+   * 1ABC, ABCDEF
+   *
+   */
+  readonly database_code: Scalars['String']['output'];
+  /**
+   * An abbreviation that identifies the database.
+   *
+   * Allowable values:
+   * AlphaFoldDB, BMRB, EBI, EMDB, MODBASE, ModelArchive, NDB, PDB, PDB-Dev, PDBE, PDB_ACC, RCSB, SWISS-MODEL_REPOSITORY, WWPDB
+   *
+   */
+  readonly database_id: Scalars['String']['output'];
+  /**
+   * Document Object Identifier (DOI) for this entry registered
+   * with http://crossref.org.
+   *
+   * Examples:
+   * 10.2210/pdb6lu7/pdb
+   *
+   */
+  readonly pdbx_DOI?: Maybe<Scalars['String']['output']>;
+  /**
+   * Extended accession code issued for for _database_2.database_code assigned by the database identified in
+   *  _database_2.database_id.
+   *
+   * Examples:
+   * pdb_00006lu7
+   *
+   */
+  readonly pdbx_database_accession?: Maybe<Scalars['String']['output']>;
+};
+
 export type Diffrn = {
   /**
    * The mean hydrostatic pressure in kilopascals at which the
@@ -1036,8 +1088,8 @@ export type Diffrn = {
   /**
    * Y/N if using serial crystallography experiment in which multiple crystals contribute to each diffraction frame in the experiment.
    *
-   * Examples:
-   * Y, N
+   * Allowable values:
+   * N, Y
    *
    */
   readonly pdbx_serial_crystal_experiment?: Maybe<Scalars['String']['output']>;
@@ -2088,7 +2140,7 @@ export type EmImaging = {
    * The name of the model of microscope.
    *
    * Allowable values:
-   * FEI MORGAGNI, FEI POLARA 300, FEI TALOS ARCTICA, FEI TECNAI 10, FEI TECNAI 12, FEI TECNAI 20, FEI TECNAI ARCTICA, FEI TECNAI F20, FEI TECNAI F30, FEI TECNAI SPHERA, FEI TECNAI SPIRIT, FEI TITAN, FEI TITAN KRIOS, FEI/PHILIPS CM10, FEI/PHILIPS CM12, FEI/PHILIPS CM120T, FEI/PHILIPS CM200FEG, FEI/PHILIPS CM200FEG/SOPHIE, FEI/PHILIPS CM200FEG/ST, FEI/PHILIPS CM200FEG/UT, FEI/PHILIPS CM200T, FEI/PHILIPS CM300FEG/HE, FEI/PHILIPS CM300FEG/ST, FEI/PHILIPS CM300FEG/T, FEI/PHILIPS EM400, FEI/PHILIPS EM420, HITACHI EF2000, HITACHI EF3000, HITACHI H-9500SD, HITACHI H3000 UHVEM, HITACHI H7600, HITACHI HF2000, HITACHI HF3000, JEOL 1000EES, JEOL 100B, JEOL 100CX, JEOL 1010, JEOL 1200, JEOL 1200EX, JEOL 1200EXII, JEOL 1230, JEOL 1400, JEOL 1400/HR + YPS FEG, JEOL 2000EX, JEOL 2000EXII, JEOL 2010, JEOL 2010F, JEOL 2010HC, JEOL 2010HT, JEOL 2010UHR, JEOL 2011, JEOL 2100, JEOL 2100F, JEOL 2200FS, JEOL 2200FSC, JEOL 3000SFF, JEOL 3100FEF, JEOL 3100FFC, JEOL 3200FS, JEOL 3200FSC, JEOL 4000, JEOL 4000EX, JEOL CRYO ARM 200, JEOL CRYO ARM 300, JEOL KYOTO-3000SFF, SIEMENS SULEIKA, TFS GLACIOS, TFS KRIOS, TFS TALOS, TFS TALOS F200C, TFS TALOS L120C, TFS TUNDRA, ZEISS LEO912, ZEISS LIBRA120PLUS
+   * FEI MORGAGNI, FEI POLARA 300, FEI TALOS ARCTICA, FEI TECNAI 10, FEI TECNAI 12, FEI TECNAI 20, FEI TECNAI ARCTICA, FEI TECNAI F20, FEI TECNAI F30, FEI TECNAI SPHERA, FEI TECNAI SPIRIT, FEI TITAN, FEI TITAN KRIOS, FEI/PHILIPS CM10, FEI/PHILIPS CM12, FEI/PHILIPS CM120T, FEI/PHILIPS CM200FEG, FEI/PHILIPS CM200FEG/SOPHIE, FEI/PHILIPS CM200FEG/ST, FEI/PHILIPS CM200FEG/UT, FEI/PHILIPS CM200T, FEI/PHILIPS CM300FEG/HE, FEI/PHILIPS CM300FEG/ST, FEI/PHILIPS CM300FEG/T, FEI/PHILIPS EM400, FEI/PHILIPS EM420, HITACHI EF2000, HITACHI EF3000, HITACHI H-9500SD, HITACHI H3000 UHVEM, HITACHI H7600, HITACHI HF2000, HITACHI HF3000, JEOL 1000EES, JEOL 100B, JEOL 100CX, JEOL 1010, JEOL 1200, JEOL 1200EX, JEOL 1200EXII, JEOL 1230, JEOL 1400, JEOL 1400/HR + YPS FEG, JEOL 2000EX, JEOL 2000EXII, JEOL 2010, JEOL 2010F, JEOL 2010HC, JEOL 2010HT, JEOL 2010UHR, JEOL 2011, JEOL 2100, JEOL 2100F, JEOL 2200FS, JEOL 2200FSC, JEOL 3000SFF, JEOL 3100FEF, JEOL 3100FFC, JEOL 3200FS, JEOL 3200FSC, JEOL 4000, JEOL 4000EX, JEOL CRYO ARM 200, JEOL CRYO ARM 300, JEOL KYOTO-3000SFF, SIEMENS SULEIKA, TFS GLACIOS, TFS KRIOS, TFS TALOS, TFS TALOS F200C, TFS TALOS L120C, TFS TITAN THEMIS, TFS TUNDRA, ZEISS LEO912, ZEISS LIBRA120PLUS
    *
    */
   readonly microscope_model?: Maybe<Scalars['String']['output']>;
@@ -2366,7 +2418,7 @@ export type EmVitrification = {
    * The type of instrument used in the vitrification process.
    *
    * Allowable values:
-   * CRYOSOL VITROJET, EMS-002 RAPID IMMERSION FREEZER, FEI VITROBOT MARK I, FEI VITROBOT MARK II, FEI VITROBOT MARK III, FEI VITROBOT MARK IV, GATAN CRYOPLUNGE 3, HOMEMADE PLUNGER, LEICA EM CPC, LEICA EM GP, LEICA KF80, LEICA PLUNGER, REICHERT-JUNG PLUNGER, SPOTITON, ZEISS PLUNGE FREEZER CRYOBOX
+   * CRYOSOL VITROJET, EMS-002 RAPID IMMERSION FREEZER, FEI VITROBOT MARK I, FEI VITROBOT MARK II, FEI VITROBOT MARK III, FEI VITROBOT MARK IV, GATAN CRYOPLUNGE 3, HOMEMADE PLUNGER, LEICA EM CPC, LEICA EM GP, LEICA KF80, LEICA PLUNGER, REICHERT-JUNG PLUNGER, SPOTITON, SPT LABTECH CHAMELEON, ZEISS PLUNGE FREEZER CRYOBOX
    *
    */
   readonly instrument?: Maybe<Scalars['String']['output']>;
@@ -3387,6 +3439,41 @@ export type GroupProvenance = {
   readonly rcsb_id?: Maybe<Scalars['String']['output']>;
 };
 
+export type IhmEntryCollectionMapping = {
+  /**
+   * Identifier for the entry collection.
+   *  This data item is a pointer to _ihm_entry_collection.id in the
+   *  IHM_ENTRY_COLLECTION category.
+   */
+  readonly collection_id: Scalars['String']['output'];
+};
+
+export type IhmExternalReferenceInfo = {
+  /**
+   * The Uniform Resource Locator (URL) corresponding to the external reference (DOI).
+   *  This URL should link to the corresponding downloadable file or archive and is provided
+   *  to enable automated software to download the referenced file or archive.
+   */
+  readonly associated_url?: Maybe<Scalars['String']['output']>;
+  /**
+   * The external reference or the Digital Object Identifier (DOI).
+   *  This field is not relevant for local files.
+   *
+   * Examples:
+   * 10.5281/zenodo.46266
+   *
+   */
+  readonly reference?: Maybe<Scalars['String']['output']>;
+  /**
+   * The name of the reference provider.
+   *
+   * Examples:
+   * Zenodo, Figshare, Crossref
+   *
+   */
+  readonly reference_provider?: Maybe<Scalars['String']['output']>;
+};
+
 export type InterfacePartnerFeatureAdditionalProperties = {
   /**
    * The additional property name.
@@ -3456,7 +3543,7 @@ export type PdbxAuditRevisionCategory = {
    * The type of file that the pdbx_audit_revision_history record refers to.
    *
    * Allowable values:
-   * Chemical component, NMR restraints, NMR shifts, Structure factors, Structure model
+   * Additional map, Chemical component, EM metadata, FSC, Half map, Image, Mask, NMR restraints, NMR shifts, Primary map, Structure factors, Structure model
    *
    */
   readonly data_content_type: Scalars['String']['output'];
@@ -3471,7 +3558,7 @@ export type PdbxAuditRevisionDetails = {
    * The type of file that the pdbx_audit_revision_history record refers to.
    *
    * Allowable values:
-   * Chemical component, NMR restraints, NMR shifts, Structure factors, Structure model
+   * Additional map, Chemical component, EM metadata, FSC, Half map, Image, Mask, NMR restraints, NMR shifts, Primary map, Structure factors, Structure model
    *
    */
   readonly data_content_type: Scalars['String']['output'];
@@ -3495,7 +3582,7 @@ export type PdbxAuditRevisionDetails = {
    * A type classification of the revision
    *
    * Allowable values:
-   * Coordinate replacement, Initial release, Obsolete, Remediation
+   * Coordinate replacement, Data added, Data removed, Data updated, Initial release, Obsolete, Remediation
    *
    */
   readonly type?: Maybe<Scalars['String']['output']>;
@@ -3506,7 +3593,7 @@ export type PdbxAuditRevisionGroup = {
    * The type of file that the pdbx_audit_revision_history record refers to.
    *
    * Allowable values:
-   * Chemical component, NMR restraints, NMR shifts, Structure factors, Structure model
+   * Additional map, Chemical component, EM metadata, FSC, Half map, Image, Mask, NMR restraints, NMR shifts, Primary map, Structure factors, Structure model
    *
    */
   readonly data_content_type: Scalars['String']['output'];
@@ -3514,7 +3601,7 @@ export type PdbxAuditRevisionGroup = {
    * The collection of categories updated with this revision.
    *
    * Allowable values:
-   * Advisory, Atomic model, Author supporting evidence, Data collection, Data processing, Database references, Derived calculations, Experimental data, Experimental preparation, Initial release, Non-polymer description, Other, Polymer sequence, Refinement description, Source and taxonomy, Structure summary, Version format compliance
+   * Advisory, Atomic model, Author supporting evidence, Data collection, Data processing, Database references, Derived calculations, Experimental data, Experimental preparation, Experimental summary, Non-polymer description, Other, Polymer sequence, Refinement description, Source and taxonomy, Structure summary, Version format compliance
    *
    */
   readonly group?: Maybe<Scalars['String']['output']>;
@@ -3529,7 +3616,7 @@ export type PdbxAuditRevisionHistory = {
    * The type of file that the pdbx_audit_revision_history record refers to.
    *
    * Allowable values:
-   * Chemical component, NMR restraints, NMR shifts, Structure factors, Structure model
+   * Additional map, Chemical component, EM metadata, FSC, Half map, Image, Mask, NMR restraints, NMR shifts, Primary map, Structure factors, Structure model
    *
    */
   readonly data_content_type: Scalars['String']['output'];
@@ -3554,7 +3641,7 @@ export type PdbxAuditRevisionItem = {
    * The type of file that the pdbx_audit_revision_history record refers to.
    *
    * Allowable values:
-   * Chemical component, NMR restraints, NMR shifts, Structure factors, Structure model
+   * Additional map, Chemical component, EM metadata, FSC, Half map, Image, Mask, NMR restraints, NMR shifts, Primary map, Structure factors, Structure model
    *
    */
   readonly data_content_type: Scalars['String']['output'];
@@ -3599,7 +3686,7 @@ export type PdbxChemCompAudit = {
    * The action associated with this audit record.
    *
    * Allowable values:
-   * Create component, Initial release, Modify aromatic_flag, Modify atom id, Modify backbone, Modify charge, Modify component atom id, Modify component comp_id, Modify coordinates, Modify descriptor, Modify formal charge, Modify formula, Modify identifier, Modify internal type, Modify leaving atom flag, Modify linking type, Modify model coordinates code, Modify name, Modify one letter code, Modify parent residue, Modify processing site, Modify subcomponent list, Modify synonyms, Modify value order, Obsolete component, Other modification
+   * Create component, Initial release, Modify PCM, Modify aromatic_flag, Modify atom id, Modify backbone, Modify charge, Modify component atom id, Modify component comp_id, Modify coordinates, Modify descriptor, Modify formal charge, Modify formula, Modify identifier, Modify internal type, Modify leaving atom flag, Modify linking type, Modify model coordinates code, Modify name, Modify one letter code, Modify parent residue, Modify processing site, Modify subcomponent list, Modify synonyms, Modify value order, Obsolete component, Other modification
    *
    */
   readonly action_type?: Maybe<Scalars['String']['output']>;
@@ -4587,7 +4674,7 @@ export type PdbxNmrSpectrometer = {
    * The model of the NMR spectrometer.
    *
    * Examples:
-   * AVANCE, AVANCE II, AVANCE III, AVANCE III HD, WH, WM, AM, AMX, DMX, DRX, MSL, OMEGA, OMEGA PSG, GX, GSX, A, AL, EC, EX, LA, ECP, VXRS, UNITY, UNITYPLUS, INOVA
+   * AVANCE, AVANCE II, AVANCE III, AVANCE III HD, WH, WM, AC+, Alpha, AM, AMX, AMX II, DMX, DRX, DSX, MSL, OMEGA, OMEGA PSG, GX, GSX, A, AL, EC, EX, LA, ECP, Infinityplus, Mercury, VNMRS, VXR, UNITY, UNITY INOVA, UNITYPLUS, INOVA, home-built
    *
    */
   readonly model?: Maybe<Scalars['String']['output']>;
@@ -6365,6 +6452,412 @@ export type PdbxStructSpecialSymmetry = {
    *  ATOM_SITE category.
    */
   readonly label_comp_id?: Maybe<Scalars['String']['output']>;
+};
+
+export type PdbxVrptSummary = {
+  /**
+   * The MolProbity conformer-match quality parameter for RNA structures.
+   * Low values are worse. Specific to structures that contain RNA polymers.
+   *
+   * Examples:
+   * null
+   *
+   */
+  readonly RNA_suiteness?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The steps that were attempted by the validation pipeline software.
+   * A step typically involves running a 3rd party validation tool, for instance "mogul"
+   * Each step will be enumerated in _pdbx_vrpt_software category.
+   */
+  readonly attempted_validation_steps?: Maybe<Scalars['String']['output']>;
+  /**
+   * A flag indicating if there are ligands in the model used for detailed Buster analysis.
+   *
+   * Allowable values:
+   * N, Y
+   *
+   */
+  readonly ligands_for_buster_report?: Maybe<Scalars['String']['output']>;
+  /**
+   * The date, time and time-zone that the validation report  was created.
+   * The string will be formatted like yyyy-mm-dd:hh:mm in GMT time.
+   */
+  readonly report_creation_date?: Maybe<Scalars['Date']['output']>;
+  /**
+   * This is a comma separated list of the residue types whose bond lengths and bond angles have
+   * not been checked against "standard geometry" using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996)
+   */
+  readonly restypes_notchecked_for_bond_angle_geometry?: Maybe<ReadonlyArray<Maybe<Scalars['String']['output']>>>;
+};
+
+export type PdbxVrptSummaryDiffraction = {
+  /**
+   * An indicator if isotropic B factors are partial or full values.
+   *
+   * Allowable values:
+   * FULL, PARTIAL
+   *
+   */
+  readonly B_factor_type?: Maybe<Scalars['String']['output']>;
+  /**
+   * REFMAC scaling parameter as reported in log output line starting 'bulk solvent: scale'.
+   * X-ray entry specific, obtained in the EDS step from REFMAC calculation.
+   */
+  readonly Babinet_b?: Maybe<Scalars['Float']['output']>;
+  /**
+   * REFMAC scaling parameter as reported in log output line starting 'bulk solvent: scale'.
+   * X-ray entry specific, obtained in the EDS step from REFMAC calculation.
+   */
+  readonly Babinet_k?: Maybe<Scalars['Float']['output']>;
+  /** The version of CCP4 suite used in the analysis. */
+  readonly CCP4_version?: Maybe<Scalars['String']['output']>;
+  /**
+   * The overall R-factor from a DCC recalculation of an electron density map.
+   * Currently value is rounded to 2 decimal places.
+   * X-ray entry specific, obtained from the DCC program.
+   */
+  readonly DCC_R?: Maybe<Scalars['Float']['output']>;
+  /** Rfree as calculated by DCC. */
+  readonly DCC_Rfree?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The overall R factor from the EDS REFMAC calculation (no free set is used in this).
+   * Currently value is rounded to 2 decimal places.
+   * X-ray entry specific, obtained in the eds step from REFMAC calculation.
+   */
+  readonly EDS_R?: Maybe<Scalars['Float']['output']>;
+  /** Warning message when EDS calculated R vs reported R is higher than a threshold */
+  readonly EDS_R_warning?: Maybe<Scalars['String']['output']>;
+  /**
+   * The data high resolution diffraction limit, in Angstroms, found in the input structure factor file.
+   * X-ray entry specific, obtained in the EDS step.
+   */
+  readonly EDS_res_high?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The data low resolution diffraction limit, in Angstroms, found in the input structure factor file.
+   * X-ray entry specific, obtained in the EDS step.
+   */
+  readonly EDS_res_low?: Maybe<Scalars['Float']['output']>;
+  /**
+   * Fo,Fc correlation: The difference between the observed structure factors (Fo) and the
+   * calculated structure factors (Fc) measures the correlation between the model and the
+   * experimental data.
+   * X-ray entry specific, obtained in the eds step from REFMAC calculation.
+   */
+  readonly Fo_Fc_correlation?: Maybe<Scalars['Float']['output']>;
+  /**
+   * Each reflection has an intensity (I) and an uncertainty in measurement
+   * (sigma(I)), so I/sigma(I) is the signal-to-noise ratio. This
+   * ratio decreases at higher resolution. <I/sigma(I)> is the mean of individual I/sigma(I)
+   * values. Value for outer resolution shell is given in parentheses. In case
+   * structure factor amplitudes are deposited, Xtriage estimates the intensities
+   * first and then calculates this metric. When intensities are available in the
+   * deposited file, these are converted to amplitudes and then back to intensity
+   * estimate before calculating the metric.
+   * X-ray entry specific, calculated by Phenix Xtriage program.
+   */
+  readonly I_over_sigma?: Maybe<Scalars['String']['output']>;
+  /**
+   * Padilla and Yeates twinning parameter <|L**2|>.
+   * Theoretical values is 0.333 in the untwinned case, and 0.2 in the perfectly twinned case.
+   * X-ray entry specific, obtained from the Xtriage program.
+   */
+  readonly Padilla_Yeates_L2_mean?: Maybe<Scalars['Float']['output']>;
+  /**
+   * Padilla and Yeates twinning parameter <|L|>.
+   * Theoretical values is 0.5 in the untwinned case, and 0.375 in the perfectly twinned case.
+   * X-ray entry specific, obtained from the Xtriage program.
+   */
+  readonly Padilla_Yeates_L_mean?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The overall Q-score of the fit of coordinates to the electron map.
+   * The Q-score is defined in Pintilie, GH. et al., Nature Methods, 17, 328-334 (2020)
+   */
+  readonly Q_score?: Maybe<Scalars['Float']['output']>;
+  /**
+   * Result of absolute likelihood based Wilson scaling,
+   * The anisotropic B value of the data is determined using a likelihood based approach.
+   * The resulting B tensor is reported, the 3 diagonal values are given first, followed
+   * by the 3 off diagonal values.
+   * A large spread in (especially the diagonal) values indicates anisotropy.
+   * X-ray entry specific, calculated by Phenix Xtriage program.
+   */
+  readonly Wilson_B_aniso?: Maybe<Scalars['String']['output']>;
+  /**
+   * An estimate of the overall B-value of the structure, calculated from the diffraction data.
+   * Units Angstroms squared.
+   * It serves as an indicator of the degree of order in the crystal and the value is usually
+   * not hugely different from the average B-value calculated from the model.
+   * X-ray entry specific, calculated by Phenix Xtriage program.
+   */
+  readonly Wilson_B_estimate?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The number of acentric reflections that Xtriage identifies as outliers on the basis
+   * of Wilson statistics. Note that if pseudo translational symmetry is present,
+   * a large number of 'outliers' will be present.
+   * X-ray entry specific, calculated by Phenix Xtriage program.
+   */
+  readonly acentric_outliers?: Maybe<Scalars['Int']['output']>;
+  /**
+   * REFMAC scaling parameter as reported in log output file.
+   * X-ray entry specific, obtained in the EDS step from REFMAC calculation.
+   */
+  readonly bulk_solvent_b?: Maybe<Scalars['Float']['output']>;
+  /**
+   * REFMAC reported scaling parameter.
+   * X-ray entry specific, obtained in the EDS step from REFMAC calculation.
+   */
+  readonly bulk_solvent_k?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The number of centric reflections that Xtriage identifies as outliers.
+   * X-ray entry specific, calculated by Phenix Xtriage program.
+   */
+  readonly centric_outliers?: Maybe<Scalars['Int']['output']>;
+  /**
+   * The ratio (Bmax - Bmin) / Bmean where Bmax, Bmin and Bmean are computed from the B-values
+   * associated with the principal axes of the anisotropic thermal ellipsoid.
+   * This ratio is usually less than 0.5; for only 1% of PDB entries it is more than 1.0 (Read et al., 2011).
+   * X-ray entry specific, obtained from the Xtriage program.
+   */
+  readonly data_anisotropy?: Maybe<Scalars['Float']['output']>;
+  /** The percent completeness of diffraction data. */
+  readonly data_completeness?: Maybe<Scalars['Float']['output']>;
+  /** The version of density-fitness suite programs used in the analysis. */
+  readonly density_fitness_version?: Maybe<Scalars['String']['output']>;
+  /** Experimental method for statistics */
+  readonly exp_method?: Maybe<Scalars['String']['output']>;
+  /**
+   * The number of Miller Indices reported by the Xtriage program. This should be the same as the
+   * number of _refln in the input structure factor file.
+   * X-ray entry specific, calculated by Phenix Xtriage program.
+   */
+  readonly num_miller_indices?: Maybe<Scalars['Int']['output']>;
+  /**
+   * The number of reflections in the free set as defined in the input structure factor file supplied to the validation pipeline.
+   * X-ray entry specific, obtained from the DCC program.
+   */
+  readonly number_reflns_R_free?: Maybe<Scalars['Int']['output']>;
+  /** The percent of RSRZ outliers. */
+  readonly percent_RSRZ_outliers?: Maybe<Scalars['Float']['output']>;
+  /** A percentage, Normally percent proportion of the total number. Between 0% and 100%. */
+  readonly percent_free_reflections?: Maybe<Scalars['Float']['output']>;
+  /** The version of Servalcat program used in the analysis. */
+  readonly servalcat_version?: Maybe<Scalars['String']['output']>;
+  /**
+   * A sentence giving the result of Xtriage's analysis on translational NCS.
+   * X-ray entry specific, obtained from the Xtriage program.
+   *
+   * Examples:
+   * The largest off-origin peak in the Patterson function is 8.82% of the height of the origin peak. No significant pseudotranslation is detected.
+   *
+   */
+  readonly trans_NCS_details?: Maybe<Scalars['String']['output']>;
+  /**
+   * Estimated twinning fraction for operators as identified by Xtriage. A semicolon separated
+   * list of operators with fractions is givens
+   * X-ray entry specific, obtained from the Xtriage program.
+   *
+   * Examples:
+   * h,h-k,h-l:0.477;-h,-h+k,-l:0.020;-h,-k,-h+l:0.017
+   *
+   */
+  readonly twin_fraction?: Maybe<Scalars['String']['output']>;
+};
+
+export type PdbxVrptSummaryEm = {
+  /**
+   * The overall Q-score of the fit of coordinates to the electron map.
+   * The Q-score is defined in Pintilie, GH. et al., Nature Methods, 17, 328-334 (2020)
+   */
+  readonly Q_score?: Maybe<Scalars['Float']['output']>;
+  /** The proportion of all non hydrogen atoms within density. */
+  readonly atom_inclusion_all_atoms?: Maybe<Scalars['Float']['output']>;
+  /** The proportion of backbone atoms within density. */
+  readonly atom_inclusion_backbone?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the author provided fsc and the indicator curve halfbit. */
+  readonly author_provided_fsc_resolution_by_cutoff_halfbit?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the author provided fsc and the indicator curve onebit. */
+  readonly author_provided_fsc_resolution_by_cutoff_onebit?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the author provided fsc and the indicator curve 0.5. */
+  readonly author_provided_fsc_resolution_by_cutoff_pt_5?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the author provided fsc and the indicator curve 0.143. */
+  readonly author_provided_fsc_resolution_by_cutoff_pt_143?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the author provided fsc and the indicator curve 0.333. */
+  readonly author_provided_fsc_resolution_by_cutoff_pt_333?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the author provided fsc and the indicator curve threesigma. */
+  readonly author_provided_fsc_resolution_by_cutoff_threesigma?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the fsc curve generated by from the provided halfmaps and the indicator curve halfbit. */
+  readonly calculated_fsc_resolution_by_cutoff_halfbit?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the fsc curve generated by from the provided halfmaps and the indicator curve onebit. */
+  readonly calculated_fsc_resolution_by_cutoff_onebit?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the fsc curve generated by from the provided halfmaps and the indicator curve 0.5. */
+  readonly calculated_fsc_resolution_by_cutoff_pt_5?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the fsc curve generated by from the provided halfmaps and the indicator curve 0.143. */
+  readonly calculated_fsc_resolution_by_cutoff_pt_143?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the fsc curve generated by from the provided halfmaps and the indicator curve 0.333. */
+  readonly calculated_fsc_resolution_by_cutoff_pt_333?: Maybe<Scalars['Float']['output']>;
+  /** The resolution from the intersection of the fsc curve generated by from the provided halfmaps and the indicator curve threesigma. */
+  readonly calculated_fsc_resolution_by_cutoff_threesigma?: Maybe<Scalars['Float']['output']>;
+  /** The recommended contour level for the primary map of this deposition. */
+  readonly contour_level_primary_map?: Maybe<Scalars['Float']['output']>;
+  /** Experimental method for statistics */
+  readonly exp_method?: Maybe<Scalars['String']['output']>;
+};
+
+export type PdbxVrptSummaryEntityFitToMap = {
+  /** The unique model number from _atom_site.pdbx_PDB_model_num. */
+  readonly PDB_model_num?: Maybe<Scalars['Int']['output']>;
+  /** The calculated average Q-score. */
+  readonly Q_score?: Maybe<Scalars['Float']['output']>;
+  /** The average of the residue inclusions for all residues in this instance */
+  readonly average_residue_inclusion?: Maybe<Scalars['Float']['output']>;
+};
+
+export type PdbxVrptSummaryEntityGeometry = {
+  /** The unique model number from _atom_site.pdbx_PDB_model_num. */
+  readonly PDB_model_num?: Maybe<Scalars['Int']['output']>;
+  /**
+   * The overall root mean square of the Z-score for deviations of bond angles in comparison to
+   * "standard geometry" made using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996).
+   */
+  readonly angles_RMSZ?: Maybe<Scalars['Float']['output']>;
+  /** The average of the residue inclusions for all residues in this instance */
+  readonly average_residue_inclusion?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The overall root mean square of the Z-score for deviations of bond lengths in comparison to
+   * "standard geometry" made using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996).
+   */
+  readonly bonds_RMSZ?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The number of bond angles compared to "standard geometry" made using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996).
+   */
+  readonly num_angles_RMSZ?: Maybe<Scalars['Int']['output']>;
+  /**
+   * The number of bond lengths compared to "standard geometry" made using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996).
+   */
+  readonly num_bonds_RMSZ?: Maybe<Scalars['Int']['output']>;
+};
+
+export type PdbxVrptSummaryGeometry = {
+  /**
+   * The overall root mean square of the Z-score for deviations of bond angles in comparison to
+   * "standard geometry" made using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996).
+   * This value is for all chains in the structure.
+   */
+  readonly angles_RMSZ?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The overall root mean square of the Z-score for deviations of bond lengths in comparison to
+   * "standard geometry" made using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996).
+   * This value is for all chains in the structure.
+   */
+  readonly bonds_RMSZ?: Maybe<Scalars['Float']['output']>;
+  /**
+   * This score is derived from the number of pairs of atoms in the PDB_model_num that are unusually close to each other.
+   * It is calculated by the MolProbity pdbx_vrpt_software and expressed as the number or such clashes per thousand atoms.
+   * For structures determined by NMR the clashscore value here will only consider label_atom_id pairs in the
+   * well-defined (core) residues from ensemble analysis.
+   */
+  readonly clashscore?: Maybe<Scalars['Float']['output']>;
+  /** Only given for structures determined by NMR. The MolProbity pdbx_vrpt_instance_clashes score for all label_atom_id pairs. */
+  readonly clashscore_full_length?: Maybe<Scalars['Float']['output']>;
+  /**
+   * This is the number of hydrogen atoms added and optimized by the MolProbity reduce pdbx_vrpt_software as part of the
+   * all-atom clashscore.
+   */
+  readonly num_H_reduce?: Maybe<Scalars['Int']['output']>;
+  /**
+   * The number of bond angles compared to "standard geometry" made using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996).
+   * This value is for all chains in the structure.
+   */
+  readonly num_angles_RMSZ?: Maybe<Scalars['Int']['output']>;
+  /**
+   * The number of bond lengths compared to "standard geometry" made using the MolProbity dangle program.
+   * Standard geometry parameters are taken from Engh and Huber (2001) and Parkinson et al. (1996).
+   * This value is for all chains in the structure.
+   */
+  readonly num_bonds_RMSZ?: Maybe<Scalars['Int']['output']>;
+  /** The percentage of residues with Ramachandran outliers. */
+  readonly percent_ramachandran_outliers?: Maybe<Scalars['Float']['output']>;
+  /**
+   * Only given for structures determined by NMR. The MolProbity Ramachandran outlier score
+   * for all atoms in the structure rather than just the well-defined (core) residues.
+   */
+  readonly percent_ramachandran_outliers_full_length?: Maybe<Scalars['Float']['output']>;
+  /**
+   * The MolProbity sidechain outlier score (a percentage).
+   * Protein sidechains mostly adopt certain (combinations of) preferred torsion angle values
+   * (called rotamers or rotameric conformers), much like their backbone torsion angles
+   * (as assessed in the Ramachandran analysis). MolProbity considers the sidechain conformation
+   * of a residue to be an outlier if its set of torsion angles is not similar to any preferred
+   * combination. The sidechain outlier score is calculated as the percentage of residues
+   * with an unusual sidechain conformation with respect to the total number of residues for
+   * which the assessment is available.
+   * Example: percent-rota-outliers="2.44".
+   * Specific to structure that contain protein chains and have sidechains modelled.
+   * For NMR structures only the  well-defined (core) residues from ensemble analysis will be considered.
+   * The percentage of residues with rotamer outliers.
+   */
+  readonly percent_rotamer_outliers?: Maybe<Scalars['Float']['output']>;
+  /**
+   * Only given for structures determined by NMR. The MolProbity sidechain outlier score
+   * for all atoms in the structure rather than just the well-defined (core) residues.
+   */
+  readonly percent_rotamer_outliers_full_length?: Maybe<Scalars['Float']['output']>;
+};
+
+export type PdbxVrptSummaryNmr = {
+  /**
+   * Overall completeness of the chemical shift assignments for the well-defined
+   * regions of the structure.
+   */
+  readonly chemical_shift_completeness?: Maybe<Scalars['Float']['output']>;
+  /**
+   * Overall completeness of the chemical shift assignments for the full
+   * macromolecule or complex as suggested by the molecular description of an entry
+   * (whether some portion of it is modelled or not).
+   */
+  readonly chemical_shift_completeness_full_length?: Maybe<Scalars['Float']['output']>;
+  /**
+   * Diagnostic message from the wrapper of Cyrange software which identifies the
+   * well-defined cores (domains) of NMR protein structures.
+   */
+  readonly cyrange_error?: Maybe<Scalars['String']['output']>;
+  /** Total number of well-defined cores (domains) identified by Cyrange */
+  readonly cyrange_number_of_domains?: Maybe<Scalars['Int']['output']>;
+  /** Experimental method for statistics */
+  readonly exp_method?: Maybe<Scalars['String']['output']>;
+  /**
+   * For each Cyrange well-defined core ("cyrange_domain") the id of the PDB_model_num which is most
+   * similar to other models as measured by pairwise RMSDs over the domain.
+   * For the whole entry ("Entry"), the medoid PDB_model_num of the largest core is taken as an overall
+   * representative of the structure.
+   */
+  readonly medoid_model?: Maybe<Scalars['Int']['output']>;
+  /**
+   * A flag indicating if all models in the NMR ensemble contain the exact
+   * same atoms ("True") or if the models differ in this respect ("False").
+   */
+  readonly nmr_models_consistency_flag?: Maybe<Scalars['String']['output']>;
+  /** Diagnostic message from the wrapper of NMRClust software which clusters NMR models. */
+  readonly nmrclust_error?: Maybe<Scalars['String']['output']>;
+  /** Total number of clusters in the NMR ensemble identified by NMRClust. */
+  readonly nmrclust_number_of_clusters?: Maybe<Scalars['Int']['output']>;
+  /**
+   * Number of models analysed by NMRClust - should in almost all cases be the
+   * same as the number of models in the NMR ensemble.
+   */
+  readonly nmrclust_number_of_models?: Maybe<Scalars['Int']['output']>;
+  /** Number of models that do not belong to any cluster as deemed by NMRClust. */
+  readonly nmrclust_number_of_outliers?: Maybe<Scalars['Int']['output']>;
+  /** Overall representative PDB_model_num of the NMR ensemble as identified by NMRClust. */
+  readonly nmrclust_representative_model?: Maybe<Scalars['Int']['output']>;
 };
 
 /** Query root */
@@ -8545,12 +9038,46 @@ export type RcsbEntryInfo = {
    * The category of experimental method(s) used to determine the structure entry.
    *
    * Allowable values:
-   * EM, Multiple methods, NMR, Neutron, Other, X-ray
+   * EM, Integrative, Multiple methods, NMR, Neutron, Other, X-ray
    *
    */
   readonly experimental_method?: Maybe<Scalars['String']['output']>;
   /** The number of experimental methods contributing data to the structure determination. */
   readonly experimental_method_count?: Maybe<Scalars['Int']['output']>;
+  /**
+   * Ensemble flag for integrative structures.
+   *
+   * Allowable values:
+   * N, Y
+   *
+   */
+  readonly ihm_ensemble_flag?: Maybe<Scalars['String']['output']>;
+  /**
+   * Multi-scale modeling flag for integrative structures.
+   *
+   * Allowable values:
+   * N, Y
+   *
+   */
+  readonly ihm_multi_scale_flag?: Maybe<Scalars['String']['output']>;
+  /**
+   * Multi-state modeling flag for integrative structures.
+   *
+   * Allowable values:
+   * N, Y
+   *
+   */
+  readonly ihm_multi_state_flag?: Maybe<Scalars['String']['output']>;
+  /**
+   * Ordered-state modeling flag for integrative structures.
+   *
+   * Allowable values:
+   * N, Y
+   *
+   */
+  readonly ihm_ordered_state_flag?: Maybe<Scalars['String']['output']>;
+  /** Description of the integrative structure. */
+  readonly ihm_structure_description?: Maybe<Scalars['String']['output']>;
   /** The number of intermolecular covalent bonds. */
   readonly inter_mol_covalent_bond_count?: Maybe<Scalars['Int']['output']>;
   /** The number of intermolecular metalic bonds. */
@@ -8642,6 +9169,8 @@ export type RcsbEntryInfo = {
   readonly polymer_monomer_count_maximum?: Maybe<Scalars['Int']['output']>;
   /** The minimum monomer count of a polymer entity per deposited structure model. */
   readonly polymer_monomer_count_minimum?: Maybe<Scalars['Int']['output']>;
+  /** The chosen representative model. */
+  readonly representative_model?: Maybe<Scalars['Int']['output']>;
   /**
    * Combined estimates of experimental resolution contributing to the refined structural model.
    *  Resolution reported in "refine.ls_d_res_high" is used for X-RAY DIFFRACTION, FIBER DIFFRACTION,
@@ -8671,7 +9200,7 @@ export type RcsbEntryInfo = {
    * Indicates if the structure was determined using experimental or computational methods.
    *
    * Allowable values:
-   * computational, experimental
+   * computational, experimental, integrative
    *
    */
   readonly structure_determination_methodology: Scalars['String']['output'];
@@ -8746,7 +9275,7 @@ export type RcsbGroupAggregationMethod = {
    * Specifies the type of similarity criteria used to aggregate members into higher levels in the hierarchy
    *
    * Allowable values:
-   * sequence_identity, matching_uniprot_accession, matching_deposit_group_id
+   * sequence_identity, matching_uniprot_accession, matching_deposit_group_id, matching_chemical_component_id
    *
    */
   readonly type: Scalars['String']['output'];
@@ -8793,7 +9322,7 @@ export type RcsbGroupContainerIdentifiers = {
    * A unique group provenance identifier
    *
    * Allowable values:
-   * provenance_sequence_identity, provenance_matching_uniprot_accession, provenance_matching_deposit_group_id
+   * provenance_sequence_identity, provenance_matching_uniprot_accession, provenance_matching_deposit_group_id, provenance_matching_chemical_component_id
    *
    */
   readonly group_provenance_id: Scalars['String']['output'];
@@ -8808,7 +9337,7 @@ export type RcsbGroupInfo = {
    * Granularity of group members identifiers
    *
    * Allowable values:
-   * assembly, entry, polymer_entity, polymer_entity_instance
+   * assembly, entry, polymer_entity, non_polymer_entity, polymer_entity_instance
    *
    */
   readonly group_members_granularity: Scalars['String']['output'];
@@ -8820,7 +9349,7 @@ export type RcsbGroupProvenanceContainerIdentifiers = {
    * A unique group provenance identifier
    *
    * Allowable values:
-   * provenance_sequence_identity, provenance_matching_uniprot_accession, provenance_matching_deposit_group_id
+   * provenance_sequence_identity, provenance_matching_uniprot_accession, provenance_matching_deposit_group_id, provenance_matching_chemical_component_id
    *
    */
   readonly group_provenance_id: Scalars['String']['output'];
@@ -8852,6 +9381,46 @@ export type RcsbGroupStatistics = {
   readonly similarity_score_max?: Maybe<Scalars['Float']['output']>;
   /** Similarity score between two least similar group members */
   readonly similarity_score_min?: Maybe<Scalars['Float']['output']>;
+};
+
+export type RcsbIhmDatasetList = {
+  /** Number of input datasets used in integrative modeling. */
+  readonly count?: Maybe<Scalars['Int']['output']>;
+  /**
+   * Name of input dataset used in integrative modeling.
+   *
+   * Allowable values:
+   * 2DEM class average, 3DEM volume, CX-MS data, Comparative model, Crosslinking-MS data, DNA footprinting data, De Novo model, EM raw micrographs, EPR data, Ensemble FRET data, Experimental model, H/D exchange data, Hydroxyl radical footprinting data, Integrative model, Mass Spectrometry data, Mutagenesis data, NMR data, Other, Predicted contacts, Quantitative measurements of genetic interactions, SAS data, Single molecule FRET data, X-ray diffraction data, Yeast two-hybrid screening data
+   *
+   */
+  readonly name: Scalars['String']['output'];
+  /**
+   * Type of input dataset used in integrative modeling.
+   *
+   * Allowable values:
+   * Computed restraints, Experimental data, Other, Starting model
+   *
+   */
+  readonly type?: Maybe<Scalars['String']['output']>;
+};
+
+export type RcsbIhmDatasetSourceDbReference = {
+  /**
+   * Accession code for the input dataset.
+   *
+   * Examples:
+   * 5FM1, EMD-2799, SASDA82, PXD003381, MA-CO2KC
+   *
+   */
+  readonly accession_code: Scalars['String']['output'];
+  /**
+   * Name of the source database for the input dataset.
+   *
+   * Allowable values:
+   * AlphaFoldDB, BMRB, BMRbig, BioGRID, EMDB, EMPIAR, MASSIVE, ModelArchive, Other, PDB, PDB-Dev, PRIDE, ProXL, ProteomeXchange, SASBDB, iProX, jPOSTrepo
+   *
+   */
+  readonly db_name: Scalars['String']['output'];
 };
 
 export type RcsbInterfaceContainerIdentifiers = {
@@ -9382,7 +9951,7 @@ export type RcsbNonpolymerInstanceAnnotation = {
    * A type or category of the annotation.
    *
    * Allowable values:
-   * HAS_COVALENT_LINKAGE, HAS_METAL_COORDINATION_LINKAGE, HAS_NO_COVALENT_LINKAGE
+   * HAS_COVALENT_LINKAGE, HAS_METAL_COORDINATION_LINKAGE, HAS_NO_COVALENT_LINKAGE, IS_RSCC_OUTLIER, IS_RSRZ_OUTLIER
    *
    */
   readonly type?: Maybe<Scalars['String']['output']>;
@@ -9431,7 +10000,7 @@ export type RcsbNonpolymerInstanceFeature = {
    * A type or category of the feature.
    *
    * Allowable values:
-   * HAS_COVALENT_LINKAGE, HAS_METAL_COORDINATION_LINKAGE, MOGUL_ANGLE_OUTLIER, MOGUL_BOND_OUTLIER, RSCC_OUTLIER, RSRZ_OUTLIER, STEREO_OUTLIER
+   * HAS_COVALENT_LINKAGE, HAS_METAL_COORDINATION_LINKAGE, MODELED_ATOMS, MOGUL_ANGLE_OUTLIER, MOGUL_ANGLE_OUTLIERS, MOGUL_BOND_OUTLIER, MOGUL_BOND_OUTLIERS, MOGUL_RING_OUTLIERS, MOGUL_TORSION_OUTLIERS, RSCC_OUTLIER, RSRZ_OUTLIER, STEREO_OUTLIER, STEREO_OUTLIERS
    *
    */
   readonly type?: Maybe<Scalars['String']['output']>;
@@ -9506,6 +10075,14 @@ export type RcsbNonpolymerInstanceFeatureSummary = {
   readonly comp_id?: Maybe<Scalars['String']['output']>;
   /** The feature count. */
   readonly count?: Maybe<Scalars['Int']['output']>;
+  /**
+   * The fractional feature coverage relative to the full entity sequence.
+   *
+   * Examples:
+   * null, null
+   *
+   */
+  readonly coverage?: Maybe<Scalars['Float']['output']>;
   /** The maximum feature length. */
   readonly maximum_length?: Maybe<Scalars['Int']['output']>;
   /**
@@ -9530,7 +10107,7 @@ export type RcsbNonpolymerInstanceFeatureSummary = {
    * Type or category of the feature.
    *
    * Allowable values:
-   * HAS_COVALENT_LINKAGE, HAS_METAL_COORDINATION_LINKAGE, MOGUL_ANGLE_OUTLIER, MOGUL_BOND_OUTLIER, RSCC_OUTLIER, RSRZ_OUTLIER, STEREO_OUTLIER
+   * HAS_COVALENT_LINKAGE, HAS_METAL_COORDINATION_LINKAGE, MODELED_ATOMS, MOGUL_ANGLE_OUTLIER, MOGUL_ANGLE_OUTLIERS, MOGUL_BOND_OUTLIER, MOGUL_BOND_OUTLIERS, MOGUL_RING_OUTLIERS, MOGUL_TORSION_OUTLIERS, RSCC_OUTLIER, RSRZ_OUTLIER, STEREO_OUTLIER, STEREO_OUTLIERS
    *
    */
   readonly type?: Maybe<Scalars['String']['output']>;
@@ -9604,7 +10181,7 @@ export type RcsbNonpolymerInstanceValidationScore = {
    */
   readonly mogul_angle_outliers?: Maybe<Scalars['Int']['output']>;
   /**
-   * The root-mean-square value of the Z-scores of bond angles for the residue in degrees
+   * The root-mean-square value of the Z-scores of bond angles for the non-polymer instance in degrees
    * obtained from a CCDC Mogul survey of bond angles in the CSD small molecule crystal structure database.
    *
    * Examples:
@@ -9619,7 +10196,7 @@ export type RcsbNonpolymerInstanceValidationScore = {
    */
   readonly mogul_bond_outliers?: Maybe<Scalars['Int']['output']>;
   /**
-   * The root-mean-square value of the Z-scores of bond lengths for the residue in Angstroms
+   * The root-mean-square value of the Z-scores of bond lengths for the nonpolymer instance in Angstroms
    * obtained from a CCDC Mogul survey of bond lengths in the CSD small molecule crystal structure database.
    *
    * Examples:
@@ -9627,6 +10204,12 @@ export type RcsbNonpolymerInstanceValidationScore = {
    *
    */
   readonly mogul_bonds_RMSZ?: Maybe<Scalars['Float']['output']>;
+  /** The number of atoms in the non-polymer instance returned by the EDS software. */
+  readonly natoms_eds?: Maybe<Scalars['Int']['output']>;
+  /** The number of bond angles compared to "standard geometry" made using the Mogul program. */
+  readonly num_mogul_angles_RMSZ?: Maybe<Scalars['Int']['output']>;
+  /** The number of bond lengths compared to "standard geometry" made using the Mogul program. */
+  readonly num_mogul_bonds_RMSZ?: Maybe<Scalars['Int']['output']>;
   /**
    * The ranking of the model fit score component.
    *
@@ -10547,7 +11130,7 @@ export type RcsbPolymerInstanceFeature = {
    * A type or category of the feature.
    *
    * Allowable values:
-   * ANGLE_OUTLIER, BEND, BINDING_SITE, BOND_OUTLIER, C-MANNOSYLATION_SITE, CATH, CIS-PEPTIDE, ECOD, HELIX_P, HELX_LH_PP_P, HELX_RH_3T_P, HELX_RH_AL_P, HELX_RH_PI_P, MA_QA_METRIC_LOCAL_TYPE_CONTACT_PROBABILITY, MA_QA_METRIC_LOCAL_TYPE_DISTANCE, MA_QA_METRIC_LOCAL_TYPE_ENERGY, MA_QA_METRIC_LOCAL_TYPE_IPTM, MA_QA_METRIC_LOCAL_TYPE_NORMALIZED_SCORE, MA_QA_METRIC_LOCAL_TYPE_OTHER, MA_QA_METRIC_LOCAL_TYPE_PAE, MA_QA_METRIC_LOCAL_TYPE_PLDDT, MA_QA_METRIC_LOCAL_TYPE_PLDDT_ALL-ATOM, MA_QA_METRIC_LOCAL_TYPE_PLDDT_ALL-ATOM_[0,1], MA_QA_METRIC_LOCAL_TYPE_PLDDT_[0,1], MA_QA_METRIC_LOCAL_TYPE_PTM, MA_QA_METRIC_LOCAL_TYPE_ZSCORE, MEMBRANE_SEGMENT, MOGUL_ANGLE_OUTLIER, MOGUL_BOND_OUTLIER, N-GLYCOSYLATION_SITE, O-GLYCOSYLATION_SITE, RAMACHANDRAN_OUTLIER, ROTAMER_OUTLIER, RSCC_OUTLIER, RSRZ_OUTLIER, S-GLYCOSYLATION_SITE, SABDAB_ANTIBODY_HEAVY_CHAIN_SUBCLASS, SABDAB_ANTIBODY_LIGHT_CHAIN_SUBCLASS, SABDAB_ANTIBODY_LIGHT_CHAIN_TYPE, SCOP, SCOP2B_SUPERFAMILY, SCOP2_FAMILY, SCOP2_SUPERFAMILY, SHEET, STEREO_OUTLIER, STRN, TURN_TY1_P, UNASSIGNED_SEC_STRUCT, UNOBSERVED_ATOM_XYZ, UNOBSERVED_RESIDUE_XYZ, ZERO_OCCUPANCY_ATOM_XYZ, ZERO_OCCUPANCY_RESIDUE_XYZ, ASA
+   * ANGLE_OUTLIER, ANGLE_OUTLIERS, AVERAGE_OCCUPANCY, BEND, BINDING_SITE, BOND_OUTLIER, BOND_OUTLIERS, C-MANNOSYLATION_SITE, CATH, CHIRAL_OUTLIERS, CIS-PEPTIDE, CLASHES, ECOD, HELIX_P, HELX_LH_PP_P, HELX_RH_3T_P, HELX_RH_AL_P, HELX_RH_PI_P, LIGAND_COVALENT_LINKAGE, LIGAND_INTERACTION, LIGAND_METAL_COORDINATION_LINKAGE, MA_QA_METRIC_LOCAL_TYPE_CONTACT_PROBABILITY, MA_QA_METRIC_LOCAL_TYPE_DISTANCE, MA_QA_METRIC_LOCAL_TYPE_ENERGY, MA_QA_METRIC_LOCAL_TYPE_IPTM, MA_QA_METRIC_LOCAL_TYPE_NORMALIZED_SCORE, MA_QA_METRIC_LOCAL_TYPE_OTHER, MA_QA_METRIC_LOCAL_TYPE_PAE, MA_QA_METRIC_LOCAL_TYPE_PLDDT, MA_QA_METRIC_LOCAL_TYPE_PLDDT_ALL-ATOM, MA_QA_METRIC_LOCAL_TYPE_PLDDT_ALL-ATOM_[0,1], MA_QA_METRIC_LOCAL_TYPE_PLDDT_[0,1], MA_QA_METRIC_LOCAL_TYPE_PTM, MA_QA_METRIC_LOCAL_TYPE_ZSCORE, MEMBRANE_SEGMENT, MOGUL_ANGLE_OUTLIER, MOGUL_ANGLE_OUTLIERS, MOGUL_BOND_OUTLIER, MOGUL_BOND_OUTLIERS, MOGUL_RING_OUTLIERS, MOGUL_TORSION_OUTLIERS, N-GLYCOSYLATION_SITE, NATOMS_EDS, O-GLYCOSYLATION_SITE, OWAB, PLANE_OUTLIERS, Q_SCORE, RAMACHANDRAN_OUTLIER, ROTAMER_OUTLIER, RSCC, RSCC_OUTLIER, RSR, RSRZ, RSRZ_OUTLIER, S-GLYCOSYLATION_SITE, SABDAB_ANTIBODY_HEAVY_CHAIN_SUBCLASS, SABDAB_ANTIBODY_LIGHT_CHAIN_SUBCLASS, SABDAB_ANTIBODY_LIGHT_CHAIN_TYPE, SCOP, SCOP2B_SUPERFAMILY, SCOP2_FAMILY, SCOP2_SUPERFAMILY, SHEET, STEREO_OUTLIER, STRN, SYMM_CLASHES, TURN_TY1_P, UNASSIGNED_SEC_STRUCT, UNOBSERVED_ATOM_XYZ, UNOBSERVED_RESIDUE_XYZ, ZERO_OCCUPANCY_ATOM_XYZ, ZERO_OCCUPANCY_RESIDUE_XYZ, ASA
    *
    */
   readonly type?: Maybe<Scalars['String']['output']>;
@@ -10558,7 +11141,7 @@ export type RcsbPolymerInstanceFeatureAdditionalProperties = {
    * The additional property name.
    *
    * Allowable values:
-   * CATH_DOMAIN_ID, CATH_NAME, ECOD_DOMAIN_ID, ECOD_FAMILY_NAME, MODELCIF_MODEL_ID, OMEGA_ANGLE, PARTNER_ASYM_ID, PARTNER_BOND_DISTANCE, PARTNER_COMP_ID, SCOP2_DOMAIN_ID, SCOP2_FAMILY_ID, SCOP2_FAMILY_NAME, SCOP2_SUPERFAMILY_ID, SCOP2_SUPERFAMILY_NAME, SCOP_DOMAIN_ID, SCOP_NAME, SCOP_SUN_ID, SHEET_SENSE
+   * CATH_DOMAIN_ID, CATH_NAME, ECOD_DOMAIN_ID, ECOD_FAMILY_NAME, MODELCIF_MODEL_ID, OMEGA_ANGLE, PARTNER_ASYM_ID, PARTNER_BOND_DISTANCE, PARTNER_COMP_ID, PDB_MODEL_NUM, SCOP2_DOMAIN_ID, SCOP2_FAMILY_ID, SCOP2_FAMILY_NAME, SCOP2_SUPERFAMILY_ID, SCOP2_SUPERFAMILY_NAME, SCOP_DOMAIN_ID, SCOP_NAME, SCOP_SUN_ID, SHEET_SENSE
    *
    */
   readonly name?: Maybe<Scalars['String']['output']>;
@@ -10596,8 +11179,6 @@ export type RcsbPolymerInstanceFeatureSummary = {
   readonly count?: Maybe<Scalars['Int']['output']>;
   /**
    * The fractional feature coverage relative to the full entity sequence.
-   *  For instance, the fraction of features such as CATH or SCOP domains, secondary structure elements,
-   *  unobserved residues, or geometrical outliers relative to the length of the entity sequence.
    *
    * Examples:
    * null, null
@@ -10628,7 +11209,7 @@ export type RcsbPolymerInstanceFeatureSummary = {
    * Type or category of the feature.
    *
    * Allowable values:
-   * ANGLE_OUTLIER, BEND, BINDING_SITE, BOND_OUTLIER, C-MANNOSYLATION_SITE, CATH, CIS-PEPTIDE, ECOD, HELIX_P, HELX_LH_PP_P, HELX_RH_3T_P, HELX_RH_AL_P, HELX_RH_PI_P, MA_QA_METRIC_LOCAL_TYPE_CONTACT_PROBABILITY, MA_QA_METRIC_LOCAL_TYPE_DISTANCE, MA_QA_METRIC_LOCAL_TYPE_ENERGY, MA_QA_METRIC_LOCAL_TYPE_IPTM, MA_QA_METRIC_LOCAL_TYPE_NORMALIZED_SCORE, MA_QA_METRIC_LOCAL_TYPE_OTHER, MA_QA_METRIC_LOCAL_TYPE_PAE, MA_QA_METRIC_LOCAL_TYPE_PLDDT, MA_QA_METRIC_LOCAL_TYPE_PLDDT_ALL-ATOM, MA_QA_METRIC_LOCAL_TYPE_PLDDT_ALL-ATOM_[0,1], MA_QA_METRIC_LOCAL_TYPE_PLDDT_[0,1], MA_QA_METRIC_LOCAL_TYPE_PTM, MA_QA_METRIC_LOCAL_TYPE_ZSCORE, MEMBRANE_SEGMENT, MOGUL_ANGLE_OUTLIER, MOGUL_BOND_OUTLIER, N-GLYCOSYLATION_SITE, O-GLYCOSYLATION_SITE, RAMACHANDRAN_OUTLIER, ROTAMER_OUTLIER, RSCC_OUTLIER, RSRZ_OUTLIER, S-GLYCOSYLATION_SITE, SABDAB_ANTIBODY_HEAVY_CHAIN_SUBCLASS, SABDAB_ANTIBODY_LIGHT_CHAIN_SUBCLASS, SABDAB_ANTIBODY_LIGHT_CHAIN_TYPE, SCOP, SCOP2B_SUPERFAMILY, SCOP2_FAMILY, SCOP2_SUPERFAMILY, SHEET, STEREO_OUTLIER, STRN, TURN_TY1_P, UNASSIGNED_SEC_STRUCT, UNOBSERVED_ATOM_XYZ, UNOBSERVED_RESIDUE_XYZ, ZERO_OCCUPANCY_ATOM_XYZ, ZERO_OCCUPANCY_RESIDUE_XYZ
+   * ANGLE_OUTLIER, ANGLE_OUTLIERS, AVERAGE_OCCUPANCY, BEND, BINDING_SITE, BOND_OUTLIER, BOND_OUTLIERS, C-MANNOSYLATION_SITE, CATH, CHIRAL_OUTLIERS, CIS-PEPTIDE, CLASHES, ECOD, HELIX_P, HELX_LH_PP_P, HELX_RH_3T_P, HELX_RH_AL_P, HELX_RH_PI_P, LIGAND_COVALENT_LINKAGE, LIGAND_INTERACTION, LIGAND_METAL_COORDINATION_LINKAGE, MA_QA_METRIC_LOCAL_TYPE_CONTACT_PROBABILITY, MA_QA_METRIC_LOCAL_TYPE_DISTANCE, MA_QA_METRIC_LOCAL_TYPE_ENERGY, MA_QA_METRIC_LOCAL_TYPE_IPTM, MA_QA_METRIC_LOCAL_TYPE_NORMALIZED_SCORE, MA_QA_METRIC_LOCAL_TYPE_OTHER, MA_QA_METRIC_LOCAL_TYPE_PAE, MA_QA_METRIC_LOCAL_TYPE_PLDDT, MA_QA_METRIC_LOCAL_TYPE_PLDDT_ALL-ATOM, MA_QA_METRIC_LOCAL_TYPE_PLDDT_ALL-ATOM_[0,1], MA_QA_METRIC_LOCAL_TYPE_PLDDT_[0,1], MA_QA_METRIC_LOCAL_TYPE_PTM, MA_QA_METRIC_LOCAL_TYPE_ZSCORE, MEMBRANE_SEGMENT, MOGUL_ANGLE_OUTLIER, MOGUL_ANGLE_OUTLIERS, MOGUL_BOND_OUTLIER, MOGUL_BOND_OUTLIERS, MOGUL_RING_OUTLIERS, MOGUL_TORSION_OUTLIERS, N-GLYCOSYLATION_SITE, NATOMS_EDS, O-GLYCOSYLATION_SITE, OWAB, PLANE_OUTLIERS, Q_SCORE, RAMACHANDRAN_OUTLIER, ROTAMER_OUTLIER, RSCC, RSCC_OUTLIER, RSR, RSRZ, RSRZ_OUTLIER, S-GLYCOSYLATION_SITE, SABDAB_ANTIBODY_HEAVY_CHAIN_SUBCLASS, SABDAB_ANTIBODY_LIGHT_CHAIN_SUBCLASS, SABDAB_ANTIBODY_LIGHT_CHAIN_TYPE, SCOP, SCOP2B_SUPERFAMILY, SCOP2_FAMILY, SCOP2_SUPERFAMILY, SHEET, STEREO_OUTLIER, STRN, SYMM_CLASHES, TURN_TY1_P, UNASSIGNED_SEC_STRUCT, UNOBSERVED_ATOM_XYZ, UNOBSERVED_RESIDUE_XYZ, ZERO_OCCUPANCY_ATOM_XYZ, ZERO_OCCUPANCY_RESIDUE_XYZ
    *
    */
   readonly type?: Maybe<Scalars['String']['output']>;
@@ -11069,7 +11650,7 @@ export type RcsbRepositoryHoldingsCurrent = {
    * The list of content types associated with this entry.
    *
    * Allowable values:
-   * 2fo-fc Map, Combined NMR data (NEF), Combined NMR data (NMR-STAR), FASTA sequence, Map Coefficients, NMR chemical shifts, NMR restraints V1, NMR restraints V2, assembly PDB, assembly mmCIF, entry PDB, entry PDB bundle, entry PDBML, entry mmCIF, fo-fc Map, structure factors, validation data mmCIF, validation report, validation slider image
+   * 2fo-fc Map, Combined NMR data (NEF), Combined NMR data (NMR-STAR), FASTA sequence, Map Coefficients, NMR chemical shifts, NMR restraints V1, NMR restraints V2, assembly PDB, assembly mmCIF, entry PDB, entry PDB bundle, entry PDBML, entry mmCIF, fo-fc Map, structure factors, validation 2fo-fc coefficients, validation data mmCIF, validation fo-fc coefficients, validation report, validation slider image
    *
    */
   readonly repository_content_types?: Maybe<ReadonlyArray<Maybe<Scalars['String']['output']>>>;
@@ -13480,7 +14061,7 @@ export type AsymIdsQueryVariables = Exact<{
 }>;
 
 
-export type AsymIdsQuery = { readonly entry?: { readonly polymer_entities?: ReadonlyArray<{ readonly entity_poly?: { readonly rcsb_entity_polymer_type?: string | null, readonly rcsb_sample_sequence_length?: number | null } | null, readonly polymer_entity_instances?: ReadonlyArray<{ readonly rcsb_polymer_entity_instance_container_identifiers?: { readonly asym_id: string, readonly auth_asym_id?: string | null } | null } | null> | null } | null> | null } | null };
+export type AsymIdsQuery = { readonly entry?: { readonly rcsb_entry_info: { readonly ihm_multi_scale_flag?: string | null }, readonly polymer_entities?: ReadonlyArray<{ readonly entity_poly?: { readonly rcsb_entity_polymer_type?: string | null, readonly rcsb_sample_sequence_length?: number | null } | null, readonly polymer_entity_instances?: ReadonlyArray<{ readonly rcsb_polymer_entity_instance_container_identifiers?: { readonly asym_id: string, readonly auth_asym_id?: string | null } | null } | null> | null } | null> | null } | null };
 
 export type PolymerInstancesQueryVariables = Exact<{
   ids: ReadonlyArray<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
