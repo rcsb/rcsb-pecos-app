@@ -59,6 +59,12 @@ export class DataService {
         const vars: AsymIdsQueryVariables = { id: entryId };
         const data = await this.fetch<AsymIdsQueryVariables>(asymIdsQuery, vars);
         if (!data || !data.entry || !data.entry.polymer_entities) return [];
+
+        if (data.entry.rcsb_entry_info.ihm_multi_scale_flag && data.entry.rcsb_entry_info.ihm_multi_scale_flag === 'Y') {
+            this._errFn(entryId + ' is an Integrative/Hybrid Model that has a multi-scale composition and lacks atomic-level chains required for structure alignment using the available methods');
+            return [];
+        }
+
         const proteins = data.entry.polymer_entities.filter(entity =>
             entity &&
             entity.entity_poly &&

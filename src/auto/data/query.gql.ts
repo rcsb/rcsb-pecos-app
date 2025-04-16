@@ -1,6 +1,9 @@
 export const asymIdsQuery = /* GraphQL */ `
 query asymIds($id: String!) {
     entry(entry_id:$id) {
+        rcsb_entry_info {
+            ihm_multi_scale_flag
+        }
         polymer_entities {
             entity_poly {
               rcsb_entity_polymer_type
