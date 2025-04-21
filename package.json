@@ -23,13 +23,13 @@
     "lib/config.js"
   ],
   "dependencies": {
-    "@rcsb/rcsb-api-tools": "^4.1.14",
+    "@rcsb/rcsb-api-tools": "^5.0.1",
     "@rcsb/rcsb-molstar": "^2.9.3",
     "@rcsb/rcsb-saguaro": "^3.1.6",
     "@rcsb/rcsb-saguaro-3d": "^4.1.11-dev-js-ihm.2",
     "@rcsb/rcsb-saguaro-app": "^6.3.12-dev-js-ihm.3",
-    "@types/react": "18.2.64",
-    "@types/react-dom": "18.2.21",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
     "classnames": "^2.5.1",
     "lodash.clonedeep": "^4.5.0",
     "molstar": "^4.0.1",
@@ -40,9 +40,9 @@
     "rc-select": "^14.13.0",
     "rc-tabs": "^14.0.0",
     "rc-upload": "^4.5.2",
-    "react": "^18.1.0",
+    "react": "^19.0.0",
     "react-autosuggest": "^10.1.0",
-    "react-dom": "^18.1.0",
+    "react-dom": "^19.0.0",
     "rxjs": "^7.4.0"
   },
   "devDependencies": {

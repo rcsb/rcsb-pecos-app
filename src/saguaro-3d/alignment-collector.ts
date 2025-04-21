@@ -1,6 +1,6 @@
-import { AlignmentResponse } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
+import { SequenceAlignments } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { AlignmentCollectorInterface } from '@rcsb/rcsb-saguaro-app/lib/RcsbCollectTools/AlignmentCollector/AlignmentCollectorInterface';
-import { TagDelimiter } from '@rcsb/rcsb-api-tools/build/RcsbUtils/TagDelimiter';
+import { TagDelimiter } from '@rcsb/rcsb-api-tools/lib/RcsbUtils/TagDelimiter';
 
 import { AlignmentReference } from './alignment-reference';
 import {
@@ -27,7 +27,7 @@ import {
 
 export class RcsbStructuralAlignmentCollector implements AlignmentCollectorInterface {
 
-    private alignmentResponse: AlignmentResponse | undefined = undefined;
+    private alignmentResponse: SequenceAlignments | undefined = undefined;
     private readonly alignment: StructureAlignmentResponse;
     private readonly alignmentReference: AlignmentReference;
 
@@ -36,19 +36,19 @@ export class RcsbStructuralAlignmentCollector implements AlignmentCollectorInter
         this.alignmentReference = alignmentReference;
     }
 
-    async collect(): Promise<AlignmentResponse> {
+    async collect(): Promise<SequenceAlignments> {
         return await this.data();
     }
     async getTargets(): Promise<string[]> {
-        return (await this.data()).target_alignment?.map(ta=>ta?.target_id ?? 'NA') ?? [];
+        return (await this.data()).target_alignments?.map(ta=>ta?.target_id ?? 'NA') ?? [];
     }
     async getAlignmentLength(): Promise<number> {
-        return Math.max(...(await this.data()).target_alignment?.map(ta=>ta?.aligned_regions?.[ta?.aligned_regions?.length - 1]?.query_end ?? -1) ?? []);
+        return Math.max(...(await this.data()).target_alignments?.map(ta=>ta?.aligned_regions?.[ta?.aligned_regions?.length - 1]?.query_end ?? -1) ?? []);
     }
-    async getAlignment(): Promise<AlignmentResponse> {
+    async getAlignment(): Promise<SequenceAlignments> {
         return await this.data();
     }
-    private async data(): Promise<AlignmentResponse> {
+    private async data(): Promise<SequenceAlignments> {
         if (!this.alignmentResponse) {
             if (!this.alignment.results)
                 return {};
@@ -57,10 +57,10 @@ export class RcsbStructuralAlignmentCollector implements AlignmentCollectorInter
         return this.alignmentResponse;
     }
 
-    private async alignmentTransform(): Promise<AlignmentResponse> {
-        const out: AlignmentResponse = this.alignmentReference.buildAlignments();
+    private async alignmentTransform(): Promise<SequenceAlignments> {
+        const out: SequenceAlignments = this.alignmentReference.buildAlignments();
         const seqs = await this.alignmentReference.getSequences();
-        out.target_alignment?.forEach(ta => {
+        out.target_alignments?.forEach(ta => {
             const seq = seqs.find(s => s.rcsbId === ta?.target_id)?.sequence;
             if (seq && ta)
                 ta.target_sequence = seq;

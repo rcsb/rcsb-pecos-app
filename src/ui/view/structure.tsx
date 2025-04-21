@@ -10,7 +10,7 @@ import {
     RcsbLoadParamsProvider,
     RcsbStructuralAlignmentCollector
 } from '../../saguaro-3d/alignment-collector';
-import { SequenceReference } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
+import { SequenceReference } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFv3D/RcsbFv3DAlignmentProvider';
 import { AlignmentTrackFactory } from '../../saguaro-3d/alignment-track-factory';
 import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
