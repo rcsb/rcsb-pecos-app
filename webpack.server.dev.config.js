@@ -59,6 +59,13 @@ const server = {
     devServer: {
         compress: true,
         port: 9000,
+        client: {
+            overlay: {
+                errors: true,
+                runtimeErrors: true,
+                warnings: false,
+            }
+        }
     },
     plugins: [new HtmlWebpackPlugin({
         filename: 'index.html',
