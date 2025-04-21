@@ -1,14 +1,12 @@
 import { cloneDeep } from 'lodash';
-import {
-    AlignedRegion,
-    AlignmentResponse,
-} from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
+
 import { rcsbRequestCtxManager as RcsbRequestContextManager } from '@rcsb/rcsb-saguaro-app/lib/RcsbRequest/RcsbRequestContextManager';
-import { TagDelimiter } from '@rcsb/rcsb-api-tools/build/RcsbUtils/TagDelimiter';
 import {
     InstanceSequenceInterface
 } from '@rcsb/rcsb-saguaro-app/lib/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
 import { Alignment, AlignmentRegion } from '../auto/alignment/alignment-response';
+import { AlignedRegions, SequenceAlignments } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
+import { TagDelimiter } from '@rcsb/rcsb-api-tools/lib/RcsbUtils/TagDelimiter';
 
 type AlignmentRefType = (number|undefined)[];
 type AlignmentMemberType = {
@@ -56,7 +54,7 @@ export class AlignmentReference {
         await this.mergeAlignments(results);
     }
 
-    public buildAlignments(): AlignmentResponse {
+    public buildAlignments(): SequenceAlignments {
         return buildAlignments(this.refId, this.alignmentRefMap, this.memberRefList.slice(1));
     }
 
@@ -324,15 +322,15 @@ function transformToGapedDomain(regions: AlignmentRegion[]): (number|undefined)[
     return out;
 }
 
-function buildAlignments(refId: string, alignmentRefMap: AlignmentRefType, alignmentMembers: AlignmentMemberType[]): AlignmentResponse {
-    const out: AlignmentResponse = {};
-    out.target_alignment = [];
-    out.target_alignment.push({
+function buildAlignments(refId: string, alignmentRefMap: AlignmentRefType, alignmentMembers: AlignmentMemberType[]): SequenceAlignments {
+    const out: SequenceAlignments = {};
+    out.target_alignments = [];
+    out.target_alignments.push({
         aligned_regions: buildRegions(alignmentRefMap),
         target_id: refId
     });
     alignmentMembers.forEach(am=>{
-        out.target_alignment?.push({
+        out.target_alignments?.push({
             target_id: am.id,
             aligned_regions: buildRegions(am.map.map((v)=> typeof v === 'number' ? am.target[v] : undefined))
         });
@@ -340,7 +338,7 @@ function buildAlignments(refId: string, alignmentRefMap: AlignmentRefType, align
     return out;
 }
 
-function buildRegions(alignment: AlignmentRefType): AlignedRegion[] {
+function buildRegions(alignment: AlignmentRefType): AlignedRegions[] {
     const regions: [number, number][][] = [[]];
     alignment.forEach((v, resIdx)=>{
         if (!v) {

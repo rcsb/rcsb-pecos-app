@@ -4,20 +4,20 @@ import {
 import {
     AlignmentRequestContextType
 } from '@rcsb/rcsb-saguaro-app/lib/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryImpl/AlignmentTrackFactory';
-import { TargetAlignment } from '@rcsb/rcsb-api-tools/build/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { RcsbFvDisplayTypes } from '@rcsb/rcsb-saguaro/lib/RcsbFv/RcsbFvConfig/RcsbFvDefaultConfigValues';
 import { ResidueCollection } from './alignment-reference';
 import { RcsbFvRowConfigInterface } from '@rcsb/rcsb-saguaro/lib/RcsbFv/RcsbFvConfig/RcsbFvConfigInterface';
 import {
     PlainAlignmentTrackFactory
 } from '@rcsb/rcsb-saguaro-app/lib/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryImpl/PlainAlignmentTrackFactory';
+import { TargetAlignments } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
 
 interface AlignmentResidueDescription {
     alignmentCloseResidues(): Map<string, ResidueCollection>;
     unalignedResidues(): Map<string, ResidueCollection>;
 }
 
-export class AlignmentTrackFactory implements TrackFactoryInterface<[AlignmentRequestContextType, TargetAlignment]> {
+export class AlignmentTrackFactory implements TrackFactoryInterface<[AlignmentRequestContextType, TargetAlignments]> {
 
     // key is alignmentId
     private readonly alignmentResidueDescription: AlignmentResidueDescription;
@@ -27,7 +27,7 @@ export class AlignmentTrackFactory implements TrackFactoryInterface<[AlignmentRe
         this.alignmentResidueDescription = alignmentResidueDescription;
     }
 
-    async getTrack(alignmentRequestContext: AlignmentRequestContextType, targetAlignment: TargetAlignment): Promise<RcsbFvRowConfigInterface> {
+    async getTrack(alignmentRequestContext: AlignmentRequestContextType, targetAlignment: TargetAlignments): Promise<RcsbFvRowConfigInterface> {
         const closeResidues = this.alignmentResidueDescription.alignmentCloseResidues();
         const unalignedResidues = this.alignmentResidueDescription.unalignedResidues();
         const config = await this.plainAlignmentTrackFactory.getTrack(alignmentRequestContext, targetAlignment);
