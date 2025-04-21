@@ -1,6 +1,4 @@
-import { SequenceAlignments } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { AlignmentCollectorInterface } from '@rcsb/rcsb-saguaro-app/lib/RcsbCollectTools/AlignmentCollector/AlignmentCollectorInterface';
-import { TagDelimiter } from '@rcsb/rcsb-api-tools/lib/RcsbUtils/TagDelimiter';
 
 import { AlignmentReference } from './alignment-reference';
 import {
@@ -23,6 +21,8 @@ import {
     AlignmentTrajectoryParamsType,
     AlignmentTrajectoryPresetProvider
 } from './molstar-trajectory/alignment-trajectory-preset-provider';
+import { SequenceAlignments } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
+import { TagDelimiter } from '@rcsb/rcsb-api-tools/lib/RcsbUtils/TagDelimiter';
 
 
 export class RcsbStructuralAlignmentCollector implements AlignmentCollectorInterface {

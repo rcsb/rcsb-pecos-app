@@ -10,13 +10,13 @@ import {
     RcsbLoadParamsProvider,
     RcsbStructuralAlignmentCollector
 } from '../../saguaro-3d/alignment-collector';
-import { SequenceReference } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { RcsbFv3DAlignmentProvider } from '@rcsb/rcsb-saguaro-3d/lib/RcsbFv3D/RcsbFv3DAlignmentProvider';
 import { AlignmentTrackFactory } from '../../saguaro-3d/alignment-track-factory';
 import { DefaultOpasityValue, getAlignmentColorRgb } from '../../utils/color';
 import { exportHierarchy } from 'molstar/lib/extensions/model-export/export';
 import { CloseResidueAlignmentColorThemeProvider, HomogenousAlignmentColorThemeProvider } from '../../saguaro-3d/molstar-trajectory/alignment-color-theme';
 import { SequenceTooltip } from '../../utils/sequence-tooltip';
+import {SequenceReference} from "@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes";
 
 let panel3D: RcsbFv3DAlignmentProvider;
 export function StructureViewComponent(props: { ctx: ApplicationContext }) {

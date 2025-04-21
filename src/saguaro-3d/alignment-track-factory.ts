@@ -4,13 +4,13 @@ import {
 import {
     AlignmentRequestContextType
 } from '@rcsb/rcsb-saguaro-app/lib/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryImpl/AlignmentTrackFactory';
-import { TargetAlignments } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
 import { RcsbFvDisplayTypes } from '@rcsb/rcsb-saguaro/lib/RcsbFv/RcsbFvConfig/RcsbFvDefaultConfigValues';
 import { ResidueCollection } from './alignment-reference';
 import { RcsbFvRowConfigInterface } from '@rcsb/rcsb-saguaro/lib/RcsbFv/RcsbFvConfig/RcsbFvConfigInterface';
 import {
     PlainAlignmentTrackFactory
 } from '@rcsb/rcsb-saguaro-app/lib/RcsbFvWeb/RcsbFvFactories/RcsbFvTrackFactory/TrackFactoryImpl/PlainAlignmentTrackFactory';
+import { TargetAlignments } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
 
 interface AlignmentResidueDescription {
     alignmentCloseResidues(): Map<string, ResidueCollection>;

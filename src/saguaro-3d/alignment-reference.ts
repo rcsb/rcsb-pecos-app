@@ -1,14 +1,12 @@
 import { cloneDeep } from 'lodash';
-import {
-    AlignedRegions,
-    SequenceAlignments,
-} from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
+
 import { rcsbRequestCtxManager as RcsbRequestContextManager } from '@rcsb/rcsb-saguaro-app/lib/RcsbRequest/RcsbRequestContextManager';
-import { TagDelimiter } from '@rcsb/rcsb-api-tools/lib/RcsbUtils/TagDelimiter';
 import {
     InstanceSequenceInterface
 } from '@rcsb/rcsb-saguaro-app/lib/RcsbCollectTools/DataCollectors/MultipleInstanceSequencesCollector';
 import { Alignment, AlignmentRegion } from '../auto/alignment/alignment-response';
+import { AlignedRegions, SequenceAlignments } from '@rcsb/rcsb-api-tools/lib/RcsbGraphQL/Types/Borrego/GqlTypes';
+import { TagDelimiter } from '@rcsb/rcsb-api-tools/lib/RcsbUtils/TagDelimiter';
 
 type AlignmentRefType = (number|undefined)[];
 type AlignmentMemberType = {
