@@ -26,7 +26,7 @@ export class DataService {
     constructor(config: DataProviderConfigs, onError: (msg: string) => void) {
         this._config = config;
         this._errFn = onError;
-        this.asymIds = memoizeOneArgAsync(this.asymIds.bind(this));
+        this.asymIds = this.asymIds.bind(this);
         this.polymerInstances = memoizeOneArgAsync(this.polymerInstances.bind(this));
     }
 
@@ -61,7 +61,7 @@ export class DataService {
         if (!data || !data.entry || !data.entry.polymer_entities) return [];
 
         if (data.entry.rcsb_entry_info.ihm_multi_scale_flag && data.entry.rcsb_entry_info.ihm_multi_scale_flag === 'Y') {
-            this._errFn(entryId + ' is an Integrative/Hybrid Model that has a multi-scale composition and lacks atomic-level chains required for structure alignment using the available methods');
+            this._errFn(entryId + ' is a multi-scale integrative structure and lacks atomic-level chains required for structure alignment using the available alignment methods');
             return [];
         }
 

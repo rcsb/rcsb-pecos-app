@@ -138,6 +138,13 @@ export class ApplicationContext {
         updateWindowURL();
     }
 
+    public clear() {
+        this.state.events.status.next('init');
+        this.state.data.request.clear();
+        this.state.data.options.clear();
+        updateWindowURL();
+    }
+
     /**
      * If sequence alignment data doesn't contain polymer sequences, fetch them
      * from the API and add them to the response object

@@ -695,12 +695,6 @@ export function StructureAlignmentInput(props: {
         </>;
     };
 
-    const clearForm = () => {
-        requestCtx.clear();
-        optionsCtx.clear();
-        updateWindowURL();
-    };
-
     const alignmentTool = () => {
         return <div className={vertical}>
             {renderSelectedStructures()}
@@ -715,7 +709,7 @@ export function StructureAlignmentInput(props: {
                 />
                 <ActionButtonControl
                     label='Clear'
-                    onClick={() => clearForm()}
+                    onClick={() => props.ctx.clear()}
                     className={classNames('btn-action', 'btn-clear')}
                 />
             </div>
