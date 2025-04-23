@@ -46,12 +46,15 @@
 .rc-collapse-header:focus {
   outline: none;
 }
-
 .rc-collapse-content {
   overflow: hidden;
   color: #666;
   padding: 0 16px;
   background-color: #fff;
+}
+.rc-collapse-body {
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 .rc-collapse-content > .rc-collapse-content-box {
   margin-top: 16px;
