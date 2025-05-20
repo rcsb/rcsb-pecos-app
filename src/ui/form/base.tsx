@@ -1,7 +1,7 @@
 import '../skin/selector.css';
 import '../skin/suggestions.css';
 import classNames from 'classnames';
-import { useState, useEffect, CSSProperties, useRef } from 'react';
+import { useState, useEffect, CSSProperties, useRef, JSX } from 'react';
 
 import Select from 'rc-select';
 import Autosuggest, { SuggestionsFetchRequestedParams } from 'react-autosuggest';
